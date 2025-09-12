@@ -55,9 +55,9 @@ class MainViewModel : ViewModel() {
 
     private val TAG = "MainViewModel"
 
+    // PERMISSIONS set remains unchanged as per user request
     val PERMISSIONS =
         setOf(
-            // Activity
             HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
             HealthPermission.getReadPermission(BasalBodyTemperatureRecord::class),
             HealthPermission.getReadPermission(BasalMetabolicRateRecord::class),
@@ -75,7 +75,6 @@ class MainViewModel : ViewModel() {
             HealthPermission.getReadPermission(StepsRecord::class),
             HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class),
             HealthPermission.getReadPermission(Vo2MaxRecord::class),
-            // Body Measurement
             HealthPermission.getReadPermission(BodyFatRecord::class),
             HealthPermission.getReadPermission(BodyTemperatureRecord::class),
             HealthPermission.getReadPermission(BodyWaterMassRecord::class),
@@ -83,12 +82,9 @@ class MainViewModel : ViewModel() {
             HealthPermission.getReadPermission(HeightRecord::class),
             HealthPermission.getReadPermission(LeanBodyMassRecord::class),
             HealthPermission.getReadPermission(WeightRecord::class),
-            // Nutrition
             HealthPermission.getReadPermission(HydrationRecord::class),
             HealthPermission.getReadPermission(NutritionRecord::class),
-            // Sleep
             HealthPermission.getReadPermission(SleepSessionRecord::class),
-            // Vitals
             HealthPermission.getReadPermission(BloodGlucoseRecord::class),
             HealthPermission.getReadPermission(BloodPressureRecord::class),
             HealthPermission.getReadPermission(OxygenSaturationRecord::class),
@@ -112,7 +108,7 @@ class MainViewModel : ViewModel() {
     private val _requestPermissionsLauncherEvent = MutableLiveData<Set<String>>()
     val requestPermissionsLauncherEvent: LiveData<Set<String>> get() = _requestPermissionsLauncherEvent
 
-    private val _allPermissionsGranted = MutableLiveData<Boolean>()
+    private val _allPermissionsGranted = MutableLiveData<Boolean>(false)
     val allPermissionsGranted: LiveData<Boolean> get() = _allPermissionsGranted
 
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
@@ -133,18 +129,22 @@ class MainViewModel : ViewModel() {
                 if (currentlyGrantedPermissions.containsAll(PERMISSIONS)) {
                     Log.d(TAG, "All permissions already granted (checked via ViewModel).")
                     _allPermissionsGranted.postValue(true)
+                    // REMOVED: fetchHealthData() 
                 } else {
                     Log.d(TAG, "Not all permissions granted; triggering request (via ViewModel).")
+                    _allPermissionsGranted.postValue(false) 
                     val permissionsToRequest = PERMISSIONS.filterNot { currentlyGrantedPermissions.contains(it) }.toSet()
                     if (permissionsToRequest.isNotEmpty()){
                         _requestPermissionsLauncherEvent.postValue(permissionsToRequest)
                     } else {
-                        // All PERMISSIONS are already in currentlyGrantedPermissions,
-                        // but containsAll was false. This implies currentlyGrantedPermissions might contain
-                        // PERMISSIONS plus others, or PERMISSIONS is empty. If PERMISSIONS is not empty,
-                        // and all its elements are in currentlyGrantedPermissions, it should be true.
-                        Log.d(TAG, "All requested permissions are already granted, no new permissions to request.")
-                        _allPermissionsGranted.postValue(true) // Should be true if all PERMISSIONS are indeed covered.
+                        if (PERMISSIONS.isEmpty()) {
+                             Log.d(TAG, "PERMISSIONS set is empty, considering all permissions granted.")
+                            _allPermissionsGranted.postValue(true)
+                            // REMOVED: fetchHealthData()
+                        } else {
+                            Log.w(TAG, "No specific permissions left to request, but not all were considered granted. Check PERMISSIONS set.")
+                            _allPermissionsGranted.postValue(false)
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -154,7 +154,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun onPermissionsResult(grantedPermissions: Set<String>) { // Parameter type changed
+    fun onPermissionsResult(grantedPermissions: Set<String>) {
         if (grantedPermissions.containsAll(PERMISSIONS)) {
             Log.d(TAG, "All required permissions granted from launcher result (processed by ViewModel).")
             _allPermissionsGranted.postValue(true)
@@ -166,15 +166,13 @@ class MainViewModel : ViewModel() {
     }
 
     fun fetchHealthData() {
-        if (!::healthConnectClient.isInitialized || _allPermissionsGranted.value != true) {
-            Log.w(TAG, "Cannot fetch data: Client not ready or permissions not granted.")
-            _stepsData.postValue("Steps: Permissions not granted or client not ready.")
-            _heartRateData.postValue("Heart Rate: Permissions not granted or client not ready.")
-            _sleepData.postValue("Sleep: Permissions not granted or client not ready.")
-            _bloodGlucoseData.postValue("Blood Glucose: Permissions not granted or client not ready.")
+        // It's crucial that this check uses the most up-to-date state of allPermissionsGranted.
+        // If called from LaunchedEffect, this LiveData's value should have propagated.
+        if (!::healthConnectClient.isInitialized || allPermissionsGranted.value != true) {
+            Log.w(TAG, "Cannot fetch data: Client not ready or permissions not granted. allPermissionsGranted.value: ${allPermissionsGranted.value}")
             return
         }
-        Log.d(TAG, "Fetching health data for UI.")
+        Log.d(TAG, "Fetching health data for UI because permissions are granted.")
         viewModelScope.launch {
             readStepsDataInternal()
             readHeartRateDataInternal()
@@ -208,9 +206,12 @@ class MainViewModel : ViewModel() {
                 ReadRecordsRequest(HeartRateRecord::class, TimeRangeFilter.between(now.minus(1, ChronoUnit.DAYS), now))
             )
             if (response.records.isNotEmpty()) {
-                val latestRecord = response.records.maxByOrNull { it.startTime }?.samples?.maxByOrNull { it.time }
-                if (latestRecord != null) {
-                    _heartRateData.postValue("Latest Heart Rate: ${latestRecord.beatsPerMinute} BPM at ${formatter.format(latestRecord.time)}")
+                // Logic to find the most recent sample from all records
+                val latestSample = response.records
+                    .flatMap { it.samples }
+                    .maxByOrNull { it.time }
+                if (latestSample != null) {
+                    _heartRateData.postValue("Latest Heart Rate: ${latestSample.beatsPerMinute} BPM at ${formatter.format(latestSample.time)}")
                 } else {
                     _heartRateData.postValue("Heart Rate: No samples found.")
                 }

@@ -24,6 +24,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect // Added for LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -154,6 +155,14 @@ fun HealthDataScreen(viewModel: MainViewModel, healthConnectAvailable: Boolean) 
     val heartRate by viewModel.heartRateData.observeAsState(initial = "Heart Rate: Loading...")
     val sleep by viewModel.sleepData.observeAsState(initial = "Sleep: Loading...")
     val bloodGlucose by viewModel.bloodGlucoseData.observeAsState(initial = "Blood Glucose: Loading...")
+
+    // Automatically fetch data when permissions are granted
+    LaunchedEffect(permissionsGranted) {
+        if (permissionsGranted) {
+            Log.d("HealthDataScreen", "Permissions granted, attempting to fetch health data.")
+            viewModel.fetchHealthData()
+        }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
