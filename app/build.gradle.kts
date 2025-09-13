@@ -1,7 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose.compiler) // ADDED Compose Compiler plugin
+    alias(libs.plugins.kotlin.compose.compiler)
+    alias(libs.plugins.ksp) // Apply KSP plugin
 }
 
 android {
@@ -37,31 +38,32 @@ android {
     buildFeatures {
         compose = true
     }
-    // REMOVED composeOptions block - Handled by the Compose Compiler plugin
-    // composeOptions {
-    //     kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
-    // }
 }
 
 dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    implementation(libs.material) // For XML views, can be removed if app is 100% Compose with Material 3
+    implementation(libs.material) 
     implementation(libs.androidx.health.connect.client)
 
-    // ViewModel and Activity KTX (already present, now using TOML aliases if they were updated)
+    // ViewModel and Activity KTX
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.activity.ktx)
 
-    // Jetpack Compose dependencies (using TOML)
+    // Jetpack Compose dependencies
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.compose.runtime.livedata) // Added for observeAsState()
+    implementation(libs.androidx.compose.runtime.livedata)
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx) // Kotlin Extensions
+    ksp(libs.androidx.room.compiler)      // Annotation processor for KSP
 
     // Compose tooling for previews (Debug only)
     debugImplementation(libs.androidx.compose.ui.tooling)
@@ -70,7 +72,4 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    // Add Compose testing dependencies if/when needed
-    // androidTestImplementation(platform(libs.androidx.compose.bom))
-    // androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 }

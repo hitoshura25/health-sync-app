@@ -3,7 +3,7 @@ package io.github.hitoshura25.healthsyncapp
 import android.util.Log
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
-// Explicit imports for Health Connect Record types
+// Health Connect Record types (used for permission definitions)
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.BasalBodyTemperatureRecord
 import androidx.health.connect.client.records.BasalMetabolicRateRecord
@@ -36,14 +36,12 @@ import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.records.Vo2MaxRecord
 import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.records.WheelchairPushesRecord
-// Other Health Connect imports
-import androidx.health.connect.client.request.ReadRecordsRequest
-import androidx.health.connect.client.time.TimeRangeFilter
 // Lifecycle and coroutines imports
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.hitoshura25.healthsyncapp.data.repository.HealthDataRepository
 import kotlinx.coroutines.launch
 // Java time imports
 import java.time.Instant
@@ -51,13 +49,20 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
-class MainViewModel : ViewModel() {
+class MainViewModel(
+    private val healthDataRepository: HealthDataRepository,
+    private val healthConnectClient: HealthConnectClient // Still needed for permission controller
+) : ViewModel() {
 
     private val TAG = "MainViewModel"
 
-    // PERMISSIONS set remains unchanged as per user request
     val PERMISSIONS =
         setOf(
+            HealthPermission.getReadPermission(StepsRecord::class),
+            HealthPermission.getReadPermission(HeartRateRecord::class),
+            HealthPermission.getReadPermission(SleepSessionRecord::class),
+            HealthPermission.getReadPermission(BloodGlucoseRecord::class),
+            // Add other permissions as needed from the original list
             HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
             HealthPermission.getReadPermission(BasalBodyTemperatureRecord::class),
             HealthPermission.getReadPermission(BasalMetabolicRateRecord::class),
@@ -66,13 +71,11 @@ class MainViewModel : ViewModel() {
             HealthPermission.getReadPermission(ElevationGainedRecord::class),
             HealthPermission.getReadPermission(ExerciseSessionRecord::class),
             HealthPermission.getReadPermission(FloorsClimbedRecord::class),
-            HealthPermission.getReadPermission(HeartRateRecord::class),
             HealthPermission.getReadPermission(HeartRateVariabilityRmssdRecord::class),
             HealthPermission.getReadPermission(PowerRecord::class),
             HealthPermission.getReadPermission(RestingHeartRateRecord::class),
             HealthPermission.getReadPermission(SpeedRecord::class),
             HealthPermission.getReadPermission(StepsCadenceRecord::class),
-            HealthPermission.getReadPermission(StepsRecord::class),
             HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class),
             HealthPermission.getReadPermission(Vo2MaxRecord::class),
             HealthPermission.getReadPermission(BodyFatRecord::class),
@@ -84,14 +87,10 @@ class MainViewModel : ViewModel() {
             HealthPermission.getReadPermission(WeightRecord::class),
             HealthPermission.getReadPermission(HydrationRecord::class),
             HealthPermission.getReadPermission(NutritionRecord::class),
-            HealthPermission.getReadPermission(SleepSessionRecord::class),
-            HealthPermission.getReadPermission(BloodGlucoseRecord::class),
             HealthPermission.getReadPermission(BloodPressureRecord::class),
             HealthPermission.getReadPermission(OxygenSaturationRecord::class),
             HealthPermission.getReadPermission(RespiratoryRateRecord::class)
         )
-
-    private lateinit var healthConnectClient: HealthConnectClient
 
     private val _stepsData = MutableLiveData<String>("Steps: Not loaded")
     val stepsData: LiveData<String> get() = _stepsData
@@ -113,34 +112,26 @@ class MainViewModel : ViewModel() {
 
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
 
-    fun setHealthConnectClient(client: HealthConnectClient) {
-        healthConnectClient = client
-    }
+    // Removed setHealthConnectClient method
 
     fun checkOrRequestPermissions() {
-        if (!::healthConnectClient.isInitialized) {
-            Log.e(TAG, "HealthConnectClient has not been initialized in ViewModel.")
-            _allPermissionsGranted.postValue(false)
-            return
-        }
+        // healthConnectClient is now injected via constructor
         viewModelScope.launch {
             try {
                 val currentlyGrantedPermissions = healthConnectClient.permissionController.getGrantedPermissions()
                 if (currentlyGrantedPermissions.containsAll(PERMISSIONS)) {
                     Log.d(TAG, "All permissions already granted (checked via ViewModel).")
                     _allPermissionsGranted.postValue(true)
-                    // REMOVED: fetchHealthData() 
                 } else {
                     Log.d(TAG, "Not all permissions granted; triggering request (via ViewModel).")
-                    _allPermissionsGranted.postValue(false) 
+                    _allPermissionsGranted.postValue(false)
                     val permissionsToRequest = PERMISSIONS.filterNot { currentlyGrantedPermissions.contains(it) }.toSet()
-                    if (permissionsToRequest.isNotEmpty()){
+                    if (permissionsToRequest.isNotEmpty()) {
                         _requestPermissionsLauncherEvent.postValue(permissionsToRequest)
                     } else {
                         if (PERMISSIONS.isEmpty()) {
-                             Log.d(TAG, "PERMISSIONS set is empty, considering all permissions granted.")
+                            Log.d(TAG, "PERMISSIONS set is empty, considering all permissions granted.")
                             _allPermissionsGranted.postValue(true)
-                            // REMOVED: fetchHealthData()
                         } else {
                             Log.w(TAG, "No specific permissions left to request, but not all were considered granted. Check PERMISSIONS set.")
                             _allPermissionsGranted.postValue(false)
@@ -166,106 +157,68 @@ class MainViewModel : ViewModel() {
     }
 
     fun fetchHealthData() {
-        // It's crucial that this check uses the most up-to-date state of allPermissionsGranted.
-        // If called from LaunchedEffect, this LiveData's value should have propagated.
-        if (!::healthConnectClient.isInitialized || allPermissionsGranted.value != true) {
-            Log.w(TAG, "Cannot fetch data: Client not ready or permissions not granted. allPermissionsGranted.value: ${allPermissionsGranted.value}")
+        if (allPermissionsGranted.value != true) {
+            Log.w(TAG, "Cannot fetch data: Permissions not granted. allPermissionsGranted.value: ${allPermissionsGranted.value}")
             return
         }
-        Log.d(TAG, "Fetching health data for UI because permissions are granted.")
+        Log.d(TAG, "Fetching and saving health data via repository because permissions are granted.")
         viewModelScope.launch {
-            readStepsDataInternal()
-            readHeartRateDataInternal()
-            readSleepSessionDataInternal()
-            readBloodGlucoseDataInternal()
-        }
-    }
-
-    private suspend fun readStepsDataInternal() {
-        try {
             val now = Instant.now()
-            val response = healthConnectClient.readRecords(
-                ReadRecordsRequest(StepsRecord::class, TimeRangeFilter.between(now.minus(1, ChronoUnit.DAYS), now))
-            )
-            if (response.records.isNotEmpty()) {
-                val totalSteps = response.records.sumOf { it.count }
+            val startTime24h = now.minus(1, ChronoUnit.DAYS)
+            val startTime48h = now.minus(2, ChronoUnit.DAYS) // For sleep data
+
+            // Fetch and Save Steps
+            val stepsEntities = healthDataRepository.fetchAndSaveStepsData(startTime24h, now)
+            if (stepsEntities.isNotEmpty()) {
+                val totalSteps = stepsEntities.sumOf { it.count }
                 _stepsData.postValue("Steps (last 24h): $totalSteps")
             } else {
                 _stepsData.postValue("Steps: No data found for last 24h.")
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error reading Steps: ${e.message}", e)
-            _stepsData.postValue("Steps: Error loading data.")
-        }
-    }
 
-    private suspend fun readHeartRateDataInternal() {
-        try {
-            val now = Instant.now()
-            val response = healthConnectClient.readRecords(
-                ReadRecordsRequest(HeartRateRecord::class, TimeRangeFilter.between(now.minus(1, ChronoUnit.DAYS), now))
-            )
-            if (response.records.isNotEmpty()) {
-                // Logic to find the most recent sample from all records
-                val latestSample = response.records
-                    .flatMap { it.samples }
-                    .maxByOrNull { it.time }
+            // Fetch and Save Heart Rate
+            val heartRateEntities = healthDataRepository.fetchAndSaveHeartRateData(startTime24h, now)
+            if (heartRateEntities.isNotEmpty()) {
+                val latestSample = heartRateEntities.maxByOrNull { it.sampleTimeEpochMillis }
                 if (latestSample != null) {
-                    _heartRateData.postValue("Latest Heart Rate: ${latestSample.beatsPerMinute} BPM at ${formatter.format(latestSample.time)}")
+                    val time = Instant.ofEpochMilli(latestSample.sampleTimeEpochMillis)
+                    _heartRateData.postValue("Latest Heart Rate: ${latestSample.beatsPerMinute} BPM at ${formatter.format(time)}")
                 } else {
                     _heartRateData.postValue("Heart Rate: No samples found.")
                 }
             } else {
                 _heartRateData.postValue("Heart Rate: No data found for last 24h.")
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error reading Heart Rate: ${e.message}", e)
-            _heartRateData.postValue("Heart Rate: Error loading data.")
-        }
-    }
 
-    private suspend fun readSleepSessionDataInternal() {
-        try {
-            val now = Instant.now()
-            val response = healthConnectClient.readRecords(
-                ReadRecordsRequest(SleepSessionRecord::class, TimeRangeFilter.between(now.minus(2, ChronoUnit.DAYS), now))
-            )
-            if (response.records.isNotEmpty()) {
-                val latestSession = response.records.maxByOrNull { it.endTime }
-                if (latestSession != null) {
-                    val duration = ChronoUnit.MINUTES.between(latestSession.startTime, latestSession.endTime)
-                    _sleepData.postValue("Last Sleep: $duration mins (ends ${formatter.format(latestSession.endTime)})")
+            // Fetch and Save Sleep Sessions
+            val sleepEntities = healthDataRepository.fetchAndSaveSleepSessions(startTime48h, now) // Using 48h for sleep
+            if (sleepEntities.isNotEmpty()) {
+                val latestSession = sleepEntities.maxByOrNull { it.endTimeEpochMillis }
+                if (latestSession != null && latestSession.durationMillis != null) {
+                    val durationMinutes = latestSession.durationMillis / (1000 * 60)
+                    val endTime = Instant.ofEpochMilli(latestSession.endTimeEpochMillis)
+                    _sleepData.postValue("Last Sleep: $durationMinutes mins (ends ${formatter.format(endTime)})")
                 } else {
-                     _sleepData.postValue("Sleep: No session data.")
+                    _sleepData.postValue("Sleep: No session data.")
                 }
             } else {
                 _sleepData.postValue("Sleep: No data found for last 48h.")
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error reading Sleep: ${e.message}", e)
-            _sleepData.postValue("Sleep: Error loading data.")
-        }
-    }
 
-    private suspend fun readBloodGlucoseDataInternal() {
-        try {
-            val now = Instant.now()
-            val response = healthConnectClient.readRecords(
-                ReadRecordsRequest(BloodGlucoseRecord::class, TimeRangeFilter.between(now.minus(1, ChronoUnit.DAYS), now))
-            )
-            if (response.records.isNotEmpty()) {
-                val latestRecord = response.records.maxByOrNull { it.time }
+            // Fetch and Save Blood Glucose
+            val bloodGlucoseEntities = healthDataRepository.fetchAndSaveBloodGlucoseData(startTime24h, now)
+            if (bloodGlucoseEntities.isNotEmpty()) {
+                val latestRecord = bloodGlucoseEntities.maxByOrNull { it.timeEpochMillis }
                 if (latestRecord != null) {
-                    _bloodGlucoseData.postValue("Latest Glucose: ${latestRecord.level.inMilligramsPerDeciliter} mg/dL at ${formatter.format(latestRecord.time)}")
+                    val time = Instant.ofEpochMilli(latestRecord.timeEpochMillis)
+                    _bloodGlucoseData.postValue("Latest Glucose: ${latestRecord.levelMgdL} mg/dL at ${formatter.format(time)}")
                 } else {
                     _bloodGlucoseData.postValue("Blood Glucose: No level data.")
                 }
             } else {
                 _bloodGlucoseData.postValue("Blood Glucose: No data found for last 24h.")
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error reading Blood Glucose: ${e.message}", e)
-            _bloodGlucoseData.postValue("Blood Glucose: Error loading data.")
         }
     }
+    // Removed internal data reading methods as their logic is now in HealthDataRepositoryImpl
 }

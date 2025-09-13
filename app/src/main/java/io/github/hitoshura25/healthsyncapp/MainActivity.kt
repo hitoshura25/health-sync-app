@@ -24,7 +24,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect // Added for LaunchedEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -43,8 +43,27 @@ private const val ACTION_SHOW_PERMISSIONS_RATIONALE = "androidx.health.ACTION_SH
 class MainActivity : ComponentActivity() {
 
     private val TAG = "MainActivity"
-    private lateinit var healthConnectClient: HealthConnectClient
-    private val mainViewModel: MainViewModel by viewModels()
+    private lateinit var healthConnectClient: HealthConnectClient // Needs to be initialized before ViewModel factory uses it.
+
+    private val mainViewModel: MainViewModel by viewModels {
+        if (!::healthConnectClient.isInitialized) {
+            // This path should ideally not be hit if initializeHealthConnectAndApp is called first in onCreate
+            // For safety, and if HealthConnectClient.getOrCreate(this) is light enough,
+            // we could initialize it here as a fallback, but it's better to ensure sequence.
+            // Or, the factory should handle a potentially uninitialized client if that's a valid state.
+            // For now, assuming healthConnectClient is initialized by the time ViewModel is first accessed.
+            Log.w(TAG, "HealthConnectClient not initialized when ViewModel factory was called. Ensure order.")
+            // As a safeguard, try to initialize it, though this might be too late if SDK not available.
+            if (HealthConnectClient.getSdkStatus(this) == HealthConnectClient.SDK_AVAILABLE) {
+                 healthConnectClient = HealthConnectClient.getOrCreate(this)
+            } else {
+                // This is problematic as the ViewModel needs a client. Handle error or provide a dummy.
+                // For this example, we proceed, but the ViewModel might fail if client is truly needed before permission check.
+                 throw IllegalStateException("HealthConnectClient could not be initialized for ViewModelFactory and SDK is unavailable.")
+            }
+        }
+        MainViewModelFactory(application, healthConnectClient)
+    }
 
     private lateinit var requestPermissionsLauncher: ActivityResultLauncher<Set<String>>
 
@@ -71,11 +90,11 @@ class MainActivity : ComponentActivity() {
         } else {
             Log.d(TAG, "Activity launched for normal app flow.")
             // Normal app startup flow
-            initializeHealthConnectAndApp()
+            initializeHealthConnectAndApp() // This initializes healthConnectClient
             setContent {
                 MaterialTheme {
                     HealthDataScreen(
-                        mainViewModel,
+                        mainViewModel, // ViewModel is accessed here, factory runs if it's the first time
                         healthConnectAvailable = HealthConnectClient.getSdkStatus(this) == HealthConnectClient.SDK_AVAILABLE
                     )
                 }
@@ -85,13 +104,15 @@ class MainActivity : ComponentActivity() {
 
     private fun initializeHealthConnectAndApp() {
         if (HealthConnectClient.getSdkStatus(this) == HealthConnectClient.SDK_AVAILABLE) {
-            healthConnectClient = HealthConnectClient.getOrCreate(this)
-            mainViewModel.setHealthConnectClient(healthConnectClient)
+            if (!::healthConnectClient.isInitialized) { // Initialize only if not already done (e.g., by VM factory fallback)
+                healthConnectClient = HealthConnectClient.getOrCreate(this)
+            }
+            // mainViewModel.setHealthConnectClient(healthConnectClient) // REMOVED: Client is now injected
 
             requestPermissionsLauncher = registerForActivityResult(
                 PermissionController.createRequestPermissionResultContract()
             ) { grantedPermissions ->
-                mainViewModel.onPermissionsResult(grantedPermissions)
+                mainViewModel.onPermissionsResult(grantedPermissions) // ViewModel access triggers factory if first time
             }
 
             mainViewModel.requestPermissionsLauncherEvent.observe(this, Observer { permissionsToRequest ->
@@ -104,6 +125,8 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             })
+            // This ViewModel access will trigger the factory if it hasn't run yet.
+            // HealthConnectClient must be initialized before this point for the factory to use it.
             mainViewModel.checkOrRequestPermissions()
         } else {
             Log.e(TAG, "Health Connect SDK is not available on this device.")
