@@ -1,15 +1,10 @@
 package io.github.hitoshura25.healthsyncapp
 
+// Import DAOs directly
 import android.app.Application
 import androidx.health.connect.client.HealthConnectClient
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import io.github.hitoshura25.healthsyncapp.data.local.database.AppDatabase
-// Import DAOs directly
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BloodGlucoseDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HeartRateSampleDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.SleepSessionDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.StepsRecordDao
 
 class MainViewModelFactory(
     private val application: Application,

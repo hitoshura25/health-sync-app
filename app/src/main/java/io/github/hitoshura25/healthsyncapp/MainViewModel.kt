@@ -5,7 +5,39 @@ import android.content.Context
 import android.util.Log
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
-import androidx.health.connect.client.records.*
+// Explicit Health Connect Record type imports
+import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
+import androidx.health.connect.client.records.BasalBodyTemperatureRecord
+import androidx.health.connect.client.records.BasalMetabolicRateRecord
+import androidx.health.connect.client.records.BloodGlucoseRecord
+import androidx.health.connect.client.records.BloodPressureRecord
+import androidx.health.connect.client.records.BodyFatRecord
+import androidx.health.connect.client.records.BodyTemperatureRecord
+import androidx.health.connect.client.records.BodyWaterMassRecord
+import androidx.health.connect.client.records.BoneMassRecord
+import androidx.health.connect.client.records.CyclingPedalingCadenceRecord
+import androidx.health.connect.client.records.DistanceRecord
+import androidx.health.connect.client.records.ElevationGainedRecord
+import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.FloorsClimbedRecord
+import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
+import androidx.health.connect.client.records.HeightRecord
+import androidx.health.connect.client.records.HydrationRecord
+import androidx.health.connect.client.records.LeanBodyMassRecord
+import androidx.health.connect.client.records.NutritionRecord
+import androidx.health.connect.client.records.OxygenSaturationRecord
+import androidx.health.connect.client.records.PowerRecord
+import androidx.health.connect.client.records.RespiratoryRateRecord
+import androidx.health.connect.client.records.RestingHeartRateRecord
+import androidx.health.connect.client.records.SleepSessionRecord
+import androidx.health.connect.client.records.SpeedRecord
+import androidx.health.connect.client.records.StepsCadenceRecord
+import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
+import androidx.health.connect.client.records.Vo2MaxRecord
+import androidx.health.connect.client.records.WeightRecord
+// Lifecycle and coroutines imports
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -25,6 +57,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+// Java time imports
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -45,7 +78,6 @@ class MainViewModel(
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
 
     val PERMISSIONS = setOf(
-        // Keeping all permissions for consistency, though ViewModel won't fetch directly
         HealthPermission.getReadPermission(StepsRecord::class), HealthPermission.getReadPermission(HeartRateRecord::class),
         HealthPermission.getReadPermission(SleepSessionRecord::class), HealthPermission.getReadPermission(BloodGlucoseRecord::class),
         HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class), HealthPermission.getReadPermission(BasalBodyTemperatureRecord::class),
@@ -148,7 +180,6 @@ class MainViewModel(
         }
     }
 
-    // Schedules a one-time SyncWorker if it hasn't been done yet after permissions are granted.
     private fun handleInitialWorkerScheduling() {
         viewModelScope.launch {
             val prefs = application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -156,7 +187,7 @@ class MainViewModel(
 
             if (!initialWorkerScheduled) {
                 Log.i(TAG, "Initial SyncWorker not yet scheduled. Enqueuing OneTimeWorkRequest.")
-                triggerDataRefreshWorker("InitialPermissionSyncWorker") // Use a specific tag for this initial worker
+                triggerDataRefreshWorker("InitialPermissionSyncWorker") 
                 prefs.edit().putBoolean(KEY_INITIAL_WORKER_SCHEDULED, true).apply()
                 Log.i(TAG, "Initial SyncWorker OneTimeWorkRequest enqueued and preference updated.")
             } else {
@@ -165,28 +196,25 @@ class MainViewModel(
         }
     }
 
-    // Public function to be called by UI (e.g., refresh button)
     fun triggerDataRefresh() {
          if (allPermissionsGranted.value == true) {
             Log.i(TAG, "User triggered data refresh. Enqueuing OneTimeWorkRequest for SyncWorker.")
             triggerDataRefreshWorker("UserTriggeredSyncWorker")
         } else {
             Log.w(TAG, "User triggered data refresh but permissions not granted. Requesting permissions.")
-            checkOrRequestPermissions() // Ask for permissions if refresh is triggered without them
+            checkOrRequestPermissions()
         }
     }
 
     private fun triggerDataRefreshWorker(tag: String) {
         val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED) // SyncWorker has this, ensure consistency
+            .setRequiredNetworkType(NetworkType.CONNECTED) 
             .build()
         val oneTimeSyncRequest = OneTimeWorkRequestBuilder<SyncWorker>()
             .setConstraints(constraints)
-            .addTag(tag) // Add a tag for easier identification/debugging
+            .addTag(tag) 
             .build()
         WorkManager.getInstance(application).enqueue(oneTimeSyncRequest)
         Log.d(TAG, "Enqueued OneTimeWorkRequest for SyncWorker with tag: $tag")
     }
-
-    // processAndMarkUnsyncedData() and _syncStatusMessage are removed as SyncWorker handles this now.
 }
