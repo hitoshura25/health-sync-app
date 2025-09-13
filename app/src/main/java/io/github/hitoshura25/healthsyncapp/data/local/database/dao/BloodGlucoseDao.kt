@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.BloodGlucoseEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface BloodGlucoseDao {
@@ -29,4 +30,10 @@ interface BloodGlucoseDao {
 
     @Query("DELETE FROM blood_glucose_records")
     suspend fun clearTable()
+
+    /**
+     * Observes all blood glucose records from the table, ordered by time.
+     */
+    @Query("SELECT * FROM blood_glucose_records ORDER BY time_epoch_millis DESC")
+    fun getAllObservable(): Flow<List<BloodGlucoseEntity>>
 }

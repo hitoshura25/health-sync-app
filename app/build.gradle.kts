@@ -65,6 +65,9 @@ dependencies {
     implementation(libs.androidx.room.ktx) // Kotlin Extensions
     ksp(libs.androidx.room.compiler)      // Annotation processor for KSP
 
+    // WorkManager
+    implementation(libs.androidx.workmanager.ktx)
+
     // Compose tooling for previews (Debug only)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.tooling.preview)

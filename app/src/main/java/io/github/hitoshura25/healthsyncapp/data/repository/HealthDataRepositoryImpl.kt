@@ -16,17 +16,40 @@ import io.github.hitoshura25.healthsyncapp.data.local.database.entity.BloodGluco
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.HeartRateSampleEntity
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.SleepSessionEntity
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.StepsRecordEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.Instant
 
 class HealthDataRepositoryImpl(
-    private val healthConnectClient: HealthConnectClient, // Make sure this is initialized and passed correctly
+    private val healthConnectClient: HealthConnectClient, 
     private val stepsRecordDao: StepsRecordDao,
     private val heartRateSampleDao: HeartRateSampleDao,
     private val sleepSessionDao: SleepSessionDao,
     private val bloodGlucoseDao: BloodGlucoseDao
 ) : HealthDataRepository {
 
-    private val TAG = "HealthDataRepository"
+    private val TAG = "HealthDataRepoImpl"
+
+    override suspend fun fetchAllDataTypesFromHealthConnectAndSave(startTime: Instant, endTime: Instant): Boolean {
+        return withContext(Dispatchers.IO) { // Ensure operations run on a background thread
+            var overallSuccess = true
+            Log.d(TAG, "Starting fetchAllDataTypesFromHealthConnectAndSave for range: $startTime to $endTime")
+            try {
+                // Fetch and save each data type
+                // Individual methods already log their specific errors and attempt to continue
+                fetchAndSaveStepsData(startTime, endTime)
+                fetchAndSaveHeartRateData(startTime, endTime)
+                fetchAndSaveSleepSessions(startTime, endTime)
+                fetchAndSaveBloodGlucoseData(startTime, endTime)
+                
+                Log.i(TAG, "fetchAllDataTypesFromHealthConnectAndSave completed.")
+            } catch (e: Exception) {
+                Log.e(TAG, "Critical error during fetchAllDataTypesFromHealthConnectAndSave orchestration: ${e.message}", e)
+                overallSuccess = false
+            }
+            overallSuccess
+        }
+    }
 
     // --- Steps Data ---
     override suspend fun fetchAndSaveStepsData(startTime: Instant, endTime: Instant): List<StepsRecordEntity> {
@@ -37,18 +60,15 @@ class HealthDataRepositoryImpl(
             val appFetchTime = Instant.now().toEpochMilli()
 
             for (record in response.records) {
-                // Optional: Check if record already exists by hcUid to avoid redundant processing
-                // val existing = stepsRecordDao.getRecordByHcUid(record.metadata.id)
-                // if (existing == null) { ... }
                 entitiesToSave.add(
                     StepsRecordEntity(
                         hcUid = record.metadata.id,
                         count = record.count,
                         startTimeEpochMillis = record.startTime.toEpochMilli(),
                         endTimeEpochMillis = record.endTime.toEpochMilli(),
-                        zoneOffsetId = record.startZoneOffset?.id, // Or record.endZoneOffset?.id
+                        zoneOffsetId = record.startZoneOffset?.id,
                         appRecordFetchTimeEpochMillis = appFetchTime,
-                        isSynced = false // New records are not synced
+                        isSynced = false
                     )
                 )
             }
@@ -58,9 +78,8 @@ class HealthDataRepositoryImpl(
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching or saving steps data: ${e.message}", e)
-            // Depending on error handling strategy, could return emptyList() or throw
         }
-        return entitiesToSave // Return what was attempted to be saved
+        return entitiesToSave
     }
 
     override suspend fun getUnsyncedStepsRecords(): List<StepsRecordEntity> {
@@ -83,10 +102,9 @@ class HealthDataRepositoryImpl(
                 record.samples.forEach { sample ->
                     entitiesToSave.add(
                         HeartRateSampleEntity(
-                            hcRecordUid = record.metadata.id, // ID of the parent HeartRateRecord
+                            hcRecordUid = record.metadata.id, 
                             sampleTimeEpochMillis = sample.time.toEpochMilli(),
                             beatsPerMinute = sample.beatsPerMinute,
-                            // HeartRateRecord samples are Instants, zoneOffset is from parent record if available
                             zoneOffsetId = record.startZoneOffset?.id ?: record.endZoneOffset?.id,
                             appRecordFetchTimeEpochMillis = appFetchTime,
                             isSynced = false
@@ -168,7 +186,7 @@ class HealthDataRepositoryImpl(
                         hcUid = record.metadata.id,
                         timeEpochMillis = record.time.toEpochMilli(),
                         zoneOffsetId = record.zoneOffset?.id,
-                        levelMgdL = record.level.inMilligramsPerDeciliter, // Convert to Double if not already
+                        levelMgdL = record.level.inMilligramsPerDeciliter,
                         specimenSource = record.specimenSource,
                         mealType = record.mealType,
                         relationToMeal = record.relationToMeal,

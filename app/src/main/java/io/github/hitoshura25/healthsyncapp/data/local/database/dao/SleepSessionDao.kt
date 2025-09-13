@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.SleepSessionEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SleepSessionDao {
@@ -29,4 +30,10 @@ interface SleepSessionDao {
 
     @Query("DELETE FROM sleep_sessions")
     suspend fun clearTable()
+
+    /**
+     * Observes all sleep sessions from the table, ordered by start time.
+     */
+    @Query("SELECT * FROM sleep_sessions ORDER BY start_time_epoch_millis DESC")
+    fun getAllObservable(): Flow<List<SleepSessionEntity>>
 }

@@ -7,7 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.viewModels
-// Explicit imports for Jetpack Compose foundation layout
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-// Other Jetpack Compose imports
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -24,41 +22,29 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.livedata.observeAsState // Can still use this for LiveData like _allPermissionsGranted
+import androidx.compose.runtime.collectAsState // For StateFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-// Health Connect and Lifecycle imports
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.lifecycle.Observer
 
-// Define the action string as a constant for clarity and to avoid typos
 private const val ACTION_SHOW_PERMISSIONS_RATIONALE = "androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE"
 
 class MainActivity : ComponentActivity() {
 
     private val TAG = "MainActivity"
-    private lateinit var healthConnectClient: HealthConnectClient // Needs to be initialized before ViewModel factory uses it.
-
+    private lateinit var healthConnectClient: HealthConnectClient
     private val mainViewModel: MainViewModel by viewModels {
         if (!::healthConnectClient.isInitialized) {
-            // This path should ideally not be hit if initializeHealthConnectAndApp is called first in onCreate
-            // For safety, and if HealthConnectClient.getOrCreate(this) is light enough,
-            // we could initialize it here as a fallback, but it's better to ensure sequence.
-            // Or, the factory should handle a potentially uninitialized client if that's a valid state.
-            // For now, assuming healthConnectClient is initialized by the time ViewModel is first accessed.
-            Log.w(TAG, "HealthConnectClient not initialized when ViewModel factory was called. Ensure order.")
-            // As a safeguard, try to initialize it, though this might be too late if SDK not available.
             if (HealthConnectClient.getSdkStatus(this) == HealthConnectClient.SDK_AVAILABLE) {
                  healthConnectClient = HealthConnectClient.getOrCreate(this)
             } else {
-                // This is problematic as the ViewModel needs a client. Handle error or provide a dummy.
-                // For this example, we proceed, but the ViewModel might fail if client is truly needed before permission check.
                  throw IllegalStateException("HealthConnectClient could not be initialized for ViewModelFactory and SDK is unavailable.")
             }
         }
@@ -70,8 +56,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Check if the activity was launched to show the permissions rationale
-        if (intent?.action == ACTION_SHOW_PERMISSIONS_RATIONALE) { // Using the defined constant
+        if (intent?.action == ACTION_SHOW_PERMISSIONS_RATIONALE) { 
             Log.d(TAG, "Activity launched to show permissions rationale.")
             setContent {
                 MaterialTheme {
@@ -89,12 +74,11 @@ class MainActivity : ComponentActivity() {
             }
         } else {
             Log.d(TAG, "Activity launched for normal app flow.")
-            // Normal app startup flow
-            initializeHealthConnectAndApp() // This initializes healthConnectClient
+            initializeHealthConnectAndApp()
             setContent {
                 MaterialTheme {
                     HealthDataScreen(
-                        mainViewModel, // ViewModel is accessed here, factory runs if it's the first time
+                        mainViewModel,
                         healthConnectAvailable = HealthConnectClient.getSdkStatus(this) == HealthConnectClient.SDK_AVAILABLE
                     )
                 }
@@ -104,15 +88,14 @@ class MainActivity : ComponentActivity() {
 
     private fun initializeHealthConnectAndApp() {
         if (HealthConnectClient.getSdkStatus(this) == HealthConnectClient.SDK_AVAILABLE) {
-            if (!::healthConnectClient.isInitialized) { // Initialize only if not already done (e.g., by VM factory fallback)
+            if (!::healthConnectClient.isInitialized) { 
                 healthConnectClient = HealthConnectClient.getOrCreate(this)
             }
-            // mainViewModel.setHealthConnectClient(healthConnectClient) // REMOVED: Client is now injected
 
             requestPermissionsLauncher = registerForActivityResult(
                 PermissionController.createRequestPermissionResultContract()
             ) { grantedPermissions ->
-                mainViewModel.onPermissionsResult(grantedPermissions) // ViewModel access triggers factory if first time
+                mainViewModel.onPermissionsResult(grantedPermissions) 
             }
 
             mainViewModel.requestPermissionsLauncherEvent.observe(this, Observer { permissionsToRequest ->
@@ -125,8 +108,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             })
-            // This ViewModel access will trigger the factory if it hasn't run yet.
-            // HealthConnectClient must be initialized before this point for the factory to use it.
+            // ViewModel now handles initial worker scheduling after permission check
             mainViewModel.checkOrRequestPermissions()
         } else {
             Log.e(TAG, "Health Connect SDK is not available on this device.")
@@ -145,8 +127,8 @@ fun PermissionRationaleScreen(onContinue: () -> Unit, onCancel: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues) // Apply padding from Scaffold
-                .padding(16.dp), // Additional padding for content
+                .padding(paddingValues) 
+                .padding(16.dp), 
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -173,19 +155,19 @@ fun PermissionRationaleScreen(onContinue: () -> Unit, onCancel: () -> Unit) {
 
 @Composable
 fun HealthDataScreen(viewModel: MainViewModel, healthConnectAvailable: Boolean) {
+    // Use observeAsState for LiveData (like allPermissionsGranted)
     val permissionsGranted by viewModel.allPermissionsGranted.observeAsState(initial = false)
-    val steps by viewModel.stepsData.observeAsState(initial = "Steps: Loading...")
-    val heartRate by viewModel.heartRateData.observeAsState(initial = "Heart Rate: Loading...")
-    val sleep by viewModel.sleepData.observeAsState(initial = "Sleep: Loading...")
-    val bloodGlucose by viewModel.bloodGlucoseData.observeAsState(initial = "Blood Glucose: Loading...")
+    
+    // Use collectAsState for StateFlow
+    val steps by viewModel.stepsData.collectAsState()
+    val heartRate by viewModel.heartRateData.collectAsState()
+    val sleep by viewModel.sleepData.collectAsState()
+    val bloodGlucose by viewModel.bloodGlucoseData.collectAsState()
+    // syncStatusMessage LiveData and its observer are removed
 
-    // Automatically fetch data when permissions are granted
-    LaunchedEffect(permissionsGranted) {
-        if (permissionsGranted) {
-            Log.d("HealthDataScreen", "Permissions granted, attempting to fetch health data.")
-            viewModel.fetchHealthData()
-        }
-    }
+    // No LaunchedEffect needed here to call viewModel.fetchHealthData() on permission grant,
+    // as the ViewModel and SyncWorker now handle initial data loading proactively.
+    // The UI will update automatically when the database changes.
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -198,7 +180,7 @@ fun HealthDataScreen(viewModel: MainViewModel, healthConnectAvailable: Boolean) 
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(text = "Health Connect Data", style = MaterialTheme.typography.headlineSmall)
+            Text(text = "Health Connect Data (from Local DB)", style = MaterialTheme.typography.headlineSmall)
 
             if (!healthConnectAvailable) {
                 Text("Health Connect SDK is not available on this device.")
@@ -210,9 +192,10 @@ fun HealthDataScreen(viewModel: MainViewModel, healthConnectAvailable: Boolean) 
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Button(onClick = { viewModel.fetchHealthData() }) {
-                    Text("Refresh Data")
+                Button(onClick = { viewModel.triggerDataRefresh() }) { // Changed to triggerDataRefresh
+                    Text("Refresh Data from Health Connect")
                 }
+                // "Process Unsynced Data" button and its status Text are removed
             } else {
                 Text("Permissions not granted. Please grant permissions to see data.")
                 Button(onClick = { viewModel.checkOrRequestPermissions() }) {
@@ -232,17 +215,18 @@ fun HealthDataScreenPreview_Granted() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(text = "Health Connect Data", style = MaterialTheme.typography.headlineSmall)
-            Text(text = "Steps: 10000")
-            Text(text = "Heart Rate: 75 BPM")
-            Text(text = "Sleep: 480 mins")
-            Text(text = "Blood Glucose: 90 mg/dL")
+            Text(text = "Health Connect Data (from Local DB)", style = MaterialTheme.typography.headlineSmall)
+            Text(text = "Steps (from DB): 10000")
+            Text(text = "Latest HR (DB): 75 BPM at 2023-01-01 10:00:00")
+            Text(text = "Last Sleep (DB): 480 mins (ends 2023-01-01 07:00:00)")
+            Text(text = "Latest Glucose (DB): 90 mg/dL at 2023-01-01 08:00:00")
             Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = { }) { Text("Refresh Data") }
+            Button(onClick = { }) { Text("Refresh Data from Health Connect") }
         }
     }
 }
 
+// Other previews (NotGranted, NotAvailable, PermissionRationaleScreen) remain the same.
 @Preview(showBackground = true, name = "Health Connect Available - Permissions Not Granted")
 @Composable
 fun HealthDataScreenPreview_NotGranted() {
@@ -252,7 +236,7 @@ fun HealthDataScreenPreview_NotGranted() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(text = "Health Connect Data", style = MaterialTheme.typography.headlineSmall)
+            Text(text = "Health Connect Data (from Local DB)", style = MaterialTheme.typography.headlineSmall)
             Text("Permissions not granted. Please grant permissions to see data.")
             Button(onClick = { }) { Text("Request Permissions") }
         }
@@ -268,7 +252,7 @@ fun HealthDataScreenPreview_NotAvailable() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(text = "Health Connect Data", style = MaterialTheme.typography.headlineSmall)
+            Text(text = "Health Connect Data (from Local DB)", style = MaterialTheme.typography.headlineSmall)
             Text("Health Connect SDK is not available on this device.")
         }
     }
