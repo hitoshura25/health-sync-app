@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose.compiler)
     alias(libs.plugins.ksp) // Apply KSP plugin
+    alias(libs.plugins.kotlin.serialization) // Using alias for Kotlinx Serialization plugin
 }
 
 android {
@@ -67,6 +68,12 @@ dependencies {
 
     // WorkManager
     implementation(libs.androidx.workmanager.ktx)
+
+    // Avro4k for Kotlin-first Avro serialization
+    implementation(libs.avro4k.core)
+    // Kotlinx Serialization
+    implementation(libs.kotlinx.serialization.core) // Using alias for Kotlinx Serialization core library
+    implementation(libs.kotlinx.io.core)
 
     // Compose tooling for previews (Debug only)
     debugImplementation(libs.androidx.compose.ui.tooling)
