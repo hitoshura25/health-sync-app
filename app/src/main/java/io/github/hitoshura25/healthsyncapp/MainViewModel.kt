@@ -109,7 +109,7 @@ class MainViewModel(
         HealthPermission.getReadPermission(BloodPressureRecord::class),
         HealthPermission.getReadPermission(OxygenSaturationRecord::class),
         HealthPermission.getReadPermission(RespiratoryRateRecord::class),
-        "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND"
+        HealthPermission.PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND
     )
 
     // Observe data from DAOs using Flow and convert to StateFlow for UI
