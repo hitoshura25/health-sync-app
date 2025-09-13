@@ -78,6 +78,7 @@ class MainViewModel(
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
 
     val PERMISSIONS = setOf(
+        HealthPermission.PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND,
         HealthPermission.getReadPermission(StepsRecord::class), HealthPermission.getReadPermission(HeartRateRecord::class),
         HealthPermission.getReadPermission(SleepSessionRecord::class), HealthPermission.getReadPermission(BloodGlucoseRecord::class),
         HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class), HealthPermission.getReadPermission(BasalBodyTemperatureRecord::class),
