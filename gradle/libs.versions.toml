@@ -22,6 +22,9 @@ workmanager = "2.9.0"
 # Kotlinx Serialization versions
 kotlinSerializationPlugin = "1.9.22"
 kotlinxSerializationCore = "1.6.3"
+# Mockito versions
+mockitoCore = "5.12.0"
+mockitoKotlin = "5.4.0"
 
 [libraries]
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
@@ -63,6 +66,9 @@ androidx-workmanager-ktx = { group = "androidx.work", name = "work-runtime-ktx",
 # Kotlinx Serialization
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationCore" }
 
+# Mockito for testing
+mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockitoCore" }
+mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
