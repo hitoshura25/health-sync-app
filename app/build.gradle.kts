@@ -39,6 +39,9 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -83,6 +86,10 @@ dependencies {
     // Mockito for unit testing
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
+
+    // Robolectric dependencies
+    testImplementation(libs.robolectric)
+    testImplementation(libs.core.ktx) // For ApplicationProvider
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
