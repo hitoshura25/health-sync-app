@@ -1,5 +1,6 @@
 package io.github.hitoshura25.healthsyncapp.data.repository
 
+import androidx.health.connect.client.HealthConnectClient // Added import
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.BloodGlucoseEntity
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.HeartRateSampleEntity
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.SleepSessionEntity
@@ -20,13 +21,36 @@ interface HealthDataRepository {
      * @return true if all fetch and save operations were attempted successfully (individual operations might still fail silently based on their implementation),
      *         false if a major, unrecoverable error occurred during orchestration.
      */
-    suspend fun fetchAllDataTypesFromHealthConnectAndSave(startTime: Instant, endTime: Instant): Boolean
+    suspend fun fetchAllDataTypesFromHealthConnectAndSave(
+        healthConnectClient: HealthConnectClient, // Added parameter
+        startTime: Instant, 
+        endTime: Instant
+    ): Boolean
 
     // --- Individual Data Fetching (can be kept for granularity or internal use) ---
-    suspend fun fetchAndSaveStepsData(startTime: Instant, endTime: Instant): List<StepsRecordEntity>
-    suspend fun fetchAndSaveHeartRateData(startTime: Instant, endTime: Instant): List<HeartRateSampleEntity>
-    suspend fun fetchAndSaveSleepSessions(startTime: Instant, endTime: Instant): List<SleepSessionEntity>
-    suspend fun fetchAndSaveBloodGlucoseData(startTime: Instant, endTime: Instant): List<BloodGlucoseEntity>
+    suspend fun fetchAndSaveStepsData(
+        healthConnectClient: HealthConnectClient, // Added parameter
+        startTime: Instant, 
+        endTime: Instant
+    ): List<StepsRecordEntity>
+    
+suspend fun fetchAndSaveHeartRateData(
+        healthConnectClient: HealthConnectClient, // Added parameter
+        startTime: Instant, 
+        endTime: Instant
+    ): List<HeartRateSampleEntity>
+    
+suspend fun fetchAndSaveSleepSessions(
+        healthConnectClient: HealthConnectClient, // Added parameter
+        startTime: Instant, 
+        endTime: Instant
+    ): List<SleepSessionEntity>
+    
+suspend fun fetchAndSaveBloodGlucoseData(
+        healthConnectClient: HealthConnectClient, // Added parameter
+        startTime: Instant, 
+        endTime: Instant
+    ): List<BloodGlucoseEntity>
 
     // --- Data Retrieval for Upload (from Local DB) ---
     suspend fun getUnsyncedStepsRecords(): List<StepsRecordEntity>

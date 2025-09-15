@@ -50,6 +50,7 @@ import androidx.work.WorkManager
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BloodGlucoseDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HeartRateSampleDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.SleepSessionDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.SleepStageDao // Added import
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.StepsRecordDao
 import io.github.hitoshura25.healthsyncapp.worker.SyncWorker
 import kotlinx.coroutines.flow.SharingStarted
@@ -68,6 +69,7 @@ class MainViewModel(
     private val heartRateDao: HeartRateSampleDao,
     private val sleepDao: SleepSessionDao,
     private val bloodGlucoseDao: BloodGlucoseDao,
+    private val sleepStageDao: SleepStageDao, // Added SleepStageDao
     private val healthConnectClient: HealthConnectClient // Still needed for permission checks
 ) : ViewModel() {
 
@@ -135,6 +137,7 @@ class MainViewModel(
             if (sessions.isNotEmpty()) {
                 sessions.maxByOrNull { it.endTimeEpochMillis }?.let {
                     val duration = it.durationMillis?.let { d -> d / (1000 * 60) } ?: "N/A"
+                    // TODO: Could enhance this to query and show number of stages if sleepStageDao is used
                     "Last Sleep (DB): $duration mins (ends ${formatter.format(Instant.ofEpochMilli(it.endTimeEpochMillis))})"
                 } ?: "Sleep: No session data in DB"
             } else "Sleep: No data in DB"

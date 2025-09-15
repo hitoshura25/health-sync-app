@@ -16,6 +16,10 @@ interface HeartRateSampleDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(entities: List<HeartRateSampleEntity>)
 
+    // Corrected column name in the query to hc_record_uid
+    @Query("SELECT * FROM heart_rate_samples WHERE hc_record_uid = :hcRecordUid ORDER BY sample_time_epoch_millis ASC")
+    suspend fun getSamplesByRecordHcUid(hcRecordUid: String): List<HeartRateSampleEntity>
+
     @Query("SELECT * FROM heart_rate_samples WHERE is_synced = 0 ORDER BY sample_time_epoch_millis ASC")
     suspend fun getUnsyncedSamples(): List<HeartRateSampleEntity>
 

@@ -19,9 +19,12 @@ import io.github.hitoshura25.healthsyncapp.data.local.database.entity.StepsRecor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
+import javax.inject.Inject // Added for Hilt
+import javax.inject.Singleton // Added for Hilt
 
-class HealthDataRepositoryImpl(
-    private val healthConnectClient: HealthConnectClient, 
+@Singleton // Good practice for repositories if they are stateless and hold no user-specific data
+class HealthDataRepositoryImpl @Inject constructor(
+    // healthConnectClient removed from constructor
     private val stepsRecordDao: StepsRecordDao,
     private val heartRateSampleDao: HeartRateSampleDao,
     private val sleepSessionDao: SleepSessionDao,
@@ -30,17 +33,19 @@ class HealthDataRepositoryImpl(
 
     private val TAG = "HealthDataRepoImpl"
 
-    override suspend fun fetchAllDataTypesFromHealthConnectAndSave(startTime: Instant, endTime: Instant): Boolean {
-        return withContext(Dispatchers.IO) { // Ensure operations run on a background thread
+    override suspend fun fetchAllDataTypesFromHealthConnectAndSave(
+        healthConnectClient: HealthConnectClient, // Added parameter
+        startTime: Instant, 
+        endTime: Instant
+    ): Boolean {
+        return withContext(Dispatchers.IO) { 
             var overallSuccess = true
             Log.d(TAG, "Starting fetchAllDataTypesFromHealthConnectAndSave for range: $startTime to $endTime")
             try {
-                // Fetch and save each data type
-                // Individual methods already log their specific errors and attempt to continue
-                fetchAndSaveStepsData(startTime, endTime)
-                fetchAndSaveHeartRateData(startTime, endTime)
-                fetchAndSaveSleepSessions(startTime, endTime)
-                fetchAndSaveBloodGlucoseData(startTime, endTime)
+                fetchAndSaveStepsData(healthConnectClient, startTime, endTime)
+                fetchAndSaveHeartRateData(healthConnectClient, startTime, endTime)
+                fetchAndSaveSleepSessions(healthConnectClient, startTime, endTime)
+                fetchAndSaveBloodGlucoseData(healthConnectClient, startTime, endTime)
                 
                 Log.i(TAG, "fetchAllDataTypesFromHealthConnectAndSave completed.")
             } catch (e: Exception) {
@@ -51,12 +56,15 @@ class HealthDataRepositoryImpl(
         }
     }
 
-    // --- Steps Data ---
-    override suspend fun fetchAndSaveStepsData(startTime: Instant, endTime: Instant): List<StepsRecordEntity> {
+    override suspend fun fetchAndSaveStepsData(
+        healthConnectClient: HealthConnectClient, // Added parameter
+        startTime: Instant, 
+        endTime: Instant
+    ): List<StepsRecordEntity> {
         val entitiesToSave = mutableListOf<StepsRecordEntity>()
         try {
             val request = ReadRecordsRequest(StepsRecord::class, TimeRangeFilter.between(startTime, endTime))
-            val response = healthConnectClient.readRecords(request)
+            val response = healthConnectClient.readRecords(request) // Use parameter
             val appFetchTime = Instant.now().toEpochMilli()
 
             for (record in response.records) {
@@ -90,12 +98,15 @@ class HealthDataRepositoryImpl(
         return stepsRecordDao.markAsSynced(ids)
     }
 
-    // --- Heart Rate Data ---
-    override suspend fun fetchAndSaveHeartRateData(startTime: Instant, endTime: Instant): List<HeartRateSampleEntity> {
+    override suspend fun fetchAndSaveHeartRateData(
+        healthConnectClient: HealthConnectClient, // Added parameter
+        startTime: Instant, 
+        endTime: Instant
+    ): List<HeartRateSampleEntity> {
         val entitiesToSave = mutableListOf<HeartRateSampleEntity>()
         try {
             val request = ReadRecordsRequest(HeartRateRecord::class, TimeRangeFilter.between(startTime, endTime))
-            val response = healthConnectClient.readRecords(request)
+            val response = healthConnectClient.readRecords(request) // Use parameter
             val appFetchTime = Instant.now().toEpochMilli()
 
             for (record in response.records) {
@@ -130,12 +141,15 @@ class HealthDataRepositoryImpl(
         return heartRateSampleDao.markAsSynced(ids)
     }
 
-    // --- Sleep Session Data ---
-    override suspend fun fetchAndSaveSleepSessions(startTime: Instant, endTime: Instant): List<SleepSessionEntity> {
+    override suspend fun fetchAndSaveSleepSessions(
+        healthConnectClient: HealthConnectClient, // Added parameter
+        startTime: Instant, 
+        endTime: Instant
+    ): List<SleepSessionEntity> {
         val entitiesToSave = mutableListOf<SleepSessionEntity>()
         try {
             val request = ReadRecordsRequest(SleepSessionRecord::class, TimeRangeFilter.between(startTime, endTime))
-            val response = healthConnectClient.readRecords(request)
+            val response = healthConnectClient.readRecords(request) // Use parameter
             val appFetchTime = Instant.now().toEpochMilli()
 
             for (record in response.records) {
@@ -151,6 +165,8 @@ class HealthDataRepositoryImpl(
                         durationMillis = record.endTime.toEpochMilli() - record.startTime.toEpochMilli(),
                         appRecordFetchTimeEpochMillis = appFetchTime,
                         isSynced = false
+                        // Note: Sleep stages from Health Connect are not directly mapped here.
+                        // If needed, SleepSessionRecord.stages would be processed separately.
                     )
                 )
             }
@@ -172,12 +188,15 @@ class HealthDataRepositoryImpl(
         return sleepSessionDao.markAsSynced(ids)
     }
 
-    // --- Blood Glucose Data ---
-    override suspend fun fetchAndSaveBloodGlucoseData(startTime: Instant, endTime: Instant): List<BloodGlucoseEntity> {
+    override suspend fun fetchAndSaveBloodGlucoseData(
+        healthConnectClient: HealthConnectClient, // Added parameter
+        startTime: Instant, 
+        endTime: Instant
+    ): List<BloodGlucoseEntity> {
         val entitiesToSave = mutableListOf<BloodGlucoseEntity>()
         try {
             val request = ReadRecordsRequest(BloodGlucoseRecord::class, TimeRangeFilter.between(startTime, endTime))
-            val response = healthConnectClient.readRecords(request)
+            val response = healthConnectClient.readRecords(request) // Use parameter
             val appFetchTime = Instant.now().toEpochMilli()
 
             for (record in response.records) {

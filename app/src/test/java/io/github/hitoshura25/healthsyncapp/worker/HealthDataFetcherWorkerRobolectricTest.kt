@@ -117,7 +117,7 @@ class HealthDataFetcherWorkerRobolectricTest {
         `when`(mockHealthConnectClient.permissionController).thenReturn(mockPermissionController)
 
         // Instantiate your concrete FileHandler implementation
-        fileHandler = FileHandlerImpl() 
+        fileHandler = FileHandlerImpl(appContext)
 
         worker = HealthDataFetcherWorker(
             appContext, // Real context from Robolectric

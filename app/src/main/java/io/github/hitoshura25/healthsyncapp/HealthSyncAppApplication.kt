@@ -4,46 +4,62 @@ import android.app.Application
 import android.util.Log
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.NetworkType
+// import androidx.work.NetworkType // Not needed for AvroFileProcessorWorker
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import io.github.hitoshura25.healthsyncapp.data.local.database.AppDatabase
-import io.github.hitoshura25.healthsyncapp.worker.SyncWorker
+import dagger.hilt.android.HiltAndroidApp
+import io.github.hitoshura25.healthsyncapp.worker.AvroFileProcessorWorker // Import the worker
 import java.util.concurrent.TimeUnit
 
+@HiltAndroidApp
 class HealthSyncAppApplication : Application() {
 
     private val TAG = "HealthSyncApp"
-    // SharedPreferences constants for initial data operations will be moved to ViewModel or a shared const file.
-
-    val database: AppDatabase by lazy { AppDatabase.getDatabase(this) }
 
     override fun onCreate() {
         super.onCreate()
-        Log.d(TAG, "Application onCreate - Initializing database and scheduling periodic sync.")
-        setupPeriodicSync()
+        Log.d(TAG, "Application onCreate - Hilt is initializing.")
+        // setupPeriodicSync() // Keep this commented or re-evaluate for SyncWorker separately
+        setupAvroFileProcessorWorker() // Add call to schedule the new worker
     }
 
-    // Removed scheduleInitialSync() - this logic will move to MainViewModel
-
-    private fun setupPeriodicSync() {
+    private fun setupAvroFileProcessorWorker() {
         val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresStorageNotLow(true) // Example: only run if storage isn't low
             .build()
 
-        // Periodic sync will run as scheduled, but its first successful data processing
-        // will depend on permissions being granted and data being available.
-        val periodicSyncRequest = PeriodicWorkRequestBuilder<SyncWorker>(
-            15, TimeUnit.MINUTES // Minimum 15 minutes for periodic
+        val avroProcessingRequest = PeriodicWorkRequestBuilder<AvroFileProcessorWorker>(
+            1, TimeUnit.HOURS // Schedule to run approximately every 1 hour
         )
             .setConstraints(constraints)
             .build()
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            SyncWorker::class.java.name, // Unique name for the periodic work
+            AvroFileProcessorWorker::class.java.name, // Unique name for this periodic work
             ExistingPeriodicWorkPolicy.KEEP, // Keep existing if already scheduled
+            avroProcessingRequest
+        )
+        Log.i(TAG, "Periodic AvroFileProcessorWorker (1-hour interval) scheduled with KEEP policy.")
+    }
+
+    /* // Commented out SyncWorker scheduling - can be re-added or managed elsewhere
+    private fun setupPeriodicSync() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val periodicSyncRequest = PeriodicWorkRequestBuilder<SyncWorker>(
+            15, TimeUnit.MINUTES
+        )
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            SyncWorker::class.java.name, 
+            ExistingPeriodicWorkPolicy.KEEP, 
             periodicSyncRequest
         )
         Log.i(TAG, "Periodic sync worker (15 min interval) scheduled with KEEP policy.")
     }
+    */
 }
