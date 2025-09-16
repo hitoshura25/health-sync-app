@@ -8,6 +8,7 @@ import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
+// Removed: import androidx.health.connect.client.units.BloodGlucose - No longer needed
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BloodGlucoseDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HeartRateSampleDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.SleepSessionDao
@@ -19,12 +20,11 @@ import io.github.hitoshura25.healthsyncapp.data.local.database.entity.StepsRecor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
-import javax.inject.Inject // Added for Hilt
-import javax.inject.Singleton // Added for Hilt
+import javax.inject.Inject 
+import javax.inject.Singleton 
 
-@Singleton // Good practice for repositories if they are stateless and hold no user-specific data
+@Singleton 
 class HealthDataRepositoryImpl @Inject constructor(
-    // healthConnectClient removed from constructor
     private val stepsRecordDao: StepsRecordDao,
     private val heartRateSampleDao: HeartRateSampleDao,
     private val sleepSessionDao: SleepSessionDao,
@@ -34,7 +34,7 @@ class HealthDataRepositoryImpl @Inject constructor(
     private val TAG = "HealthDataRepoImpl"
 
     override suspend fun fetchAllDataTypesFromHealthConnectAndSave(
-        healthConnectClient: HealthConnectClient, // Added parameter
+        healthConnectClient: HealthConnectClient, 
         startTime: Instant, 
         endTime: Instant
     ): Boolean {
@@ -57,14 +57,14 @@ class HealthDataRepositoryImpl @Inject constructor(
     }
 
     override suspend fun fetchAndSaveStepsData(
-        healthConnectClient: HealthConnectClient, // Added parameter
+        healthConnectClient: HealthConnectClient, 
         startTime: Instant, 
         endTime: Instant
     ): List<StepsRecordEntity> {
         val entitiesToSave = mutableListOf<StepsRecordEntity>()
         try {
             val request = ReadRecordsRequest(StepsRecord::class, TimeRangeFilter.between(startTime, endTime))
-            val response = healthConnectClient.readRecords(request) // Use parameter
+            val response = healthConnectClient.readRecords(request) 
             val appFetchTime = Instant.now().toEpochMilli()
 
             for (record in response.records) {
@@ -99,14 +99,14 @@ class HealthDataRepositoryImpl @Inject constructor(
     }
 
     override suspend fun fetchAndSaveHeartRateData(
-        healthConnectClient: HealthConnectClient, // Added parameter
+        healthConnectClient: HealthConnectClient, 
         startTime: Instant, 
         endTime: Instant
     ): List<HeartRateSampleEntity> {
         val entitiesToSave = mutableListOf<HeartRateSampleEntity>()
         try {
             val request = ReadRecordsRequest(HeartRateRecord::class, TimeRangeFilter.between(startTime, endTime))
-            val response = healthConnectClient.readRecords(request) // Use parameter
+            val response = healthConnectClient.readRecords(request) 
             val appFetchTime = Instant.now().toEpochMilli()
 
             for (record in response.records) {
@@ -142,14 +142,14 @@ class HealthDataRepositoryImpl @Inject constructor(
     }
 
     override suspend fun fetchAndSaveSleepSessions(
-        healthConnectClient: HealthConnectClient, // Added parameter
+        healthConnectClient: HealthConnectClient, 
         startTime: Instant, 
         endTime: Instant
     ): List<SleepSessionEntity> {
         val entitiesToSave = mutableListOf<SleepSessionEntity>()
         try {
             val request = ReadRecordsRequest(SleepSessionRecord::class, TimeRangeFilter.between(startTime, endTime))
-            val response = healthConnectClient.readRecords(request) // Use parameter
+            val response = healthConnectClient.readRecords(request) 
             val appFetchTime = Instant.now().toEpochMilli()
 
             for (record in response.records) {
@@ -165,8 +165,6 @@ class HealthDataRepositoryImpl @Inject constructor(
                         durationMillis = record.endTime.toEpochMilli() - record.startTime.toEpochMilli(),
                         appRecordFetchTimeEpochMillis = appFetchTime,
                         isSynced = false
-                        // Note: Sleep stages from Health Connect are not directly mapped here.
-                        // If needed, SleepSessionRecord.stages would be processed separately.
                     )
                 )
             }
@@ -189,14 +187,14 @@ class HealthDataRepositoryImpl @Inject constructor(
     }
 
     override suspend fun fetchAndSaveBloodGlucoseData(
-        healthConnectClient: HealthConnectClient, // Added parameter
+        healthConnectClient: HealthConnectClient, 
         startTime: Instant, 
         endTime: Instant
     ): List<BloodGlucoseEntity> {
         val entitiesToSave = mutableListOf<BloodGlucoseEntity>()
         try {
             val request = ReadRecordsRequest(BloodGlucoseRecord::class, TimeRangeFilter.between(startTime, endTime))
-            val response = healthConnectClient.readRecords(request) // Use parameter
+            val response = healthConnectClient.readRecords(request) 
             val appFetchTime = Instant.now().toEpochMilli()
 
             for (record in response.records) {
@@ -205,10 +203,15 @@ class HealthDataRepositoryImpl @Inject constructor(
                         hcUid = record.metadata.id,
                         timeEpochMillis = record.time.toEpochMilli(),
                         zoneOffsetId = record.zoneOffset?.id,
-                        levelMgdL = record.level.inMilligramsPerDeciliter,
+                        levelInMilligramsPerDeciliter = record.level.inMilligramsPerDeciliter, // Renamed field, value is mg/dL
+                        // levelUnit field removed from Entity
                         specimenSource = record.specimenSource,
                         mealType = record.mealType,
                         relationToMeal = record.relationToMeal,
+                        dataOriginPackageName = record.metadata.dataOrigin.packageName, 
+                        hcLastModifiedTimeEpochMillis = record.metadata.lastModifiedTime.toEpochMilli(), 
+                        clientRecordId = record.metadata.clientRecordId, 
+                        clientRecordVersion = record.metadata.clientRecordVersion, 
                         appRecordFetchTimeEpochMillis = appFetchTime,
                         isSynced = false
                     )

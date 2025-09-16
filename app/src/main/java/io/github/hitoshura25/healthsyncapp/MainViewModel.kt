@@ -148,7 +148,7 @@ class MainViewModel(
         .map { records ->
             if (records.isNotEmpty()) {
                 records.maxByOrNull { it.timeEpochMillis }?.let {
-                    "Latest Glucose (DB): ${it.levelMgdL} mg/dL at ${formatter.format(Instant.ofEpochMilli(it.timeEpochMillis))}"
+                    "Latest Glucose (DB): ${it.levelInMilligramsPerDeciliter} mg/dL at ${formatter.format(Instant.ofEpochMilli(it.timeEpochMillis))}"
                 } ?: "Blood Glucose: No level data in DB"
             } else "Blood Glucose: No data in DB"
         }

@@ -1,6 +1,7 @@
 package io.github.hitoshura25.healthsyncapp.di
 
 import android.content.Context
+// import androidx.health.connect.client.HealthConnectClient // No longer provided here
 import androidx.room.Room
 import dagger.Binds
 import dagger.Module
@@ -8,6 +9,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.github.hitoshura25.healthsyncapp.data.HealthConnectToAvroMapper
 import io.github.hitoshura25.healthsyncapp.data.local.database.AppDatabase
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BloodGlucoseDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HeartRateSampleDao
@@ -28,7 +30,6 @@ abstract class AppModule {
     @Singleton
     abstract fun bindHealthDataRepository(impl: HealthDataRepositoryImpl): HealthDataRepository
 
-    // Annotations @Module and @InstallIn removed from companion object
     companion object {
         @Provides
         @Singleton
@@ -76,6 +77,14 @@ abstract class AppModule {
         @Singleton
         fun provideFileHandler(@ApplicationContext appContext: Context): FileHandler {
             return FileHandlerImpl(appContext)
+        }
+
+        // Removed provideHealthConnectClient from here
+
+        @Provides
+        @Singleton
+        fun provideHealthConnectToAvroMapper(): HealthConnectToAvroMapper {
+            return HealthConnectToAvroMapper
         }
     }
 }

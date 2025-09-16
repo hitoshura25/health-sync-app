@@ -23,7 +23,7 @@ import io.github.hitoshura25.healthsyncapp.data.local.database.entity.StepsRecor
         SleepStageEntity::class, // Added
         BloodGlucoseEntity::class
     ],
-    version = 1, // You might need to increment this version if you had a previous version without SleepStageEntity and handle migration.
+    version = 2, // Incremented version due to BloodGlucoseEntity schema change
     exportSchema = false // Set to true if you plan to export schema to version control
 )
 // @TypeConverters(YourTypeConverters::class) // We'll add this later if needed
@@ -47,7 +47,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "health_sync_app_database" // Name changed to health_sync_app_database from health_sync_database in previous AppModule
                 )
                 // .addMigrations(MIGRATION_X_Y) // Add migrations if you change schema later
-                // .fallbackToDestructiveMigration() // Use this only during development if you don't want to write migrations
+                .fallbackToDestructiveMigration() // Use this only during development if you don't want to write migrations
                 .build()
                 INSTANCE = instance
                 instance

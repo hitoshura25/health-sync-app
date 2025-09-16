@@ -80,40 +80,35 @@ data class AvroSleepSessionRecord(
 
 // --- Appended Blood Glucose Avro DTOs and Enums ---
 
+// AvroBloodGlucoseLevelUnit enum removed as it's no longer used.
+
 @Serializable
-enum class AvroBloodGlucoseLevelUnit {
-    MILLIGRAMS_PER_DECILITER, // Corresponds to BloodGlucose.UNIT_MILLIGRAMS_PER_DECILITER
-    MILLIMOLES_PER_LITER,     // Corresponds to BloodGlucose.UNIT_MILLIMOLES_PER_LITER
+enum class AvroBloodGlucoseSpecimenSource { 
+    INTERSTITIAL_FLUID,       
+    CAPILLARY_BLOOD,          
+    PLASMA,                   
+    SERUM,                    
+    TEARS,                    
+    WHOLE_BLOOD,              
     UNKNOWN
 }
 
 @Serializable
-enum class AvroSpecimenSource {
-    INTERSTITIAL_FLUID,       // Corresponds to BloodGlucoseRecord.SPECIMEN_SOURCE_INTERSTITIAL_FLUID
-    CAPILLARY_BLOOD,          // Corresponds to BloodGlucoseRecord.SPECIMEN_SOURCE_CAPILLARY_BLOOD
-    PLASMA,                   // Corresponds to BloodGlucoseRecord.SPECIMEN_SOURCE_PLASMA
-    SERUM,                    // Corresponds to BloodGlucoseRecord.SPECIMEN_SOURCE_SERUM
-    TEARS,                    // Corresponds to BloodGlucoseRecord.SPECIMEN_SOURCE_TEARS
-    WHOLE_BLOOD,              // Corresponds to BloodGlucoseRecord.SPECIMEN_SOURCE_WHOLE_BLOOD
-    UNKNOWN
+enum class AvroBloodGlucoseMealType { 
+    UNKNOWN,                  
+    BREAKFAST,                
+    LUNCH,                    
+    DINNER,                   
+    SNACK                     
 }
 
 @Serializable
-enum class AvroMealType {
-    UNKNOWN,                  // Corresponds to BloodGlucoseRecord.MEAL_TYPE_UNKNOWN
-    BREAKFAST,                // Corresponds to BloodGlucoseRecord.MEAL_TYPE_BREAKFAST
-    LUNCH,                    // Corresponds to BloodGlucoseRecord.MEAL_TYPE_LUNCH
-    DINNER,                   // Corresponds to BloodGlucoseRecord.MEAL_TYPE_DINNER
-    SNACK                     // Corresponds to BloodGlucoseRecord.MEAL_TYPE_SNACK
-}
-
-@Serializable
-enum class AvroRelationToMeal {
-    UNKNOWN,                  // Corresponds to BloodGlucoseRecord.RELATION_TO_MEAL_UNKNOWN
-    GENERAL,                  // Corresponds to BloodGlucoseRecord.RELATION_TO_MEAL_GENERAL
-    FASTING,                  // Corresponds to BloodGlucoseRecord.RELATION_TO_MEAL_FASTING
-    BEFORE_MEAL,              // Corresponds to BloodGlucoseRecord.RELATION_TO_MEAL_BEFORE_MEAL
-    AFTER_MEAL                // Corresponds to BloodGlucoseRecord.RELATION_TO_MEAL_AFTER_MEAL
+enum class AvroBloodGlucoseRelationToMeal { 
+    UNKNOWN,                  
+    GENERAL,                  
+    FASTING,                  
+    BEFORE_MEAL,              
+    AFTER_MEAL                
 }
 
 @Serializable
@@ -121,11 +116,11 @@ data class AvroBloodGlucoseRecord(
     val hcUid: String,
     val timeEpochMillis: Long,
     val zoneOffsetId: String? = null,
-    val levelValue: Double, // From BloodGlucose.value
-    val levelUnit: AvroBloodGlucoseLevelUnit, // From BloodGlucose.unit
-    val specimenSource: AvroSpecimenSource,
-    val mealType: AvroMealType,
-    val relationToMeal: AvroRelationToMeal,
+    val levelInMilligramsPerDeciliter: Double, // Renamed from levelValue, unit is implicit
+    // levelUnit field removed
+    val specimenSource: AvroBloodGlucoseSpecimenSource,
+    val mealType: AvroBloodGlucoseMealType,
+    val relationToMeal: AvroBloodGlucoseRelationToMeal,
     val dataOriginPackageName: String,
     val hcLastModifiedTimeEpochMillis: Long,
     val clientRecordId: String? = null,

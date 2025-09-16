@@ -18,25 +18,25 @@ class AvroFileProcessorWorker @AssistedInject constructor(
     private val avroFileProcessingService: AvroFileProcessingService
 ) : CoroutineWorker(appContext, workerParams) {
 
+    companion object {
+        const val WORK_NAME = "AvroFileProcessorWorker"
+    }
+
     private val TAG = "AvroFileProcWorker"
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        Log.i(TAG, "AvroFileProcessorWorker started.")
+        Log.i(TAG, "$WORK_NAME started.") // Use WORK_NAME in log
         try {
             val success = avroFileProcessingService.processStagedAvroFiles()
             if (success) {
-                Log.i(TAG, "AvroFileProcessingService completed successfully.")
+                Log.i(TAG, "AvroFileProcessingService completed successfully for $WORK_NAME.")
                 Result.success()
             } else {
-                Log.w(TAG, "AvroFileProcessingService reported one or more files failed to process or move.")
-                // If any file or part of a file (like a single sleep session in a multi-session file) fails,
-                // the service returns false. This is treated as a failure for the worker.
+                Log.w(TAG, "AvroFileProcessingService reported one or more files failed to process or move for $WORK_NAME.")
                 Result.failure()
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error during Avro file processing in worker.", e)
-            // Consider if retry is appropriate. If the error is likely transient (e.g., network issues if service called remote things,
-            // or temporary DB lock), retry might be good. For parsing/data errors, failure might be better.
+            Log.e(TAG, "Error during Avro file processing in $WORK_NAME.", e)
             Result.retry() 
         }
     }

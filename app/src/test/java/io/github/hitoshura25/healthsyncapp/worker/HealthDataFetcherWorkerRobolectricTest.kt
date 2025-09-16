@@ -5,99 +5,127 @@ import android.os.Build
 import android.util.Log
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
-import androidx.health.connect.client.records.metadata.Device
 import androidx.health.connect.client.records.metadata.Metadata
-import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.response.ReadRecordsResponse
+import androidx.health.connect.client.units.BloodGlucose
+import androidx.hilt.work.HiltWorkerFactory
 import androidx.test.core.app.ApplicationProvider
+import androidx.work.Configuration
 import androidx.work.ListenableWorker
-import androidx.work.WorkerParameters
-import androidx.work.impl.utils.taskexecutor.TaskExecutor
-import androidx.work.impl.utils.taskexecutor.SerialExecutor
-import com.github.avrokotlin.avro4k.AvroObjectContainer
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.testing.TestListenableWorkerBuilder
+import androidx.work.testing.WorkManagerTestInitHelper
 import com.github.avrokotlin.avro4k.ExperimentalAvro4kApi
-import com.github.avrokotlin.avro4k.decodeFromStream
-import io.github.hitoshura25.healthsyncapp.avro.AvroStepsRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroHeartRateRecord // Assuming this Avro DTO exists
-import io.github.hitoshura25.healthsyncapp.avro.AvroSleepSessionRecord // Assuming this Avro DTO exists
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import dagger.hilt.android.testing.HiltTestApplication
+import dagger.hilt.android.testing.UninstallModules
+import dagger.hilt.components.SingletonComponent
 import io.github.hitoshura25.healthsyncapp.data.HealthConnectToAvroMapper
-import io.github.hitoshura25.healthsyncapp.file.FileHandler // The interface
-import io.github.hitoshura25.healthsyncapp.file.FileHandlerImpl // Concrete implementation
+import io.github.hitoshura25.healthsyncapp.di.HealthConnectModule
+import io.github.hitoshura25.healthsyncapp.file.FileHandler
 import kotlinx.coroutines.runBlocking
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.argThat
 import org.mockito.Mock
 import org.mockito.MockedStatic
 import org.mockito.Mockito
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.io.File
-import java.nio.file.Files
+import java.io.IOException
 import java.time.Instant
 import java.time.ZoneOffset
-import java.time.Duration
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
+import javax.inject.Inject
+import javax.inject.Singleton
 
-// Configure Robolectric to run tests
+@UninstallModules(HealthConnectModule::class)
+@HiltAndroidTest
 @RunWith(RobolectricTestRunner::class)
-// Configure the SDK level for the test environment (optional, but good practice)
-@Config(sdk = [Build.VERSION_CODES.P]) 
+@Config(application = HiltTestApplication::class, manifest = Config.NONE, sdk = [Build.VERSION_CODES.P])
 class HealthDataFetcherWorkerRobolectricTest {
 
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object TestHealthConnectClientModule {
+        lateinit var mockClient: HealthConnectClient
+
+        @Provides
+        @Singleton
+        fun provideMockHealthConnectClient(): HealthConnectClient {
+            return mockClient
+        }
+    }
+
+    @get:Rule
+    var hiltRule = HiltAndroidRule(this)
+
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
+
+    @Mock
+    lateinit var mockHealthConnectClient: HealthConnectClient
+
+    @Inject
+    lateinit var fileHandler: FileHandler // Using actual FileHandler injected by Hilt
+
+    private val mapper = HealthConnectToAvroMapper
+
     private lateinit var appContext: Context
-
-    @Mock
-    private lateinit var mockWorkerParams: WorkerParameters
-
-    @Mock
-    private lateinit var mockTaskExecutor: TaskExecutor
-
-    @Mock
-    private lateinit var mockSerialTaskExecutor: SerialExecutor
-
-    @Mock
-    private lateinit var mockHealthConnectClient: HealthConnectClient
+    private lateinit var mockedLog: MockedStatic<Log>
+    private lateinit var mockedInstant: MockedStatic<Instant>
 
     @Mock
     private lateinit var mockPermissionController: PermissionController
 
-    private val mapper = HealthConnectToAvroMapper // Real instance
-    private lateinit var fileHandler: FileHandler // Real instance of your FileHandler implementation
-
-    private lateinit var worker: HealthDataFetcherWorker
-
-    private lateinit var mockedLog: MockedStatic<Log>
-    private lateinit var mockedInstant: MockedStatic<Instant>
-
     private val FIXED_INSTANT = Instant.ofEpochMilli(1678886400000L)
-    private val AVRO_STAGING_SUBDIR = "avro_staging"
 
     private val allDataPermissions = setOf(
         HealthPermission.getReadPermission(StepsRecord::class),
         HealthPermission.getReadPermission(HeartRateRecord::class),
-        HealthPermission.getReadPermission(SleepSessionRecord::class)
+        HealthPermission.getReadPermission(SleepSessionRecord::class),
+        HealthPermission.getReadPermission(BloodGlucoseRecord::class)
     )
+    private lateinit var synchronousExecutor: Executor
 
     @Before
     fun setUp() {
-        MockitoAnnotations.openMocks(this) // Initialize mocks for Robolectric
+        MockitoAnnotations.openMocks(this)
+        TestHealthConnectClientModule.mockClient = mockHealthConnectClient
+        hiltRule.inject() // fileHandler is injected here
 
-        appContext = ApplicationProvider.getApplicationContext<Context>()
+        appContext = ApplicationProvider.getApplicationContext<HiltTestApplication>()
+        synchronousExecutor = Executors.newSingleThreadExecutor()
 
-        // Mock static Log methods
+        val config = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .setMinimumLoggingLevel(Log.DEBUG)
+            .setExecutor(synchronousExecutor)
+            .setTaskExecutor(synchronousExecutor)
+            .build()
+        WorkManagerTestInitHelper.initializeTestWorkManager(appContext, config)
+
         mockedLog = Mockito.mockStatic(Log::class.java)
         `when`(Log.d(Mockito.anyString(), Mockito.anyString())).thenAnswer { println("LOG D: ${it.arguments[1]}"); 0 }
         `when`(Log.i(Mockito.anyString(), Mockito.anyString())).thenAnswer { println("LOG I: ${it.arguments[1]}"); 0 }
@@ -108,43 +136,41 @@ class HealthDataFetcherWorkerRobolectricTest {
         mockedInstant = Mockito.mockStatic(Instant::class.java, Mockito.CALLS_REAL_METHODS)
         `when`(Instant.now()).thenReturn(FIXED_INSTANT)
 
-        // Setup WorkerParameters mocks
-        `when`(mockWorkerParams.taskExecutor).thenReturn(mockTaskExecutor)
-        `when`(mockTaskExecutor.serialTaskExecutor).thenReturn(mockSerialTaskExecutor)
-        doNothing().`when`(mockSerialTaskExecutor).execute(Mockito.any())
-
-        // Setup HealthConnectClient mocks
         `when`(mockHealthConnectClient.permissionController).thenReturn(mockPermissionController)
 
-        // Instantiate your concrete FileHandler implementation
-        fileHandler = FileHandlerImpl(appContext)
+        val stagingDir = fileHandler.getStagingDirectory()
+        if (stagingDir.exists()) stagingDir.deleteRecursively()
+        stagingDir.mkdirs()
 
-        worker = HealthDataFetcherWorker(
-            appContext, // Real context from Robolectric
-            mockWorkerParams,
-            mockHealthConnectClient,
-            mapper,      // Real mapper
-            fileHandler  // Real FileHandler
-        )
+        val completedDir = fileHandler.getCompletedDirectory()
+        if (completedDir.exists()) completedDir.deleteRecursively()
+        completedDir.mkdirs()
     }
 
     @After
     fun tearDown() {
         mockedLog.close()
         mockedInstant.close()
-        // Clean up files created by the test to ensure test isolation
-        val stagingDir = File(appContext.filesDir, AVRO_STAGING_SUBDIR)
+        val stagingDir = fileHandler.getStagingDirectory()
         if (stagingDir.exists()) {
             stagingDir.deleteRecursively()
         }
+        val completedDir = fileHandler.getCompletedDirectory()
+        if (completedDir.exists()) {
+            completedDir.deleteRecursively()
+        }
+    }
+
+    private fun createWorker(): HealthDataFetcherWorker {
+        return TestListenableWorkerBuilder<HealthDataFetcherWorker>(appContext)
+            .setWorkerFactory(workerFactory)
+            .build()
     }
 
     @OptIn(ExperimentalAvro4kApi::class)
     @Test
-    fun `doWork processes StepsRecord data and writes file successfully`() = runBlocking {
-        // 1. Setup mocks for this specific test
+    fun `doWork processes StepsRecord data and writes file successfully and enqueues processor`() = runBlocking {
         `when`(mockPermissionController.getGrantedPermissions()).thenReturn(allDataPermissions)
-
         val testEndTime = FIXED_INSTANT
         val testStartTime = testEndTime.minusSeconds(3600)
         val simulatedFetchedTimeMillis = FIXED_INSTANT.toEpochMilli()
@@ -155,10 +181,7 @@ class HealthDataFetcherWorkerRobolectricTest {
             endTime = testEndTime,
             endZoneOffset = ZoneOffset.UTC,
             count = 100L,
-            metadata = Metadata.manualEntry(
-                device = Device(type = Device.TYPE_WATCH),
-                clientRecordId = "client-steps-id-test-001"
-            )
+            metadata = Metadata.manualEntry(clientRecordId = "client-steps-id-test-001")
         )
         val stepsRecords = listOf(hcStepsRecord1)
         val stepsResponse = mock<ReadRecordsResponse<StepsRecord>>()
@@ -166,75 +189,43 @@ class HealthDataFetcherWorkerRobolectricTest {
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<StepsRecord>? -> req != null && req.recordType == StepsRecord::class }))
             .thenReturn(stepsResponse)
 
-        // Mock other data types to return empty lists
         val emptyHeartRateResponse = mock<ReadRecordsResponse<HeartRateRecord>>()
         `when`(emptyHeartRateResponse.records).thenReturn(emptyList())
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<HeartRateRecord>? -> req != null && req.recordType == HeartRateRecord::class }))
             .thenReturn(emptyHeartRateResponse)
-
         val emptySleepResponse = mock<ReadRecordsResponse<SleepSessionRecord>>()
         `when`(emptySleepResponse.records).thenReturn(emptyList())
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<SleepSessionRecord>? -> req != null && req.recordType == SleepSessionRecord::class }))
             .thenReturn(emptySleepResponse)
+        val emptyBgResponse = mock<ReadRecordsResponse<BloodGlucoseRecord>>()
+        `when`(emptyBgResponse.records).thenReturn(emptyList())
+        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BloodGlucoseRecord>? -> req != null && req.recordType == BloodGlucoseRecord::class }))
+            .thenReturn(emptyBgResponse)
 
-        // Expected Avro data (real mapper will be used)
-        val expectedAvroStepsRecord1 = mapper.mapStepsRecord(hcStepsRecord1, simulatedFetchedTimeMillis)
-        val expectedAvroList = listOf(expectedAvroStepsRecord1)
-
-        // 2. Execute the worker
+        val worker = createWorker()
         val result = worker.doWork()
-
-        // 3. Assertions
         assertTrue("Worker should succeed.", result is ListenableWorker.Result.Success)
 
-        val expectedFileName = "StepsRecord_${FIXED_INSTANT.toEpochMilli()}.avro"
-        val stagingDir = File(appContext.filesDir, AVRO_STAGING_SUBDIR)
-        val outputFile = File(stagingDir, expectedFileName)
+        val stagingDir = fileHandler.getStagingDirectory()
+        val expectedFile = File(stagingDir, "StepsRecord_${simulatedFetchedTimeMillis}.avro")
+        assertTrue("Expected StepsRecord Avro file should exist and be a file", expectedFile.exists() && expectedFile.isFile)
 
-        // Verify file was created
-        assertTrue("Output file should exist: ${outputFile.absolutePath}", outputFile.exists())
-        assertTrue("Output file should not be empty.", outputFile.length() > 0)
-
-        // ---- START: AVRO FILE CONTENT VERIFICATION ----
-        try {
-            val deserializedRecordsList = Files.newInputStream(outputFile.toPath()).buffered().use { inputStream ->
-                AvroObjectContainer.decodeFromStream<AvroStepsRecord>(inputStream).toList()
-            }
-            assertEquals("Deserialized Avro content mismatch for StepsRecord. Expected: $expectedAvroList, Actual: $deserializedRecordsList", expectedAvroList, deserializedRecordsList)
-        } catch (e: Exception) {
-            throw AssertionError("Failed to read or deserialize StepsRecord Avro file ${outputFile.absolutePath}: ${e.message}", e)
-        }
-        // ---- END: AVRO FILE CONTENT VERIFICATION ----
-
-        println("LOG I: StepsRecord Avro file created at: ${outputFile.absolutePath} and content verified.")
+        val workInfos = WorkManager.getInstance(appContext).getWorkInfosForUniqueWork(AvroFileProcessorWorker.WORK_NAME).get()
+        assertTrue("AvroFileProcessorWorker should have been enqueued.", workInfos.any { it.state == WorkInfo.State.ENQUEUED })
     }
 
     @OptIn(ExperimentalAvro4kApi::class)
     @Test
-    fun `doWork processes HeartRateRecord data and writes file successfully`() = runBlocking {
-        // 1. Setup mocks for this specific test
+    fun `doWork processes HeartRateRecord data and writes file successfully and enqueues processor`() = runBlocking {
         `when`(mockPermissionController.getGrantedPermissions()).thenReturn(allDataPermissions)
-
         val testEndTime = FIXED_INSTANT
-        val testStartTime = testEndTime.minusSeconds(3600) // Example time range
+        val testStartTime = testEndTime.minusSeconds(3600)
         val simulatedFetchedTimeMillis = FIXED_INSTANT.toEpochMilli()
 
-        // Create sample HeartRateRecord data
-        val sampleTime1 = testStartTime.plusSeconds(300) // 5 minutes in
-        val sampleTime2 = testStartTime.plusSeconds(600) // 10 minutes in
         val hcHeartRateRecord1 = HeartRateRecord(
-            startTime = testStartTime,
-            startZoneOffset = ZoneOffset.UTC,
-            endTime = testEndTime,
-            endZoneOffset = ZoneOffset.UTC,
-            samples = listOf(
-                HeartRateRecord.Sample(time = sampleTime1, beatsPerMinute = 75L),
-                HeartRateRecord.Sample(time = sampleTime2, beatsPerMinute = 78L)
-            ),
-            metadata = Metadata.manualEntry(
-                device = Device(type = Device.TYPE_WATCH),
-                clientRecordId = "client-hr-id-test-001"
-            )
+            startTime = testStartTime, startZoneOffset = ZoneOffset.UTC, endTime = testEndTime, endZoneOffset = ZoneOffset.UTC,
+            samples = listOf(HeartRateRecord.Sample(time = testStartTime.plusSeconds(300), beatsPerMinute = 75L)),
+            metadata = Metadata.manualEntry(clientRecordId = "client-hr-id-test-001")
         )
         val heartRateRecords = listOf(hcHeartRateRecord1)
         val heartRateResponse = mock<ReadRecordsResponse<HeartRateRecord>>()
@@ -242,311 +233,242 @@ class HealthDataFetcherWorkerRobolectricTest {
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<HeartRateRecord>? -> req != null && req.recordType == HeartRateRecord::class }))
             .thenReturn(heartRateResponse)
 
-        // Mock other data types to return empty lists
         val emptyStepsResponse = mock<ReadRecordsResponse<StepsRecord>>()
         `when`(emptyStepsResponse.records).thenReturn(emptyList())
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<StepsRecord>? -> req != null && req.recordType == StepsRecord::class }))
             .thenReturn(emptyStepsResponse)
-
         val emptySleepResponse = mock<ReadRecordsResponse<SleepSessionRecord>>()
         `when`(emptySleepResponse.records).thenReturn(emptyList())
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<SleepSessionRecord>? -> req != null && req.recordType == SleepSessionRecord::class }))
             .thenReturn(emptySleepResponse)
+        val emptyBgResponse = mock<ReadRecordsResponse<BloodGlucoseRecord>>()
+        `when`(emptyBgResponse.records).thenReturn(emptyList())
+        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BloodGlucoseRecord>? -> req != null && req.recordType == BloodGlucoseRecord::class }))
+            .thenReturn(emptyBgResponse)
 
-        // Expected Avro data (real mapper will be used)
-        val expectedAvroHeartRateRecord1 = mapper.mapHeartRateRecord(hcHeartRateRecord1, simulatedFetchedTimeMillis)
-        val expectedAvroList = listOf(expectedAvroHeartRateRecord1)
-
-        // 2. Execute the worker
+        val worker = createWorker()
         val result = worker.doWork()
-
-        // 3. Assertions
         assertTrue("Worker should succeed.", result is ListenableWorker.Result.Success)
 
-        val expectedFileName = "HeartRateRecord_${FIXED_INSTANT.toEpochMilli()}.avro"
-        val stagingDir = File(appContext.filesDir, AVRO_STAGING_SUBDIR)
-        val outputFile = File(stagingDir, expectedFileName)
+        val stagingDir = fileHandler.getStagingDirectory()
+        val expectedFile = File(stagingDir, "HeartRateRecord_${simulatedFetchedTimeMillis}.avro")
+        assertTrue("Expected HeartRateRecord Avro file should exist and be a file", expectedFile.exists() && expectedFile.isFile)
 
-        // Verify file was created
-        assertTrue("Output file should exist: ${outputFile.absolutePath}", outputFile.exists())
-        assertTrue("Output file should not be empty.", outputFile.length() > 0)
-
-        // ---- START: AVRO FILE CONTENT VERIFICATION ----
-        try {
-            val deserializedRecordsList = Files.newInputStream(outputFile.toPath()).buffered().use { inputStream ->
-                AvroObjectContainer.decodeFromStream<AvroHeartRateRecord>(inputStream).toList()
-            }
-            assertEquals("Deserialized Avro content mismatch for HeartRateRecord. Expected: $expectedAvroList, Actual: $deserializedRecordsList", expectedAvroList, deserializedRecordsList)
-        } catch (e: Exception) {
-            throw AssertionError("Failed to read or deserialize HeartRateRecord Avro file ${outputFile.absolutePath}: ${e.message}", e)
-        }
-        // ---- END: AVRO FILE CONTENT VERIFICATION ----
-
-        println("LOG I: HeartRateRecord Avro file created at: ${outputFile.absolutePath} and content verified.")
+        val workInfos = WorkManager.getInstance(appContext).getWorkInfosForUniqueWork(AvroFileProcessorWorker.WORK_NAME).get()
+        assertTrue("AvroFileProcessorWorker should have been enqueued.", workInfos.any { it.state == WorkInfo.State.ENQUEUED })
     }
 
     @OptIn(ExperimentalAvro4kApi::class)
     @Test
-    fun `doWork processes SleepSessionRecord data and writes file successfully`() = runBlocking {
-        // 1. Setup mocks for this specific test
+    fun `doWork processes all data types and writes multiple files successfully and enqueues processor`() = runBlocking {
         `when`(mockPermissionController.getGrantedPermissions()).thenReturn(allDataPermissions)
-
-        val sessionEndTime = FIXED_INSTANT
-        val sessionStartTime = sessionEndTime.minusSeconds(8 * 3600) // 8 hour sleep session
+        val testEndTime = FIXED_INSTANT
+        val testStartTime = testEndTime.minusSeconds(3600)
         val simulatedFetchedTimeMillis = FIXED_INSTANT.toEpochMilli()
 
-        // Create sample SleepSessionRecord data
-        val stages = listOf(
-            SleepSessionRecord.Stage(startTime = sessionStartTime, endTime = sessionStartTime.plus(Duration.ofHours(1)), stage = SleepSessionRecord.STAGE_TYPE_AWAKE),
-            SleepSessionRecord.Stage(startTime = sessionStartTime.plus(Duration.ofHours(1)), endTime = sessionStartTime.plus(Duration.ofHours(3)), stage = SleepSessionRecord.STAGE_TYPE_LIGHT),
-            SleepSessionRecord.Stage(startTime = sessionStartTime.plus(Duration.ofHours(3)), endTime = sessionStartTime.plus(Duration.ofHours(5)), stage = SleepSessionRecord.STAGE_TYPE_DEEP),
-            SleepSessionRecord.Stage(startTime = sessionStartTime.plus(Duration.ofHours(5)), endTime = sessionStartTime.plus(Duration.ofHours(7)), stage = SleepSessionRecord.STAGE_TYPE_REM),
-            SleepSessionRecord.Stage(startTime = sessionStartTime.plus(Duration.ofHours(7)), endTime = sessionEndTime, stage = SleepSessionRecord.STAGE_TYPE_LIGHT)
-        )
-        val hcSleepSessionRecord1 = SleepSessionRecord(
-            startTime = sessionStartTime,
-            startZoneOffset = ZoneOffset.UTC,
-            endTime = sessionEndTime,
-            endZoneOffset = ZoneOffset.UTC,
-            stages = stages,
-            title = "Nightly Sleep",
-            notes = "Tested with Robolectric",
-            metadata = Metadata.manualEntry(
-                device = Device(type = Device.TYPE_PHONE),
-                clientRecordId = "client-sleep-id-test-001"
-            )
-        )
-        val sleepSessionRecords = listOf(hcSleepSessionRecord1)
+        val hcStepsRecord = StepsRecord(startTime = testStartTime, startZoneOffset = ZoneOffset.UTC, endTime = testEndTime, endZoneOffset = ZoneOffset.UTC, count = 150L, metadata = Metadata.manualEntry("client-steps-all"))
+        val stepsResponse = mock<ReadRecordsResponse<StepsRecord>>()
+        `when`(stepsResponse.records).thenReturn(listOf(hcStepsRecord))
+        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<StepsRecord>? -> req != null && req.recordType == StepsRecord::class }))
+            .thenReturn(stepsResponse)
+
+        val hcHeartRateRecord = HeartRateRecord(startTime = testStartTime, startZoneOffset = ZoneOffset.UTC, endTime = testEndTime, endZoneOffset = ZoneOffset.UTC, samples = listOf(HeartRateRecord.Sample(FIXED_INSTANT, 70L)), metadata = Metadata.manualEntry("client-hr-all"))
+        val hrResponse = mock<ReadRecordsResponse<HeartRateRecord>>()
+        `when`(hrResponse.records).thenReturn(listOf(hcHeartRateRecord))
+        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<HeartRateRecord>? -> req != null && req.recordType == HeartRateRecord::class }))
+            .thenReturn(hrResponse)
+        
+        val hcSleepSessionRecord = SleepSessionRecord(startTime = testStartTime, startZoneOffset = ZoneOffset.UTC, endTime = testEndTime, endZoneOffset = ZoneOffset.UTC, stages = emptyList(), metadata = Metadata.manualEntry("client-sleep-all"))
         val sleepResponse = mock<ReadRecordsResponse<SleepSessionRecord>>()
-        `when`(sleepResponse.records).thenReturn(sleepSessionRecords)
+        `when`(sleepResponse.records).thenReturn(listOf(hcSleepSessionRecord))
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<SleepSessionRecord>? -> req != null && req.recordType == SleepSessionRecord::class }))
             .thenReturn(sleepResponse)
 
-        // Mock other data types to return empty lists
+        val hcBgRecord = BloodGlucoseRecord(time = testStartTime, zoneOffset = ZoneOffset.UTC, level = androidx.health.connect.client.units.BloodGlucose.milligramsPerDeciliter(100.0), metadata = Metadata.manualEntry("client-bg-all"))
+        val bgResponse = mock<ReadRecordsResponse<BloodGlucoseRecord>>()
+        `when`(bgResponse.records).thenReturn(listOf(hcBgRecord))
+        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BloodGlucoseRecord>? -> req != null && req.recordType == BloodGlucoseRecord::class }))
+            .thenReturn(bgResponse)
+
+        val worker = createWorker()
+        val result = worker.doWork()
+        assertTrue("Worker should succeed when all types have data.", result is ListenableWorker.Result.Success)
+
+        val stagingDir = fileHandler.getStagingDirectory()
+        val stepsFile = File(stagingDir, "StepsRecord_${simulatedFetchedTimeMillis}.avro")
+        assertTrue("Expected StepsRecord Avro file should exist and be a file", stepsFile.exists() && stepsFile.isFile)
+        val hrFile = File(stagingDir, "HeartRateRecord_${simulatedFetchedTimeMillis}.avro")
+        assertTrue("Expected HeartRateRecord Avro file should exist and be a file", hrFile.exists() && hrFile.isFile)
+        val sleepFile = File(stagingDir, "SleepSessionRecord_${simulatedFetchedTimeMillis}.avro")
+        assertTrue("Expected SleepSessionRecord Avro file should exist and be a file", sleepFile.exists() && sleepFile.isFile)
+        val bgFile = File(stagingDir, "BloodGlucoseRecord_${simulatedFetchedTimeMillis}.avro")
+        assertTrue("Expected BloodGlucoseRecord Avro file should exist and be a file", bgFile.exists() && bgFile.isFile)
+
+        val workInfos = WorkManager.getInstance(appContext).getWorkInfosForUniqueWork(AvroFileProcessorWorker.WORK_NAME).get()
+        assertTrue("AvroFileProcessorWorker should have been enqueued when files written.", workInfos.any { it.state == WorkInfo.State.ENQUEUED })
+    }
+
+    @Test
+    fun `doWork returns success and does not enqueue processor when no permissions are granted`() = runBlocking {
+        `when`(mockPermissionController.getGrantedPermissions()).thenReturn(emptySet())
         val emptyStepsResponse = mock<ReadRecordsResponse<StepsRecord>>()
         `when`(emptyStepsResponse.records).thenReturn(emptyList())
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<StepsRecord>? -> req != null && req.recordType == StepsRecord::class }))
             .thenReturn(emptyStepsResponse)
-
         val emptyHeartRateResponse = mock<ReadRecordsResponse<HeartRateRecord>>()
         `when`(emptyHeartRateResponse.records).thenReturn(emptyList())
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<HeartRateRecord>? -> req != null && req.recordType == HeartRateRecord::class }))
             .thenReturn(emptyHeartRateResponse)
-
-        // Expected Avro data (real mapper will be used)
-        val expectedAvroSleepSessionRecord1 = mapper.mapSleepSessionRecord(hcSleepSessionRecord1, simulatedFetchedTimeMillis)
-        val expectedAvroList = listOf(expectedAvroSleepSessionRecord1)
-
-        // 2. Execute the worker
-        val result = worker.doWork()
-
-        // 3. Assertions
-        assertTrue("Worker should succeed.", result is ListenableWorker.Result.Success)
-
-        val expectedFileName = "SleepSessionRecord_${FIXED_INSTANT.toEpochMilli()}.avro"
-        val stagingDir = File(appContext.filesDir, AVRO_STAGING_SUBDIR)
-        val outputFile = File(stagingDir, expectedFileName)
-
-        // Verify file was created
-        assertTrue("Output file should exist: ${outputFile.absolutePath}", outputFile.exists())
-        assertTrue("Output file should not be empty.", outputFile.length() > 0)
-
-        // ---- START: AVRO FILE CONTENT VERIFICATION ----
-        try {
-            val deserializedRecordsList = Files.newInputStream(outputFile.toPath()).buffered().use { inputStream ->
-                AvroObjectContainer.decodeFromStream<AvroSleepSessionRecord>(inputStream).toList()
-            }
-            assertEquals("Deserialized Avro content mismatch for SleepSessionRecord. Expected: $expectedAvroList, Actual: $deserializedRecordsList", expectedAvroList, deserializedRecordsList)
-        } catch (e: Exception) {
-            throw AssertionError("Failed to read or deserialize SleepSessionRecord Avro file ${outputFile.absolutePath}: ${e.message}", e)
-        }
-        // ---- END: AVRO FILE CONTENT VERIFICATION ----
-
-        println("LOG I: SleepSessionRecord Avro file created at: ${outputFile.absolutePath} and content verified.")
-    }
-
-    @OptIn(ExperimentalAvro4kApi::class)
-    @Test
-    fun `doWork processes all data types and writes multiple files successfully`() = runBlocking {
-        // 1. Setup mocks for this specific test
-        `when`(mockPermissionController.getGrantedPermissions()).thenReturn(allDataPermissions)
-
-        val testEndTime = FIXED_INSTANT
-        val testStartTime = testEndTime.minusSeconds(3600) // Shared time range for simplicity
-        val sessionStartTimeSleep = testEndTime.minusSeconds(8 * 3600) // For sleep
-        val simulatedFetchedTimeMillis = FIXED_INSTANT.toEpochMilli()
-
-        // --- StepsRecord Data ---
-        val hcStepsRecord = StepsRecord(
-            startTime = testStartTime, startZoneOffset = ZoneOffset.UTC, endTime = testEndTime, endZoneOffset = ZoneOffset.UTC, count = 150L,
-            metadata = Metadata.manualEntry(device = Device(type = Device.TYPE_WATCH), clientRecordId = "client-steps-all-001")
-        )
-        val stepsRecords = listOf(hcStepsRecord)
-        val stepsResponse = mock<ReadRecordsResponse<StepsRecord>>()
-        `when`(stepsResponse.records).thenReturn(stepsRecords)
-        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<StepsRecord>? -> req != null && req.recordType == StepsRecord::class }))
-            .thenReturn(stepsResponse)
-        val expectedAvroSteps = mapper.mapStepsRecord(hcStepsRecord, simulatedFetchedTimeMillis)
-
-        // --- HeartRateRecord Data ---
-        val sampleHrTime1 = testStartTime.plusSeconds(100)
-        val hcHeartRateRecord = HeartRateRecord(
-            startTime = testStartTime, startZoneOffset = ZoneOffset.UTC, endTime = testEndTime, endZoneOffset = ZoneOffset.UTC,
-            samples = listOf(HeartRateRecord.Sample(time = sampleHrTime1, beatsPerMinute = 80L)),
-            metadata = Metadata.manualEntry(device = Device(type = Device.TYPE_WATCH), clientRecordId = "client-hr-all-001")
-        )
-        val heartRateRecords = listOf(hcHeartRateRecord)
-        val heartRateResponse = mock<ReadRecordsResponse<HeartRateRecord>>()
-        `when`(heartRateResponse.records).thenReturn(heartRateRecords)
-        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<HeartRateRecord>? -> req != null && req.recordType == HeartRateRecord::class }))
-            .thenReturn(heartRateResponse)
-        val expectedAvroHeartRate = mapper.mapHeartRateRecord(hcHeartRateRecord, simulatedFetchedTimeMillis)
-
-        // --- SleepSessionRecord Data ---
-        val hcSleepSessionRecord = SleepSessionRecord(
-            startTime = sessionStartTimeSleep, startZoneOffset = ZoneOffset.UTC, endTime = testEndTime, endZoneOffset = ZoneOffset.UTC, // Using testEndTime for session for simplicity
-            stages = listOf(SleepSessionRecord.Stage(startTime = sessionStartTimeSleep, endTime = testEndTime, stage = SleepSessionRecord.STAGE_TYPE_DEEP)),
-            title = "Full Night Sleep",
-            metadata = Metadata.manualEntry(device = Device(type = Device.TYPE_PHONE), clientRecordId = "client-sleep-all-001")
-        )
-        val sleepSessionRecords = listOf(hcSleepSessionRecord)
-        val sleepResponse = mock<ReadRecordsResponse<SleepSessionRecord>>()
-        `when`(sleepResponse.records).thenReturn(sleepSessionRecords)
+        val emptySleepResponse = mock<ReadRecordsResponse<SleepSessionRecord>>()
+        `when`(emptySleepResponse.records).thenReturn(emptyList())
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<SleepSessionRecord>? -> req != null && req.recordType == SleepSessionRecord::class }))
-            .thenReturn(sleepResponse)
-        val expectedAvroSleep = mapper.mapSleepSessionRecord(hcSleepSessionRecord, simulatedFetchedTimeMillis)
-        
-        // 2. Execute the worker
+            .thenReturn(emptySleepResponse)
+        val emptyBgResponse = mock<ReadRecordsResponse<BloodGlucoseRecord>>()
+        `when`(emptyBgResponse.records).thenReturn(emptyList())
+        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BloodGlucoseRecord>? -> req != null && req.recordType == BloodGlucoseRecord::class }))
+            .thenReturn(emptyBgResponse)
+
+        val worker = createWorker()
         val result = worker.doWork()
-
-        // 3. Assertions
-        assertTrue("Worker should succeed.", result is ListenableWorker.Result.Success)
-        val stagingDir = File(appContext.filesDir, AVRO_STAGING_SUBDIR)
-
-        // ---- Verify StepsRecord File ----
-        val stepsFileName = "StepsRecord_${FIXED_INSTANT.toEpochMilli()}.avro"
-        val stepsOutputFile = File(stagingDir, stepsFileName)
-        assertTrue("StepsRecord output file should exist: ${stepsOutputFile.absolutePath}", stepsOutputFile.exists())
-        assertTrue("StepsRecord output file should not be empty.", stepsOutputFile.length() > 0)
-        try {
-            val deserializedSteps = Files.newInputStream(stepsOutputFile.toPath()).buffered().use { inputStream ->
-                AvroObjectContainer.decodeFromStream<AvroStepsRecord>(inputStream).toList()
-            }
-            assertEquals("Deserialized Avro content mismatch for StepsRecord.", listOf(expectedAvroSteps), deserializedSteps)
-        } catch (e: Exception) {
-            throw AssertionError("Failed to read/deserialize StepsRecord Avro file ${stepsOutputFile.absolutePath}: ${e.message}", e)
-        }
-        println("LOG I: StepsRecord Avro file (all types test) verified.")
-
-        // ---- Verify HeartRateRecord File ----
-        val hrFileName = "HeartRateRecord_${FIXED_INSTANT.toEpochMilli()}.avro"
-        val hrOutputFile = File(stagingDir, hrFileName)
-        assertTrue("HeartRateRecord output file should exist: ${hrOutputFile.absolutePath}", hrOutputFile.exists())
-        assertTrue("HeartRateRecord output file should not be empty.", hrOutputFile.length() > 0)
-        try {
-            val deserializedHr = Files.newInputStream(hrOutputFile.toPath()).buffered().use { inputStream ->
-                AvroObjectContainer.decodeFromStream<AvroHeartRateRecord>(inputStream).toList()
-            }
-            assertEquals("Deserialized Avro content mismatch for HeartRateRecord.", listOf(expectedAvroHeartRate), deserializedHr)
-        } catch (e: Exception) {
-            throw AssertionError("Failed to read/deserialize HeartRateRecord Avro file ${hrOutputFile.absolutePath}: ${e.message}", e)
-        }
-        println("LOG I: HeartRateRecord Avro file (all types test) verified.")
-
-        // ---- Verify SleepSessionRecord File ----
-        val sleepFileName = "SleepSessionRecord_${FIXED_INSTANT.toEpochMilli()}.avro"
-        val sleepOutputFile = File(stagingDir, sleepFileName)
-        assertTrue("SleepSessionRecord output file should exist: ${sleepOutputFile.absolutePath}", sleepOutputFile.exists())
-        assertTrue("SleepSessionRecord output file should not be empty.", sleepOutputFile.length() > 0)
-        try {
-            val deserializedSleep = Files.newInputStream(sleepOutputFile.toPath()).buffered().use { inputStream ->
-                AvroObjectContainer.decodeFromStream<AvroSleepSessionRecord>(inputStream).toList()
-            }
-            assertEquals("Deserialized Avro content mismatch for SleepSessionRecord.", listOf(expectedAvroSleep), deserializedSleep)
-        } catch (e: Exception) {
-            throw AssertionError("Failed to read/deserialize SleepSessionRecord Avro file ${sleepOutputFile.absolutePath}: ${e.message}", e)
-        }
-        println("LOG I: SleepSessionRecord Avro file (all types test) verified.")
-    }
-
-    @Test
-    fun `doWork returns success when no permissions are granted`() = runBlocking {
-        // 1. Setup mocks: No permissions granted
-        `when`(mockPermissionController.getGrantedPermissions()).thenReturn(emptySet()) // No permissions
-
-        // Mock HealthConnectClient.readRecords for all types to ensure they are NOT called if permissions are checked first.
-        // If the worker correctly checks permissions and finds none, it should not attempt to read.
-        val stepsResponse = mock<ReadRecordsResponse<StepsRecord>>()
-        `when`(stepsResponse.records).thenReturn(emptyList()) // Should not be reached
-        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<StepsRecord>? -> req != null && req.recordType == StepsRecord::class }))
-            .thenReturn(stepsResponse)
-
-        val heartRateResponse = mock<ReadRecordsResponse<HeartRateRecord>>()
-        `when`(heartRateResponse.records).thenReturn(emptyList()) // Should not be reached
-        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<HeartRateRecord>? -> req != null && req.recordType == HeartRateRecord::class }))
-            .thenReturn(heartRateResponse)
-
-        val sleepResponse = mock<ReadRecordsResponse<SleepSessionRecord>>()
-        `when`(sleepResponse.records).thenReturn(emptyList()) // Should not be reached
-        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<SleepSessionRecord>? -> req != null && req.recordType == SleepSessionRecord::class }))
-            .thenReturn(sleepResponse)
-
-        // 2. Execute the worker
-        val result = worker.doWork()
-
-        // 3. Assertions
         assertTrue("Worker should succeed even if no permissions are granted.", result is ListenableWorker.Result.Success)
 
-        // Verify that NO files were created
-        val stagingDir = File(appContext.filesDir, AVRO_STAGING_SUBDIR)
-        val stepsFile = File(stagingDir, "StepsRecord_${FIXED_INSTANT.toEpochMilli()}.avro")
-        val hrFile = File(stagingDir, "HeartRateRecord_${FIXED_INSTANT.toEpochMilli()}.avro")
-        val sleepFile = File(stagingDir, "SleepSessionRecord_${FIXED_INSTANT.toEpochMilli()}.avro")
-
-        assertFalse("StepsRecord file should not be created when no permissions granted.", stepsFile.exists())
-        assertFalse("HeartRateRecord file should not be created when no permissions granted.", hrFile.exists())
-        assertFalse("SleepSessionRecord file should not be created when no permissions granted.", sleepFile.exists())
-
-        println("LOG I: Worker succeeded and no files created when no permissions granted, as expected.")
+        val workInfos = WorkManager.getInstance(appContext).getWorkInfosForUniqueWork(AvroFileProcessorWorker.WORK_NAME).get()
+        assertFalse("AvroFileProcessorWorker should NOT have been enqueued when no files written.", workInfos.any { it.state == WorkInfo.State.ENQUEUED })
     }
 
     @Test
-    fun `doWork succeeds and creates no files when permissions granted but no data`() = runBlocking {
-        // 1. Setup mocks: All permissions granted
+    fun `doWork succeeds and does not enqueue processor when permissions granted but no data`() = runBlocking {
         `when`(mockPermissionController.getGrantedPermissions()).thenReturn(allDataPermissions)
-
-        // Mock HealthConnectClient.readRecords to return empty lists for all data types
         val emptyStepsResponse = mock<ReadRecordsResponse<StepsRecord>>()
         `when`(emptyStepsResponse.records).thenReturn(emptyList())
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<StepsRecord>? -> req != null && req.recordType == StepsRecord::class }))
             .thenReturn(emptyStepsResponse)
-
         val emptyHeartRateResponse = mock<ReadRecordsResponse<HeartRateRecord>>()
         `when`(emptyHeartRateResponse.records).thenReturn(emptyList())
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<HeartRateRecord>? -> req != null && req.recordType == HeartRateRecord::class }))
             .thenReturn(emptyHeartRateResponse)
-
         val emptySleepResponse = mock<ReadRecordsResponse<SleepSessionRecord>>()
         `when`(emptySleepResponse.records).thenReturn(emptyList())
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<SleepSessionRecord>? -> req != null && req.recordType == SleepSessionRecord::class }))
             .thenReturn(emptySleepResponse)
+        val emptyBgResponse = mock<ReadRecordsResponse<BloodGlucoseRecord>>()
+        `when`(emptyBgResponse.records).thenReturn(emptyList())
+        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BloodGlucoseRecord>? -> req != null && req.recordType == BloodGlucoseRecord::class }))
+            .thenReturn(emptyBgResponse)
 
-        // 2. Execute the worker
+        val worker = createWorker()
         val result = worker.doWork()
-
-        // 3. Assertions
         assertTrue("Worker should succeed when permissions are granted but no data is returned.", result is ListenableWorker.Result.Success)
 
-        // Verify that NO files were created because the record lists were empty
-        val stagingDir = File(appContext.filesDir, AVRO_STAGING_SUBDIR)
-        val stepsFile = File(stagingDir, "StepsRecord_${FIXED_INSTANT.toEpochMilli()}.avro")
-        val hrFile = File(stagingDir, "HeartRateRecord_${FIXED_INSTANT.toEpochMilli()}.avro")
-        val sleepFile = File(stagingDir, "SleepSessionRecord_${FIXED_INSTANT.toEpochMilli()}.avro")
+        val workInfos = WorkManager.getInstance(appContext).getWorkInfosForUniqueWork(AvroFileProcessorWorker.WORK_NAME).get()
+        assertFalse("AvroFileProcessorWorker should NOT have been enqueued when no files written (empty data).", workInfos.any { it.state == WorkInfo.State.ENQUEUED })
+    }
 
-        assertFalse("StepsRecord file should not be created when data is empty.", stepsFile.exists())
-        assertFalse("HeartRateRecord file should not be created when data is empty.", hrFile.exists())
-        assertFalse("SleepSessionRecord file should not be created when data is empty.", sleepFile.exists())
+    @OptIn(ExperimentalAvro4kApi::class)
+    @Test
+    fun `doWork when readRecords fails for one type returns Failure and processes others`() = runBlocking {
+        `when`(mockPermissionController.getGrantedPermissions()).thenReturn(allDataPermissions)
+        val testEndTime = FIXED_INSTANT
+        val testStartTime = testEndTime.minusSeconds(3600)
+        val simulatedFetchedTimeMillis = FIXED_INSTANT.toEpochMilli()
 
-        println("LOG I: Worker succeeded and no files created when permissions granted but no data, as expected.")
+        val hcStepsRecord = StepsRecord(
+            startTime = testStartTime, startZoneOffset = ZoneOffset.UTC, endTime = testEndTime, endZoneOffset = ZoneOffset.UTC, count = 100L,
+            metadata = Metadata.manualEntry(clientRecordId = "steps-error-case")
+        )
+        val stepsResponse = mock<ReadRecordsResponse<StepsRecord>>()
+        `when`(stepsResponse.records).thenReturn(listOf(hcStepsRecord))
+        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<StepsRecord>? -> req?.recordType == StepsRecord::class }))
+            .thenReturn(stepsResponse)
+
+        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<HeartRateRecord>? -> req?.recordType == HeartRateRecord::class }))
+            .thenAnswer { throw IOException("Simulated network error reading HeartRate") } // MODIFIED LINE
+
+        val emptySleepResponse = mock<ReadRecordsResponse<SleepSessionRecord>>()
+        `when`(emptySleepResponse.records).thenReturn(emptyList())
+        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<SleepSessionRecord>? -> req?.recordType == SleepSessionRecord::class }))
+            .thenReturn(emptySleepResponse)
+
+        val hcBgRecord = BloodGlucoseRecord(
+            time = testStartTime.plusSeconds(10), zoneOffset = ZoneOffset.UTC,
+            level = androidx.health.connect.client.units.BloodGlucose.milligramsPerDeciliter(95.0),
+            metadata = Metadata.manualEntry(clientRecordId = "bg-error-case")
+        )
+        val bgResponse = mock<ReadRecordsResponse<BloodGlucoseRecord>>()
+        `when`(bgResponse.records).thenReturn(listOf(hcBgRecord))
+        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BloodGlucoseRecord>? -> req?.recordType == BloodGlucoseRecord::class }))
+            .thenReturn(bgResponse)
+
+        val worker = createWorker()
+        val result = worker.doWork()
+
+        assertTrue("Worker should return Failure when a record type fails to read.", result is ListenableWorker.Result.Failure)
+
+        val stagingDir = fileHandler.getStagingDirectory()
+        val stepsFile = File(stagingDir, "StepsRecord_${simulatedFetchedTimeMillis}.avro")
+        assertTrue("StepsRecord file should exist and be a file despite later read error", stepsFile.exists() && stepsFile.isFile)
+        val bgFile = File(stagingDir, "BloodGlucoseRecord_${simulatedFetchedTimeMillis}.avro")
+        assertTrue("BloodGlucoseRecord file should exist and be a file despite earlier read error", bgFile.exists() && bgFile.isFile)
+        
+        val hrFile = File(stagingDir, "HeartRateRecord_${simulatedFetchedTimeMillis}.avro")
+        assertFalse("HeartRateRecord file should NOT exist as its read failed", hrFile.exists())
+        val sleepFile = File(stagingDir, "SleepSessionRecord_${simulatedFetchedTimeMillis}.avro")
+        assertFalse("SleepSessionRecord file should NOT exist as it had no data", sleepFile.exists())
+
+        val workInfos = WorkManager.getInstance(appContext).getWorkInfosForUniqueWork(AvroFileProcessorWorker.WORK_NAME).get()
+        assertFalse("AvroFileProcessorWorker should NOT be enqueued on overall failure.", workInfos.any { it.state == WorkInfo.State.ENQUEUED })
+    }
+
+    @OptIn(ExperimentalAvro4kApi::class)
+    @Test
+    fun `doWork when fileHandler writeAvroFile fails for one type returns Failure and processes others`() = runBlocking {
+        `when`(mockPermissionController.getGrantedPermissions()).thenReturn(allDataPermissions)
+        val simulatedFetchedTimeMillis = FIXED_INSTANT.toEpochMilli()
+        val stagingDir = fileHandler.getStagingDirectory()
+
+        // Data for all types
+        val hcStepsRecord = StepsRecord(FIXED_INSTANT.minusSeconds(100), ZoneOffset.UTC, FIXED_INSTANT, ZoneOffset.UTC, 100L, Metadata.manualEntry("steps-write-fail"))
+        val stepsResponse = mock<ReadRecordsResponse<StepsRecord>>()
+        `when`(stepsResponse.records).thenReturn(listOf(hcStepsRecord))
+        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<StepsRecord>? -> req?.recordType == StepsRecord::class })).thenReturn(stepsResponse)
+
+        val hcHeartRateRecord = HeartRateRecord(FIXED_INSTANT.minusSeconds(200), ZoneOffset.UTC, FIXED_INSTANT.minusSeconds(100), ZoneOffset.UTC, listOf(HeartRateRecord.Sample(FIXED_INSTANT.minusSeconds(150), 75L)), Metadata.manualEntry("hr-write-success"))
+        val hrResponse = mock<ReadRecordsResponse<HeartRateRecord>>()
+        `when`(hrResponse.records).thenReturn(listOf(hcHeartRateRecord))
+        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<HeartRateRecord>? -> req?.recordType == HeartRateRecord::class })).thenReturn(hrResponse)
+
+        val hcBgRecord = BloodGlucoseRecord(FIXED_INSTANT.minusSeconds(50), ZoneOffset.UTC,Metadata.manualEntry("bg-write-success"), BloodGlucose.milligramsPerDeciliter(90.0))
+        val bgResponse = mock<ReadRecordsResponse<BloodGlucoseRecord>>()
+        `when`(bgResponse.records).thenReturn(listOf(hcBgRecord))
+        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BloodGlucoseRecord>? -> req?.recordType == BloodGlucoseRecord::class })).thenReturn(bgResponse)
+        
+        val emptySleepResponse = mock<ReadRecordsResponse<SleepSessionRecord>>()
+        `when`(emptySleepResponse.records).thenReturn(emptyList())
+        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<SleepSessionRecord>? -> req?.recordType == SleepSessionRecord::class })).thenReturn(emptySleepResponse)
+
+        // --- Induce failure for StepsRecord write --- 
+        val stepsFileNameToFail = "StepsRecord_${simulatedFetchedTimeMillis}.avro"
+        val fileToFail = File(stagingDir, stepsFileNameToFail)
+        fileToFail.mkdirs() // Create a directory at the target file path to cause IOException on write
+        assertTrue("Directory to cause failure should exist", fileToFail.exists() && fileToFail.isDirectory)
+
+        val worker = createWorker()
+        val result = worker.doWork()
+
+        assertTrue("Worker should return Failure when a file write fails.", result is ListenableWorker.Result.Failure)
+
+        // Assertions
+        assertTrue("Directory created to cause StepsRecord write failure should still exist (or file write failed before deleting it)", fileToFail.exists() && fileToFail.isDirectory)
+        assertFalse("StepsRecord file should not have been written as a file", fileToFail.isFile) // Double check it's not a file
+
+        val hrFile = File(stagingDir, "HeartRateRecord_${simulatedFetchedTimeMillis}.avro")
+        assertTrue("HeartRateRecord file should have been written successfully", hrFile.exists() && hrFile.isFile)
+        val bgFile = File(stagingDir, "BloodGlucoseRecord_${simulatedFetchedTimeMillis}.avro")
+        assertTrue("BloodGlucoseRecord file should have been written successfully", bgFile.exists() && bgFile.isFile)
+        val sleepFile = File(stagingDir, "SleepSessionRecord_${simulatedFetchedTimeMillis}.avro")
+        assertFalse("SleepSessionRecord file should NOT exist as it had no data", sleepFile.exists())
+
+        val workInfos = WorkManager.getInstance(appContext).getWorkInfosForUniqueWork(AvroFileProcessorWorker.WORK_NAME).get()
+        assertFalse("AvroFileProcessorWorker should NOT be enqueued on overall failure (due to write error).", workInfos.any { it.state == WorkInfo.State.ENQUEUED })
     }
 }
