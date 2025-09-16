@@ -27,6 +27,7 @@ class HealthSyncAppApplication : Application(), Configuration.Provider {
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
+            .setMinimumLoggingLevel(android.util.Log.DEBUG) // Optional: for more logs
             .build()
 
     private fun setupHealthDataFetcherWorker() {

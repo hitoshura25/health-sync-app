@@ -21,7 +21,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
     @Provides
     @Singleton
     fun provideAppDatabase(@ApplicationContext appContext: Context): AppDatabase {
@@ -30,7 +29,7 @@ object AppModule {
             AppDatabase::class.java,
             "health_sync_app_database" // Consistent database name
         )
-        // .fallbackToDestructiveMigration() // REMOVED fallbackToDestructiveMigration
+            .fallbackToDestructiveMigration(false) // Added back for development convenience
         .build()
     }
 
