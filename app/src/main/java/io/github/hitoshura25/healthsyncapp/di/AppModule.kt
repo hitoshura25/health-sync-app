@@ -30,7 +30,6 @@ object AppModule {
             AppDatabase::class.java,
             "health_sync_app_database" // Consistent database name
         )
-        .addMigrations(AppDatabase.MIGRATION_2_3) // Added our new migration
         // .fallbackToDestructiveMigration() // REMOVED fallbackToDestructiveMigration
         .build()
     }
