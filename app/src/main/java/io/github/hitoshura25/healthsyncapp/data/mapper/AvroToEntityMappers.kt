@@ -30,7 +30,6 @@ fun AvroStepsRecord.toStepsRecordEntity(): StepsRecordEntity {
         endTimeEpochMillis = this.endTimeEpochMillis,
         zoneOffsetId = this.startZoneOffsetId,
         appRecordFetchTimeEpochMillis = this.appRecordFetchTimeEpochMillis,
-        isSynced = false
     )
 }
 
@@ -48,7 +47,6 @@ fun AvroHeartRateRecord.toHeartRateSampleEntities(): List<HeartRateSampleEntity>
             beatsPerMinute = avroSample.beatsPerMinute,
             zoneOffsetId = sessionStartZoneOffsetId,
             appRecordFetchTimeEpochMillis = recordFetchedAtTime,
-            isSynced = false
         )
     }
 }
@@ -79,7 +77,6 @@ fun AvroSleepSessionRecord.toSleepSessionEntity(): SleepSessionEntity {
         endZoneOffsetId = this.endZoneOffsetId,
         durationMillis = this.durationMillis,
         appRecordFetchTimeEpochMillis = this.appRecordFetchTimeEpochMillis,
-        isSynced = false
     )
 }
 
@@ -133,6 +130,5 @@ fun AvroBloodGlucoseRecord.toBloodGlucoseEntity(): BloodGlucoseEntity {
         clientRecordId = this.clientRecordId, 
         clientRecordVersion = this.clientRecordVersion, 
         appRecordFetchTimeEpochMillis = this.appRecordFetchTimeEpochMillis,
-        isSynced = false 
     )
 }

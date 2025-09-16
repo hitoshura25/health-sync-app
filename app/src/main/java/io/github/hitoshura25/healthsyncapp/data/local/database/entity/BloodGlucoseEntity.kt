@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey
     tableName = "blood_glucose_records",
     indices = [
         Index(value = ["health_connect_uid"], unique = true),
-        Index(value = ["is_synced"]),
+        // Index for is_synced removed
         Index(value = ["time_epoch_millis"]),
         Index(value = ["hc_last_modified_time_epoch_millis"]) 
     ]
@@ -28,10 +28,8 @@ data class BloodGlucoseEntity(
     @ColumnInfo(name = "zone_offset_id")
     val zoneOffsetId: String?,
 
-    @ColumnInfo(name = "level_in_milligrams_per_deciliter") // Renamed from level_value, unit is implicit
+    @ColumnInfo(name = "level_in_milligrams_per_deciliter")
     val levelInMilligramsPerDeciliter: Double,
-
-    // levelUnit field removed
 
     @ColumnInfo(name = "specimen_source")
     val specimenSource: Int, 
@@ -55,8 +53,7 @@ data class BloodGlucoseEntity(
     val clientRecordVersion: Long = 0L,
 
     @ColumnInfo(name = "app_record_fetch_time_epoch_millis")
-    val appRecordFetchTimeEpochMillis: Long,
+    val appRecordFetchTimeEpochMillis: Long
 
-    @ColumnInfo(name = "is_synced", defaultValue = "0")
-    val isSynced: Boolean = false
+    // isSynced property removed
 )

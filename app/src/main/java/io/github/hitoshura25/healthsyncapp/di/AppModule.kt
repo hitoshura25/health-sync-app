@@ -1,9 +1,7 @@
 package io.github.hitoshura25.healthsyncapp.di
 
 import android.content.Context
-// import androidx.health.connect.client.HealthConnectClient // No longer provided here
 import androidx.room.Room
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,75 +14,66 @@ import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HeartRateSamp
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.SleepSessionDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.SleepStageDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.StepsRecordDao
-import io.github.hitoshura25.healthsyncapp.data.repository.HealthDataRepository
-import io.github.hitoshura25.healthsyncapp.data.repository.HealthDataRepositoryImpl
 import io.github.hitoshura25.healthsyncapp.file.FileHandler
 import io.github.hitoshura25.healthsyncapp.file.FileHandlerImpl
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class AppModule {
+object AppModule {
 
-    @Binds
+    @Provides
     @Singleton
-    abstract fun bindHealthDataRepository(impl: HealthDataRepositoryImpl): HealthDataRepository
+    fun provideAppDatabase(@ApplicationContext appContext: Context): AppDatabase {
+        return Room.databaseBuilder(
+            appContext,
+            AppDatabase::class.java,
+            "health_sync_app_database" // Consistent database name
+        )
+        .addMigrations(AppDatabase.MIGRATION_2_3) // Added our new migration
+        // .fallbackToDestructiveMigration() // REMOVED fallbackToDestructiveMigration
+        .build()
+    }
 
-    companion object {
-        @Provides
-        @Singleton
-        fun provideAppDatabase(@ApplicationContext appContext: Context): AppDatabase {
-            return Room.databaseBuilder(
-                appContext,
-                AppDatabase::class.java,
-                "health_sync_database" 
-            )
-            .fallbackToDestructiveMigration()
-            .build()
-        }
+    @Provides
+    @Singleton
+    fun provideStepsRecordDao(appDatabase: AppDatabase): StepsRecordDao {
+        return appDatabase.stepsRecordDao()
+    }
 
-        @Provides
-        @Singleton
-        fun provideStepsRecordDao(appDatabase: AppDatabase): StepsRecordDao {
-            return appDatabase.stepsRecordDao()
-        }
+    @Provides
+    @Singleton
+    fun provideHeartRateSampleDao(appDatabase: AppDatabase): HeartRateSampleDao {
+        return appDatabase.heartRateSampleDao()
+    }
 
-        @Provides
-        @Singleton
-        fun provideHeartRateSampleDao(appDatabase: AppDatabase): HeartRateSampleDao {
-            return appDatabase.heartRateSampleDao()
-        }
+    @Provides
+    @Singleton
+    fun provideSleepSessionDao(appDatabase: AppDatabase): SleepSessionDao {
+        return appDatabase.sleepSessionDao()
+    }
 
-        @Provides
-        @Singleton
-        fun provideSleepSessionDao(appDatabase: AppDatabase): SleepSessionDao {
-            return appDatabase.sleepSessionDao()
-        }
+    @Provides
+    @Singleton
+    fun provideSleepStageDao(appDatabase: AppDatabase): SleepStageDao {
+        return appDatabase.sleepStageDao()
+    }
 
-        @Provides
-        @Singleton
-        fun provideSleepStageDao(appDatabase: AppDatabase): SleepStageDao {
-            return appDatabase.sleepStageDao()
-        }
+    @Provides
+    @Singleton
+    fun provideBloodGlucoseDao(appDatabase: AppDatabase): BloodGlucoseDao {
+        return appDatabase.bloodGlucoseDao()
+    }
 
-        @Provides
-        @Singleton
-        fun provideBloodGlucoseDao(appDatabase: AppDatabase): BloodGlucoseDao {
-            return appDatabase.bloodGlucoseDao()
-        }
+    @Provides
+    @Singleton
+    fun provideFileHandler(@ApplicationContext appContext: Context): FileHandler {
+        return FileHandlerImpl(appContext)
+    }
 
-        @Provides
-        @Singleton
-        fun provideFileHandler(@ApplicationContext appContext: Context): FileHandler {
-            return FileHandlerImpl(appContext)
-        }
-
-        // Removed provideHealthConnectClient from here
-
-        @Provides
-        @Singleton
-        fun provideHealthConnectToAvroMapper(): HealthConnectToAvroMapper {
-            return HealthConnectToAvroMapper
-        }
+    @Provides
+    @Singleton
+    fun provideHealthConnectToAvroMapper(): HealthConnectToAvroMapper {
+        return HealthConnectToAvroMapper
     }
 }

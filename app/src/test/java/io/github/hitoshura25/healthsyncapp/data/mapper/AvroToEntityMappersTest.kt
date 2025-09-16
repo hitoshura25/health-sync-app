@@ -45,7 +45,6 @@ class AvroToEntityMappersTest {
         assertEquals("client-bg-001", entity.clientRecordId)
         assertEquals(2L, entity.clientRecordVersion)
         assertEquals(nowEpochMillis, entity.appRecordFetchTimeEpochMillis)
-        assertEquals(false, entity.isSynced) 
     }
 
     private fun mapSpecimenSourceToInt(avroSpecimenSource: AvroBloodGlucoseSpecimenSource): Int { 

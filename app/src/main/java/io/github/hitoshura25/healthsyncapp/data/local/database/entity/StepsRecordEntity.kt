@@ -8,8 +8,8 @@ import androidx.room.PrimaryKey
 @Entity(
     tableName = "steps_records",
     indices = [
-        Index(value = ["health_connect_uid"], unique = true), // To prevent duplicate entries from Health Connect
-        Index(value = ["is_synced"])
+        Index(value = ["health_connect_uid"], unique = true) // To prevent duplicate entries from Health Connect
+        // Index for is_synced removed
     ]
 )
 data class StepsRecordEntity(
@@ -33,8 +33,7 @@ data class StepsRecordEntity(
     val zoneOffsetId: String?, // Store ZoneOffset.id as String, nullable
 
     @ColumnInfo(name = "app_record_fetch_time_epoch_millis")
-    val appRecordFetchTimeEpochMillis: Long,
+    val appRecordFetchTimeEpochMillis: Long
 
-    @ColumnInfo(name = "is_synced", defaultValue = "0") // SQLite stores Boolean as 0 (false) or 1 (true)
-    val isSynced: Boolean = false
+    // isSynced property removed
 )

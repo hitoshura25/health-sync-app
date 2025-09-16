@@ -58,7 +58,6 @@ class BloodGlucoseDaoTest {
             clientRecordId = "client-id-xyz",
             clientRecordVersion = 3L,
             appRecordFetchTimeEpochMillis = now,
-            isSynced = false
         )
 
         bloodGlucoseDao.insert(entity)
@@ -78,7 +77,6 @@ class BloodGlucoseDaoTest {
         assertEquals(entity.clientRecordId, retrievedEntity?.clientRecordId)
         assertEquals(entity.clientRecordVersion, retrievedEntity?.clientRecordVersion)
         assertEquals(entity.appRecordFetchTimeEpochMillis, retrievedEntity?.appRecordFetchTimeEpochMillis)
-        assertEquals(entity.isSynced, retrievedEntity?.isSynced)
         assertTrue((retrievedEntity?.id ?: 0L) > 0L)
     }
 

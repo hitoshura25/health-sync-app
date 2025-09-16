@@ -20,11 +20,9 @@ interface HeartRateSampleDao {
     @Query("SELECT * FROM heart_rate_samples WHERE hc_record_uid = :hcRecordUid ORDER BY sample_time_epoch_millis ASC")
     suspend fun getSamplesByRecordHcUid(hcRecordUid: String): List<HeartRateSampleEntity>
 
-    @Query("SELECT * FROM heart_rate_samples WHERE is_synced = 0 ORDER BY sample_time_epoch_millis ASC")
-    suspend fun getUnsyncedSamples(): List<HeartRateSampleEntity>
+    // getUnsyncedSamples() removed
 
-    @Query("UPDATE heart_rate_samples SET is_synced = 1 WHERE id IN (:ids)")
-    suspend fun markAsSynced(ids: List<Long>): Int
+    // markAsSynced(ids: List<Long>) removed
 
     @Query("DELETE FROM heart_rate_samples WHERE id IN (:ids)")
     suspend fun deleteByIds(ids: List<Long>): Int

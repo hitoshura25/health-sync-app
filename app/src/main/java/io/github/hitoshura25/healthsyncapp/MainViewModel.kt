@@ -52,7 +52,7 @@ import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HeartRateSamp
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.SleepSessionDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.SleepStageDao // Added import
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.StepsRecordDao
-import io.github.hitoshura25.healthsyncapp.worker.SyncWorker
+import io.github.hitoshura25.healthsyncapp.worker.HealthDataFetcherWorker // Changed import
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -205,35 +205,47 @@ class MainViewModel(
             val initialWorkerScheduled = prefs.getBoolean(KEY_INITIAL_WORKER_SCHEDULED, false)
 
             if (!initialWorkerScheduled) {
-                Log.i(TAG, "Initial SyncWorker not yet scheduled. Enqueuing OneTimeWorkRequest.")
-                triggerDataRefreshWorker("InitialPermissionSyncWorker") 
+                Log.i(TAG, "Initial HealthDataFetcherWorker not yet scheduled. Enqueuing OneTimeWorkRequest.")
+                // Changed to enqueue HealthDataFetcherWorker directly
+                val constraints = Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED) 
+                    .build()
+                val oneTimeFetchRequest = OneTimeWorkRequestBuilder<HealthDataFetcherWorker>()
+                    .setConstraints(constraints)
+                    .addTag("InitialPermissionHealthDataFetcherWorker") 
+                    .build()
+                WorkManager.getInstance(application).enqueue(oneTimeFetchRequest)
+                Log.d(TAG, "Enqueued OneTimeWorkRequest for HealthDataFetcherWorker with tag: InitialPermissionHealthDataFetcherWorker")
+                
                 prefs.edit().putBoolean(KEY_INITIAL_WORKER_SCHEDULED, true).apply()
-                Log.i(TAG, "Initial SyncWorker OneTimeWorkRequest enqueued and preference updated.")
+                Log.i(TAG, "Initial HealthDataFetcherWorker OneTimeWorkRequest enqueued and preference updated.")
             } else {
-                Log.d(TAG, "Initial SyncWorker has already been scheduled previously.")
+                Log.d(TAG, "Initial HealthDataFetcherWorker has already been scheduled previously.")
             }
         }
     }
 
     fun triggerDataRefresh() {
          if (allPermissionsGranted.value == true) {
-            Log.i(TAG, "User triggered data refresh. Enqueuing OneTimeWorkRequest for SyncWorker.")
-            triggerDataRefreshWorker("UserTriggeredSyncWorker")
+            Log.i(TAG, "User triggered data refresh. Enqueuing OneTimeWorkRequest for HealthDataFetcherWorker.")
+            // Changed to call the modified enqueueHealthDataFetcherWorker method
+            enqueueHealthDataFetcherWorker("UserTriggeredHealthDataFetcherWorker")
         } else {
             Log.w(TAG, "User triggered data refresh but permissions not granted. Requesting permissions.")
             checkOrRequestPermissions()
         }
     }
 
-    private fun triggerDataRefreshWorker(tag: String) {
+    // Renamed from triggerDataRefreshWorker and changed to enqueue HealthDataFetcherWorker
+    private fun enqueueHealthDataFetcherWorker(tag: String) {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED) 
             .build()
-        val oneTimeSyncRequest = OneTimeWorkRequestBuilder<SyncWorker>()
+        val oneTimeFetchRequest = OneTimeWorkRequestBuilder<HealthDataFetcherWorker>() // Changed to HealthDataFetcherWorker
             .setConstraints(constraints)
             .addTag(tag) 
             .build()
-        WorkManager.getInstance(application).enqueue(oneTimeSyncRequest)
-        Log.d(TAG, "Enqueued OneTimeWorkRequest for SyncWorker with tag: $tag")
+        WorkManager.getInstance(application).enqueue(oneTimeFetchRequest)
+        Log.d(TAG, "Enqueued OneTimeWorkRequest for HealthDataFetcherWorker with tag: $tag")
     }
 }

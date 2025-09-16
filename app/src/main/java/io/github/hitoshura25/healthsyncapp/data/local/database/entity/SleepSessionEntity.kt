@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey
     tableName = "sleep_sessions",
     indices = [
         Index(value = ["health_connect_uid"], unique = true),
-        Index(value = ["is_synced"]),
+        // Index for is_synced removed
         Index(value = ["start_time_epoch_millis"])
     ]
 )
@@ -43,8 +43,7 @@ data class SleepSessionEntity(
     val durationMillis: Long? = null, // Can be calculated: endTime - startTime
 
     @ColumnInfo(name = "app_record_fetch_time_epoch_millis")
-    val appRecordFetchTimeEpochMillis: Long,
+    val appRecordFetchTimeEpochMillis: Long
 
-    @ColumnInfo(name = "is_synced", defaultValue = "0")
-    val isSynced: Boolean = false
+    // isSynced property removed
 )

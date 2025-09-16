@@ -244,7 +244,6 @@ class AvroFileProcessorWorkerRobolectricTest {
         assertThat(savedBg?.clientRecordId).isEqualTo(originalAvroBgRecord.clientRecordId)
         assertThat(savedBg?.clientRecordVersion).isEqualTo(originalAvroBgRecord.clientRecordVersion)
         assertThat(savedBg?.appRecordFetchTimeEpochMillis).isEqualTo(originalAvroBgRecord.appRecordFetchTimeEpochMillis)
-        assertThat(savedBg?.isSynced).isFalse() // Should be false by default
     }
 
     @Test
