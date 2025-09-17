@@ -73,6 +73,7 @@ androidx-work-testing = { group = "androidx.work", name = "work-testing", versio
 
 # Kotlinx Serialization
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationCore" }
+kotlinx-serialization-cbor = { module = "org.jetbrains.kotlinx:kotlinx-serialization-cbor", version.ref = "kotlinxSerializationCore" }
 
 # Mockito for testing
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockitoCore" }

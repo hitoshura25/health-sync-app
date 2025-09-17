@@ -27,7 +27,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+
 import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
@@ -205,7 +205,7 @@ fun HealthDataScreen(viewModel: MainViewModel, healthConnectAvailable: Boolean) 
     }
 }
 
-@Preview(showBackground = true, name = "Health Connect Available - Permissions Granted")
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true, name = "Health Connect Available - Permissions Granted")
 @Composable
 fun HealthDataScreenPreview_Granted() {
     MaterialTheme {
@@ -226,7 +226,7 @@ fun HealthDataScreenPreview_Granted() {
 }
 
 // Other previews (NotGranted, NotAvailable, PermissionRationaleScreen) remain the same.
-@Preview(showBackground = true, name = "Health Connect Available - Permissions Not Granted")
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true, name = "Health Connect Available - Permissions Not Granted")
 @Composable
 fun HealthDataScreenPreview_NotGranted() {
     MaterialTheme {
@@ -242,7 +242,7 @@ fun HealthDataScreenPreview_NotGranted() {
     }
 }
 
-@Preview(showBackground = true, name = "Health Connect Not Available")
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true, name = "Health Connect Not Available")
 @Composable
 fun HealthDataScreenPreview_NotAvailable() {
     MaterialTheme {
@@ -257,7 +257,7 @@ fun HealthDataScreenPreview_NotAvailable() {
     }
 }
 
-@Preview(showBackground = true, name = "Permission Rationale Screen")
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true, name = "Permission Rationale Screen")
 @Composable
 fun PermissionRationaleScreenPreview() {
     MaterialTheme {

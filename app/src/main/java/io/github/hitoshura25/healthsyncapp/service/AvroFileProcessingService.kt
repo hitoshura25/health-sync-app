@@ -126,7 +126,7 @@ class AvroFileProcessingService @Inject constructor(
                                         }
                                     }
                                 } catch (e: Exception) {
-                                    Log.e(TAG, "Failed to process and insert session ${avroRecord.hcUid} from file ${file.name}", e)
+                                    Log.e(TAG, "Failed to process and insert session ${avroRecord.metadata.id} from file ${file.name}", e)
                                     allTransactionsInFileSucceeded = false
                                     break 
                                 }

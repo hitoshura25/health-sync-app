@@ -2,15 +2,16 @@ package io.github.hitoshura25.healthsyncapp.data
 
 import androidx.health.connect.client.records.*
 import androidx.health.connect.client.records.metadata.DataOrigin
+import androidx.health.connect.client.records.metadata.Device
 import androidx.health.connect.client.records.metadata.Metadata
-// Removed: import androidx.health.connect.client.units.BloodGlucose
-// Removed: import io.github.hitoshura25.healthsyncapp.avro.AvroBloodGlucoseLevelUnit - No longer used
 import io.github.hitoshura25.healthsyncapp.avro.AvroBloodGlucoseMealType
 import io.github.hitoshura25.healthsyncapp.avro.AvroBloodGlucoseRecord
 import io.github.hitoshura25.healthsyncapp.avro.AvroBloodGlucoseRelationToMeal
 import io.github.hitoshura25.healthsyncapp.avro.AvroBloodGlucoseSpecimenSource
+import io.github.hitoshura25.healthsyncapp.avro.AvroDevice
 import io.github.hitoshura25.healthsyncapp.avro.AvroHeartRateRecord
 import io.github.hitoshura25.healthsyncapp.avro.AvroHeartRateSample
+import io.github.hitoshura25.healthsyncapp.avro.AvroMetadata
 import io.github.hitoshura25.healthsyncapp.avro.AvroSleepSessionRecord
 import io.github.hitoshura25.healthsyncapp.avro.AvroSleepStageRecord
 import io.github.hitoshura25.healthsyncapp.avro.AvroSleepStageType
@@ -22,18 +23,48 @@ import java.time.Instant
  */
 object HealthConnectToAvroMapper {
 
+    private fun mapMetadata(metadata: Metadata): AvroMetadata {
+        val device = metadata.device
+        val avroDevice = device?.let {
+            AvroDevice(
+                manufacturer = it.manufacturer,
+                model = it.model,
+                type = mapDeviceType(it.type)
+            )
+        }
+        return AvroMetadata(
+            id = metadata.id,
+            dataOriginPackageName = metadata.dataOrigin.packageName,
+            lastModifiedTimeEpochMillis = metadata.lastModifiedTime.toEpochMilli(),
+            clientRecordId = metadata.clientRecordId,
+            clientRecordVersion = metadata.clientRecordVersion,
+            device = avroDevice
+        )
+    }
+
+    private fun mapDeviceType(deviceType: Int): String {
+        return when (deviceType) {
+            Device.TYPE_PHONE -> "PHONE"
+            Device.TYPE_WATCH -> "WATCH"
+            // Device.TYPE_TABLET -> "TABLET"
+            Device.TYPE_HEAD_MOUNTED -> "HEAD_MOUNTED"
+            Device.TYPE_RING -> "RING"
+            Device.TYPE_SCALE -> "SCALE"
+            Device.TYPE_FITNESS_BAND -> "FITNESS_BAND"
+            Device.TYPE_CHEST_STRAP -> "CHEST_STRAP"
+            Device.TYPE_SMART_DISPLAY -> "SMART_DISPLAY"
+            else -> "UNKNOWN"
+        }
+    }
+
     fun mapStepsRecord(record: StepsRecord, fetchedTimeEpochMillis: Long): AvroStepsRecord {
         return AvroStepsRecord(
-            hcUid = record.metadata.id,
+            metadata = mapMetadata(record.metadata),
             startTimeEpochMillis = record.startTime.toEpochMilli(),
             endTimeEpochMillis = record.endTime.toEpochMilli(),
             startZoneOffsetId = record.startZoneOffset?.id,
             endZoneOffsetId = record.endZoneOffset?.id,
             count = record.count,
-            dataOriginPackageName = record.metadata.dataOrigin.packageName,
-            hcLastModifiedTimeEpochMillis = record.metadata.lastModifiedTime.toEpochMilli(),
-            clientRecordId = record.metadata.clientRecordId,
-            clientRecordVersion = record.metadata.clientRecordVersion,
             appRecordFetchTimeEpochMillis = fetchedTimeEpochMillis
         )
     }
@@ -46,15 +77,11 @@ object HealthConnectToAvroMapper {
             )
         }
         return AvroHeartRateRecord(
-            hcUid = record.metadata.id,
+            metadata = mapMetadata(record.metadata),
             startTimeEpochMillis = record.startTime.toEpochMilli(),
             endTimeEpochMillis = record.endTime.toEpochMilli(),
             startZoneOffsetId = record.startZoneOffset?.id,
             endZoneOffsetId = record.endZoneOffset?.id,
-            dataOriginPackageName = record.metadata.dataOrigin.packageName,
-            hcLastModifiedTimeEpochMillis = record.metadata.lastModifiedTime.toEpochMilli(),
-            clientRecordId = record.metadata.clientRecordId,
-            clientRecordVersion = record.metadata.clientRecordVersion,
             appRecordFetchTimeEpochMillis = fetchedTimeEpochMillis,
             samples = avroSamples
         )
@@ -70,18 +97,14 @@ object HealthConnectToAvroMapper {
         }
 
         return AvroSleepSessionRecord(
-            hcUid = record.metadata.id,
+            metadata = mapMetadata(record.metadata),
             title = record.title,
             notes = record.notes,
             startTimeEpochMillis = record.startTime.toEpochMilli(),
             endTimeEpochMillis = record.endTime.toEpochMilli(),
             startZoneOffsetId = record.startZoneOffset?.id,
             endZoneOffsetId = record.endZoneOffset?.id,
-            durationMillis = record.endTime.toEpochMilli() - record.startTime.toEpochMilli(), 
-            dataOriginPackageName = record.metadata.dataOrigin.packageName,
-            hcLastModifiedTimeEpochMillis = record.metadata.lastModifiedTime.toEpochMilli(),
-            clientRecordId = record.metadata.clientRecordId,
-            clientRecordVersion = record.metadata.clientRecordVersion,
+            durationMillis = record.endTime.toEpochMilli() - record.startTime.toEpochMilli(),
             appRecordFetchTimeEpochMillis = fetchedTimeEpochMillis,
             stages = avroStages
         )
@@ -89,18 +112,13 @@ object HealthConnectToAvroMapper {
 
     fun mapBloodGlucoseRecord(record: BloodGlucoseRecord, fetchedTimeEpochMillis: Long): AvroBloodGlucoseRecord {
         return AvroBloodGlucoseRecord(
-            hcUid = record.metadata.id,
+            metadata = mapMetadata(record.metadata),
             timeEpochMillis = record.time.toEpochMilli(),
             zoneOffsetId = record.zoneOffset?.id,
-            levelInMilligramsPerDeciliter = record.level.inMilligramsPerDeciliter, // Renamed field, value is mg/dL
-            // levelUnit field removed from Avro DTO
+            levelInMilligramsPerDeciliter = record.level.inMilligramsPerDeciliter,
             specimenSource = mapHcSpecimenSourceToAvro(record.specimenSource),
             mealType = mapHcMealTypeToAvro(record.mealType),
             relationToMeal = mapHcRelationToMealToAvro(record.relationToMeal),
-            dataOriginPackageName = record.metadata.dataOrigin.packageName,
-            hcLastModifiedTimeEpochMillis = record.metadata.lastModifiedTime.toEpochMilli(),
-            clientRecordId = record.metadata.clientRecordId,
-            clientRecordVersion = record.metadata.clientRecordVersion,
             appRecordFetchTimeEpochMillis = fetchedTimeEpochMillis
         )
     }
@@ -114,11 +132,11 @@ object HealthConnectToAvroMapper {
             SleepSessionRecord.STAGE_TYPE_DEEP -> AvroSleepStageType.DEEP
             SleepSessionRecord.STAGE_TYPE_REM -> AvroSleepStageType.REM
             SleepSessionRecord.STAGE_TYPE_UNKNOWN -> AvroSleepStageType.UNKNOWN
-            else -> AvroSleepStageType.UNKNOWN 
+            else -> AvroSleepStageType.UNKNOWN
         }
     }
 
-    private fun mapHcSpecimenSourceToAvro(hcSpecimenSource: Int): AvroBloodGlucoseSpecimenSource { 
+    private fun mapHcSpecimenSourceToAvro(hcSpecimenSource: Int): AvroBloodGlucoseSpecimenSource {
         return when (hcSpecimenSource) {
             BloodGlucoseRecord.SPECIMEN_SOURCE_INTERSTITIAL_FLUID -> AvroBloodGlucoseSpecimenSource.INTERSTITIAL_FLUID
             BloodGlucoseRecord.SPECIMEN_SOURCE_CAPILLARY_BLOOD -> AvroBloodGlucoseSpecimenSource.CAPILLARY_BLOOD
@@ -131,7 +149,7 @@ object HealthConnectToAvroMapper {
         }
     }
 
-    private fun mapHcMealTypeToAvro(hcMealType: Int): AvroBloodGlucoseMealType { 
+    private fun mapHcMealTypeToAvro(hcMealType: Int): AvroBloodGlucoseMealType {
         return when (hcMealType) {
             MealType.MEAL_TYPE_BREAKFAST -> AvroBloodGlucoseMealType.BREAKFAST
             MealType.MEAL_TYPE_LUNCH -> AvroBloodGlucoseMealType.LUNCH
@@ -142,7 +160,7 @@ object HealthConnectToAvroMapper {
         }
     }
 
-    private fun mapHcRelationToMealToAvro(hcRelationToMeal: Int): AvroBloodGlucoseRelationToMeal { 
+    private fun mapHcRelationToMealToAvro(hcRelationToMeal: Int): AvroBloodGlucoseRelationToMeal {
         return when (hcRelationToMeal) {
             BloodGlucoseRecord.RELATION_TO_MEAL_GENERAL -> AvroBloodGlucoseRelationToMeal.GENERAL
             BloodGlucoseRecord.RELATION_TO_MEAL_FASTING -> AvroBloodGlucoseRelationToMeal.FASTING

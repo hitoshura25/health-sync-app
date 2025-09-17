@@ -15,20 +15,26 @@ import org.junit.Test
 @OptIn(ExperimentalSerializationApi::class, ExperimentalAvro4kApi::class)
 class AvroSerializationTest {
 
+    private fun createTestMetadata(id: String): AvroMetadata {
+        return AvroMetadata(
+            id = id,
+            dataOriginPackageName = "com.example.healthapp",
+            lastModifiedTimeEpochMillis = 1672534860000L, // A bit after end time
+            clientRecordId = "client-xyz",
+            clientRecordVersion = 1L,
+            device = AvroDevice("Google", "Pixel Watch", "WATCH")
+        )
+    }
+
     @Test
     fun `AvroStepsRecord data file should serialize and deserialize correctly`() {
-        // This test now correctly uses AvroObjectContainer for data file testing
         val originalRecord = AvroStepsRecord(
-            hcUid = "uid-123",
+            metadata = createTestMetadata("uid-123"),
             startTimeEpochMillis = 1672531200000L, // 2023-01-01 00:00:00 UTC
             endTimeEpochMillis = 1672534800000L,   // 2023-01-01 01:00:00 UTC
             startZoneOffsetId = "UTC",
             endZoneOffsetId = "UTC",
             count = 1500L,
-            dataOriginPackageName = "com.example.healthapp",
-            hcLastModifiedTimeEpochMillis = 1672534860000L, // A bit after end time
-            clientRecordId = "client-xyz",
-            clientRecordVersion = 1L,
             appRecordFetchTimeEpochMillis = System.currentTimeMillis()
         )
 
@@ -55,15 +61,11 @@ class AvroSerializationTest {
     @Test
     fun `AvroHeartRateRecord data file should serialize and deserialize correctly`() {
         val originalRecord = AvroHeartRateRecord(
-            hcUid = "uid-hr-456",
+            metadata = createTestMetadata("uid-hr-456"),
             startTimeEpochMillis = 1672531200000L, // 2023-01-01 00:00:00 UTC
             endTimeEpochMillis = 1672531500000L,   // 2023-01-01 00:05:00 UTC
             startZoneOffsetId = "America/New_York",
             endZoneOffsetId = "America/New_York",
-            dataOriginPackageName = "com.example.fitnessapp",
-            hcLastModifiedTimeEpochMillis = 1672531560000L,
-            clientRecordId = "client-hr-abc",
-            clientRecordVersion = 2L,
             appRecordFetchTimeEpochMillis = System.currentTimeMillis(),
             samples = listOf(
                 AvroHeartRateSample(timeEpochMillis = 1672531260000L, beatsPerMinute = 75L),
@@ -73,7 +75,7 @@ class AvroSerializationTest {
         )
 
         val buffer = Buffer()
-        val valuesToEncode = sequenceOf(originalRecord) // For a single record in the data file
+        val valuesToEncode = sequenceOf(originalRecord)
 
         buffer.asOutputStream().use { stream ->
             AvroObjectContainer.openWriter<AvroHeartRateRecord>(stream).use { writer ->
@@ -95,7 +97,7 @@ class AvroSerializationTest {
     @Test
     fun `AvroSleepSessionRecord data file should serialize and deserialize correctly`() {
         val originalRecord = AvroSleepSessionRecord(
-            hcUid = "uid-sleep-789",
+            metadata = createTestMetadata("uid-sleep-789"),
             title = "Nightly Sleep",
             notes = "Felt well rested",
             startTimeEpochMillis = 1672531200000L, // 2023-01-01 00:00:00 UTC
@@ -103,10 +105,6 @@ class AvroSerializationTest {
             startZoneOffsetId = "Europe/Paris",
             endZoneOffsetId = "Europe/Paris",
             durationMillis = 21600000L, // 6 hours
-            dataOriginPackageName = "com.example.sleepapp",
-            hcLastModifiedTimeEpochMillis = 1672553000000L,
-            clientRecordId = "client-sleep-def",
-            clientRecordVersion = 1L,
             appRecordFetchTimeEpochMillis = System.currentTimeMillis(),
             stages = listOf(
                 AvroSleepStageRecord(

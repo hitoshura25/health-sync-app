@@ -109,6 +109,8 @@ dependencies {
     kspTest(libs.androidx.hilt.compiler) // AndroidX Hilt KSP for tests
 
     // Added Test Dependencies
+    testImplementation(libs.kotlinx.serialization.cbor)
+    testImplementation(libs.avro4k.core)
     testImplementation(libs.google.truth)
     testImplementation(libs.androidx.work.testing)
 

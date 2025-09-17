@@ -1,32 +1,159 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper
 
-// Removed: import io.github.hitoshura25.healthsyncapp.avro.AvroBloodGlucoseLevelUnit - No longer used
 import io.github.hitoshura25.healthsyncapp.avro.AvroBloodGlucoseMealType
 import io.github.hitoshura25.healthsyncapp.avro.AvroBloodGlucoseRecord
 import io.github.hitoshura25.healthsyncapp.avro.AvroBloodGlucoseRelationToMeal
 import io.github.hitoshura25.healthsyncapp.avro.AvroBloodGlucoseSpecimenSource
+import io.github.hitoshura25.healthsyncapp.avro.AvroDevice
+import io.github.hitoshura25.healthsyncapp.avro.AvroHeartRateRecord
+import io.github.hitoshura25.healthsyncapp.avro.AvroHeartRateSample
+import io.github.hitoshura25.healthsyncapp.avro.AvroMetadata
+import io.github.hitoshura25.healthsyncapp.avro.AvroSleepSessionRecord
+import io.github.hitoshura25.healthsyncapp.avro.AvroSleepStageRecord
+import io.github.hitoshura25.healthsyncapp.avro.AvroSleepStageType
+import io.github.hitoshura25.healthsyncapp.avro.AvroStepsRecord
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.Instant
 
 class AvroToEntityMappersTest {
 
+    private val testMetadata = AvroMetadata(
+        id = "test-hcuid-123",
+        dataOriginPackageName = "com.example.healthapp",
+        lastModifiedTimeEpochMillis = Instant.now().toEpochMilli() - 5000L,
+        clientRecordId = "client-rec-001",
+        clientRecordVersion = 2L,
+        device = AvroDevice(
+            manufacturer = "Google",
+            model = "Pixel Watch",
+            type = "WATCH"
+        )
+    )
+
+    @Test
+    fun `AvroStepsRecord toStepsRecordEntity correctly maps all fields`() {
+        val nowEpochMillis = Instant.now().toEpochMilli()
+        val avroRecord = AvroStepsRecord(
+            metadata = testMetadata,
+            startTimeEpochMillis = nowEpochMillis - 20000L,
+            endTimeEpochMillis = nowEpochMillis - 10000L,
+            startZoneOffsetId = "Europe/London",
+            count = 500L,
+            appRecordFetchTimeEpochMillis = nowEpochMillis
+        )
+
+        val entity = avroRecord.toStepsRecordEntity()
+
+        assertEquals(testMetadata.id, entity.hcUid)
+        assertEquals(500L, entity.count)
+        assertEquals(nowEpochMillis - 20000L, entity.startTimeEpochMillis)
+        assertEquals(nowEpochMillis - 10000L, entity.endTimeEpochMillis)
+        assertEquals("Europe/London", entity.zoneOffsetId)
+        assertEquals(nowEpochMillis, entity.appRecordFetchTimeEpochMillis)
+        assertEquals(testMetadata.dataOriginPackageName, entity.dataOriginPackageName)
+        assertEquals(testMetadata.lastModifiedTimeEpochMillis, entity.hcLastModifiedTimeEpochMillis)
+        assertEquals(testMetadata.clientRecordId, entity.clientRecordId)
+        assertEquals(testMetadata.clientRecordVersion, entity.clientRecordVersion)
+        assertEquals(testMetadata.device?.manufacturer, entity.deviceManufacturer)
+        assertEquals(testMetadata.device?.model, entity.deviceModel)
+        assertEquals(testMetadata.device?.type, entity.deviceType)
+    }
+
+    @Test
+    fun `AvroHeartRateRecord toHeartRateSampleEntities correctly maps all fields`() {
+        val nowEpochMillis = Instant.now().toEpochMilli()
+        val avroRecord = AvroHeartRateRecord(
+            metadata = testMetadata.copy(id = "hr-record-uid"),
+            startTimeEpochMillis = nowEpochMillis - 30000L,
+            endTimeEpochMillis = nowEpochMillis - 20000L,
+            startZoneOffsetId = "America/New_York",
+            appRecordFetchTimeEpochMillis = nowEpochMillis,
+            samples = listOf(
+                AvroHeartRateSample(nowEpochMillis - 25000L, 80L),
+                AvroHeartRateSample(nowEpochMillis - 24000L, 82L)
+            )
+        )
+
+        val entities = avroRecord.toHeartRateSampleEntities()
+
+        assertEquals(2, entities.size)
+        entities.forEach {
+            assertEquals("hr-record-uid", it.hcRecordUid)
+            assertEquals("America/New_York", it.zoneOffsetId)
+            assertEquals(nowEpochMillis, it.appRecordFetchTimeEpochMillis)
+            assertEquals(testMetadata.dataOriginPackageName, it.dataOriginPackageName)
+            assertEquals(testMetadata.lastModifiedTimeEpochMillis, it.hcLastModifiedTimeEpochMillis)
+            assertEquals(testMetadata.clientRecordId, it.clientRecordId)
+            assertEquals(testMetadata.clientRecordVersion, it.clientRecordVersion)
+            assertEquals(testMetadata.device?.manufacturer, it.deviceManufacturer)
+            assertEquals(testMetadata.device?.model, it.deviceModel)
+            assertEquals(testMetadata.device?.type, it.deviceType)
+        }
+        assertEquals(80L, entities[0].beatsPerMinute)
+        assertEquals(82L, entities[1].beatsPerMinute)
+    }
+
+    @Test
+    fun `AvroSleepSessionRecord toSleepSessionEntity correctly maps all fields`() {
+        val nowEpochMillis = Instant.now().toEpochMilli()
+        val avroRecord = AvroSleepSessionRecord(
+            metadata = testMetadata.copy(id = "sleep-session-uid"),
+            title = "Night Sleep",
+            notes = "Good sleep",
+            startTimeEpochMillis = nowEpochMillis - 8 * 3600 * 1000,
+            endTimeEpochMillis = nowEpochMillis,
+            startZoneOffsetId = "UTC",
+            endZoneOffsetId = "UTC",
+            durationMillis = 8 * 3600 * 1000,
+            appRecordFetchTimeEpochMillis = nowEpochMillis + 1000,
+            stages = emptyList()
+        )
+
+        val entity = avroRecord.toSleepSessionEntity()
+
+        assertEquals("sleep-session-uid", entity.hcUid)
+        assertEquals("Night Sleep", entity.title)
+        assertEquals(nowEpochMillis - 8 * 3600 * 1000, entity.startTimeEpochMillis)
+        assertEquals(nowEpochMillis, entity.endTimeEpochMillis)
+        assertEquals(nowEpochMillis + 1000, entity.appRecordFetchTimeEpochMillis)
+        assertEquals(testMetadata.dataOriginPackageName, entity.dataOriginPackageName)
+        assertEquals(testMetadata.lastModifiedTimeEpochMillis, entity.hcLastModifiedTimeEpochMillis)
+        assertEquals(testMetadata.clientRecordId, entity.clientRecordId)
+        assertEquals(testMetadata.clientRecordVersion, entity.clientRecordVersion)
+        assertEquals(testMetadata.device?.manufacturer, entity.deviceManufacturer)
+        assertEquals(testMetadata.device?.model, entity.deviceModel)
+        assertEquals(testMetadata.device?.type, entity.deviceType)
+    }
+
+    @Test
+    fun `AvroSleepStageRecord toSleepStageEntity correctly maps all fields`() {
+        val nowEpochMillis = Instant.now().toEpochMilli()
+        val avroRecord = AvroSleepStageRecord(
+            startTimeEpochMillis = nowEpochMillis - 3600 * 1000,
+            endTimeEpochMillis = nowEpochMillis,
+            stage = AvroSleepStageType.DEEP
+        )
+
+        val entity = avroRecord.toSleepStageEntity("parent-sleep-session-uid")
+
+        assertEquals("parent-sleep-session-uid", entity.sessionHcUid)
+        assertEquals(nowEpochMillis - 3600 * 1000, entity.startTimeEpochMillis)
+        assertEquals(nowEpochMillis, entity.endTimeEpochMillis)
+        assertEquals(AvroSleepStageType.DEEP.name, entity.stage)
+    }
+
     @Test
     fun `AvroBloodGlucoseRecord toBloodGlucoseEntity correctly maps all fields`() {
         val nowEpochMillis = Instant.now().toEpochMilli()
         val avroRecord = AvroBloodGlucoseRecord(
-            hcUid = "test-hcuid-bg-123",
+            metadata = testMetadata.copy(id = "test-hcuid-bg-123"),
             timeEpochMillis = nowEpochMillis - 10000L,
             zoneOffsetId = "Europe/London",
-            levelInMilligramsPerDeciliter = 120.5, // Renamed field
-            // levelUnit field removed
-            specimenSource = AvroBloodGlucoseSpecimenSource.CAPILLARY_BLOOD, 
-            mealType = AvroBloodGlucoseMealType.LUNCH, 
-            relationToMeal = AvroBloodGlucoseRelationToMeal.AFTER_MEAL, 
-            dataOriginPackageName = "com.example.healthapp",
-            hcLastModifiedTimeEpochMillis = nowEpochMillis - 5000L,
-            clientRecordId = "client-bg-001",
-            clientRecordVersion = 2L,
+            levelInMilligramsPerDeciliter = 120.5,
+            specimenSource = AvroBloodGlucoseSpecimenSource.CAPILLARY_BLOOD,
+            mealType = AvroBloodGlucoseMealType.LUNCH,
+            relationToMeal = AvroBloodGlucoseRelationToMeal.AFTER_MEAL,
             appRecordFetchTimeEpochMillis = nowEpochMillis
         )
 
@@ -35,47 +162,17 @@ class AvroToEntityMappersTest {
         assertEquals("test-hcuid-bg-123", entity.hcUid)
         assertEquals(nowEpochMillis - 10000L, entity.timeEpochMillis)
         assertEquals("Europe/London", entity.zoneOffsetId)
-        assertEquals(120.5, entity.levelInMilligramsPerDeciliter, 0.001) // Assert renamed field
-        // assertEquals for levelUnit removed
-        assertEquals(mapSpecimenSourceToInt(AvroBloodGlucoseSpecimenSource.CAPILLARY_BLOOD), entity.specimenSource) 
-        assertEquals(mapMealTypeToInt(AvroBloodGlucoseMealType.LUNCH), entity.mealType) 
-        assertEquals(mapRelationToMealToInt(AvroBloodGlucoseRelationToMeal.AFTER_MEAL), entity.relationToMeal) 
-        assertEquals("com.example.healthapp", entity.dataOriginPackageName)
-        assertEquals(nowEpochMillis - 5000L, entity.hcLastModifiedTimeEpochMillis)
-        assertEquals("client-bg-001", entity.clientRecordId)
-        assertEquals(2L, entity.clientRecordVersion)
+        assertEquals(120.5, entity.levelInMilligramsPerDeciliter, 0.001)
+        assertEquals(2, entity.specimenSource)
+        assertEquals(2, entity.mealType)
+        assertEquals(4, entity.relationToMeal)
+        assertEquals(testMetadata.dataOriginPackageName, entity.dataOriginPackageName)
+        assertEquals(testMetadata.lastModifiedTimeEpochMillis, entity.hcLastModifiedTimeEpochMillis)
+        assertEquals(testMetadata.clientRecordId, entity.clientRecordId)
+        assertEquals(testMetadata.clientRecordVersion, entity.clientRecordVersion)
         assertEquals(nowEpochMillis, entity.appRecordFetchTimeEpochMillis)
-    }
-
-    private fun mapSpecimenSourceToInt(avroSpecimenSource: AvroBloodGlucoseSpecimenSource): Int { 
-        return when (avroSpecimenSource) {
-            AvroBloodGlucoseSpecimenSource.INTERSTITIAL_FLUID -> 1
-            AvroBloodGlucoseSpecimenSource.CAPILLARY_BLOOD -> 2
-            AvroBloodGlucoseSpecimenSource.PLASMA -> 3
-            AvroBloodGlucoseSpecimenSource.SERUM -> 4
-            AvroBloodGlucoseSpecimenSource.TEARS -> 5
-            AvroBloodGlucoseSpecimenSource.WHOLE_BLOOD -> 6
-            AvroBloodGlucoseSpecimenSource.UNKNOWN -> 0
-        }
-    }
-
-    private fun mapMealTypeToInt(avroMealType: AvroBloodGlucoseMealType): Int { 
-        return when (avroMealType) {
-            AvroBloodGlucoseMealType.BREAKFAST -> 1
-            AvroBloodGlucoseMealType.LUNCH -> 2
-            AvroBloodGlucoseMealType.DINNER -> 3
-            AvroBloodGlucoseMealType.SNACK -> 4
-            AvroBloodGlucoseMealType.UNKNOWN -> 0
-        }
-    }
-
-    private fun mapRelationToMealToInt(avroRelationToMeal: AvroBloodGlucoseRelationToMeal): Int { 
-        return when (avroRelationToMeal) {
-            AvroBloodGlucoseRelationToMeal.GENERAL -> 1
-            AvroBloodGlucoseRelationToMeal.FASTING -> 2
-            AvroBloodGlucoseRelationToMeal.BEFORE_MEAL -> 3
-            AvroBloodGlucoseRelationToMeal.AFTER_MEAL -> 4
-            AvroBloodGlucoseRelationToMeal.UNKNOWN -> 0
-        }
+        assertEquals(testMetadata.device?.manufacturer, entity.deviceManufacturer)
+        assertEquals(testMetadata.device?.model, entity.deviceModel)
+        assertEquals(testMetadata.device?.type, entity.deviceType)
     }
 }
