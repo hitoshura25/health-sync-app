@@ -9,7 +9,6 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
 import io.github.hitoshura25.healthsyncapp.data.local.database.AppDatabase
 import io.github.hitoshura25.healthsyncapp.file.FileHandler
-import io.github.hitoshura25.healthsyncapp.avro.*
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -25,6 +24,16 @@ import com.github.avrokotlin.avro4k.ExperimentalAvro4kApi
 import com.github.avrokotlin.avro4k.openWriter
 import androidx.test.core.app.ApplicationProvider
 import androidx.hilt.work.HiltWorkerFactory
+import io.github.hitoshura25.healthsyncapp.avro.AvroBloodGlucoseMealType
+import io.github.hitoshura25.healthsyncapp.avro.AvroBloodGlucoseRecord
+import io.github.hitoshura25.healthsyncapp.avro.AvroBloodGlucoseRelationToMeal
+import io.github.hitoshura25.healthsyncapp.avro.AvroBloodGlucoseSpecimenSource
+import io.github.hitoshura25.healthsyncapp.avro.AvroDevice
+import io.github.hitoshura25.healthsyncapp.avro.AvroHeartRateRecord
+import io.github.hitoshura25.healthsyncapp.avro.AvroHeartRateSample
+import io.github.hitoshura25.healthsyncapp.avro.AvroMetadata
+import io.github.hitoshura25.healthsyncapp.avro.AvroSleepSessionRecord
+import io.github.hitoshura25.healthsyncapp.avro.AvroStepsRecord
 
 @HiltAndroidTest
 @Config(application = HiltTestApplication::class, manifest = Config.NONE)
@@ -89,10 +98,54 @@ class AvroFileProcessorWorkerRobolectricTest {
         )
 
         // Create test files
-        createAvroFileInDir(stagingDir, "StepsRecord_test1.avro", listOf(AvroStepsRecord(metadata, 1L, 2L, null, null, 100L, fetchTime)))
-        createAvroFileInDir(stagingDir, "HeartRateRecord_test1.avro", listOf(AvroHeartRateRecord(metadata, 1L, 2L, null, null, fetchTime, listOf(AvroHeartRateSample(1L, 75L)))))
-        createAvroFileInDir(stagingDir, "SleepSessionRecord_test1.avro", listOf(AvroSleepSessionRecord(metadata, "title", "notes", 1L, 2L, null, null, 1L, fetchTime, emptyList())))
-        createAvroFileInDir(stagingDir, "BloodGlucoseRecord_test1.avro", listOf(AvroBloodGlucoseRecord(metadata, 1L, null, 120.0, AvroBloodGlucoseSpecimenSource.CAPILLARY_BLOOD, AvroBloodGlucoseMealType.BREAKFAST, AvroBloodGlucoseRelationToMeal.BEFORE_MEAL, fetchTime)))
+        createAvroFileInDir(stagingDir, "StepsRecord_test1.avro", listOf(
+            AvroStepsRecord(
+                metadata,
+                1L,
+                2L,
+                null,
+                null,
+                100L,
+                fetchTime
+            )
+        ))
+        createAvroFileInDir(stagingDir, "HeartRateRecord_test1.avro", listOf(
+            AvroHeartRateRecord(
+                metadata,
+                1L,
+                2L,
+                null,
+                null,
+                fetchTime,
+                listOf(AvroHeartRateSample(1L, 75L))
+            )
+        ))
+        createAvroFileInDir(stagingDir, "SleepSessionRecord_test1.avro", listOf(
+            AvroSleepSessionRecord(
+                metadata,
+                "title",
+                "notes",
+                1L,
+                2L,
+                null,
+                null,
+                1L,
+                fetchTime,
+                emptyList()
+            )
+        ))
+        createAvroFileInDir(stagingDir, "BloodGlucoseRecord_test1.avro", listOf(
+            AvroBloodGlucoseRecord(
+                metadata,
+                1L,
+                null,
+                120.0,
+                AvroBloodGlucoseSpecimenSource.CAPILLARY_BLOOD,
+                AvroBloodGlucoseMealType.BREAKFAST,
+                AvroBloodGlucoseRelationToMeal.BEFORE_MEAL,
+                fetchTime
+            )
+        ))
 
         val worker = TestListenableWorkerBuilder<AvroFileProcessorWorker>(context)
             .setWorkerFactory(workerFactory)

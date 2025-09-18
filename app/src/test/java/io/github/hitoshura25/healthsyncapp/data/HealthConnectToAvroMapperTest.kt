@@ -13,6 +13,10 @@ import java.time.Instant
 import java.time.ZoneOffset
 import androidx.health.connect.client.records.metadata.Device as HcDevice
 
+import io.github.hitoshura25.healthsyncapp.data.mapStepsRecord
+import io.github.hitoshura25.healthsyncapp.data.mapHeartRateRecord
+import io.github.hitoshura25.healthsyncapp.data.mapSleepSessionRecord
+
 class HealthConnectToAvroMapperTest {
 
     private fun createHcMetadata(clientRecordId: String, device: HcDevice): Metadata {
@@ -38,7 +42,7 @@ class HealthConnectToAvroMapperTest {
             metadata = metadata
         )
 
-        val actualAvroRecord = HealthConnectToAvroMapper.mapStepsRecord(hcRecord, fetchedTime)
+        val actualAvroRecord = mapStepsRecord(hcRecord, fetchedTime)
 
         assertEquals(metadata.id, actualAvroRecord.metadata.id)
         assertEquals(5000L, actualAvroRecord.count)
@@ -64,7 +68,7 @@ class HealthConnectToAvroMapperTest {
             metadata = metadata
         )
 
-        val actualAvroRecord = HealthConnectToAvroMapper.mapHeartRateRecord(hcHeartRateRecord, fetchedTime)
+        val actualAvroRecord = mapHeartRateRecord(hcHeartRateRecord, fetchedTime)
 
         assertEquals(metadata.id, actualAvroRecord.metadata.id)
         assertEquals(2, actualAvroRecord.samples.size)
@@ -100,7 +104,7 @@ class HealthConnectToAvroMapperTest {
             metadata = metadata
         )
 
-        val actualAvroRecord = HealthConnectToAvroMapper.mapSleepSessionRecord(hcSleepSessionRecord, fetchedTime)
+        val actualAvroRecord = mapSleepSessionRecord(hcSleepSessionRecord, fetchedTime)
 
         assertEquals(metadata.id, actualAvroRecord.metadata.id)
         assertEquals("Afternoon Nap", actualAvroRecord.title)

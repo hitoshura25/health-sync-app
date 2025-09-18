@@ -5,11 +5,14 @@ import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
+import androidx.health.connect.client.records.BasalBodyTemperatureRecord
 import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import androidx.work.CoroutineWorker
@@ -19,20 +22,119 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import io.github.hitoshura25.healthsyncapp.data.HealthConnectToAvroMapper
+
 import io.github.hitoshura25.healthsyncapp.file.FileHandler
 import java.io.File
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlin.reflect.KClass
+import androidx.health.connect.client.records.DistanceRecord
+import androidx.health.connect.client.records.ElevationGainedRecord
+import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.FloorsClimbedRecord
+import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
+import androidx.health.connect.client.records.PowerRecord
+import androidx.health.connect.client.records.RestingHeartRateRecord
+import androidx.health.connect.client.records.SpeedRecord
+import androidx.health.connect.client.records.StepsCadenceRecord
+import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
+import androidx.health.connect.client.records.Vo2MaxRecord
+import androidx.health.connect.client.records.BodyFatRecord
+import androidx.health.connect.client.records.BodyTemperatureRecord
+import androidx.health.connect.client.records.BodyWaterMassRecord
+import androidx.health.connect.client.records.BoneMassRecord
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.DistanceRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.ElevationGainedRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.ExerciseSessionRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.FloorsClimbedRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HeartRateVariabilityRmssdRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.PowerRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.RestingHeartRateRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.SpeedRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.StepsCadenceRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.TotalCaloriesBurnedRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.Vo2MaxRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BodyFatRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BodyTemperatureRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BodyWaterMassRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BoneMassRecordDao
+
+
+import androidx.health.connect.client.records.HeightRecord
+import androidx.health.connect.client.records.LeanBodyMassRecord
+import androidx.health.connect.client.records.HydrationRecord
+import androidx.health.connect.client.records.NutritionRecord
+import androidx.health.connect.client.records.BloodPressureRecord
+import androidx.health.connect.client.records.OxygenSaturationRecord
+import androidx.health.connect.client.records.RespiratoryRateRecord
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HeightRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.LeanBodyMassRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HydrationRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.NutritionRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BloodPressureRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.OxygenSaturationRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.RespiratoryRateRecordDao
+
+import io.github.hitoshura25.healthsyncapp.data.mapStepsRecord
+import io.github.hitoshura25.healthsyncapp.data.mapHeartRateRecord
+import io.github.hitoshura25.healthsyncapp.data.mapSleepSessionRecord
+import io.github.hitoshura25.healthsyncapp.data.mapBloodGlucoseRecord
+import io.github.hitoshura25.healthsyncapp.data.mapWeightRecord
+import io.github.hitoshura25.healthsyncapp.data.mapActiveCaloriesBurnedRecord
+import io.github.hitoshura25.healthsyncapp.data.mapBasalBodyTemperatureRecord
+import io.github.hitoshura25.healthsyncapp.data.mapDistanceRecord
+import io.github.hitoshura25.healthsyncapp.data.mapElevationGainedRecord
+import io.github.hitoshura25.healthsyncapp.data.mapExerciseSessionRecord
+import io.github.hitoshura25.healthsyncapp.data.mapFloorsClimbedRecord
+import io.github.hitoshura25.healthsyncapp.data.mapHeartRateVariabilityRmssdRecord
+import io.github.hitoshura25.healthsyncapp.data.mapPowerRecord
+import io.github.hitoshura25.healthsyncapp.data.mapRestingHeartRateRecord
+import io.github.hitoshura25.healthsyncapp.data.mapSpeedRecord
+import io.github.hitoshura25.healthsyncapp.data.mapStepsCadenceRecord
+import io.github.hitoshura25.healthsyncapp.data.mapTotalCaloriesBurnedRecord
+import io.github.hitoshura25.healthsyncapp.data.mapVo2MaxRecord
+import io.github.hitoshura25.healthsyncapp.data.mapBodyFatRecord
+import io.github.hitoshura25.healthsyncapp.data.mapBodyTemperatureRecord
+import io.github.hitoshura25.healthsyncapp.data.mapBodyWaterMassRecord
+import io.github.hitoshura25.healthsyncapp.data.mapBoneMassRecord
+import io.github.hitoshura25.healthsyncapp.data.mapHeightRecord
+import io.github.hitoshura25.healthsyncapp.data.mapLeanBodyMassRecord
+import io.github.hitoshura25.healthsyncapp.data.mapHydrationRecord
+import io.github.hitoshura25.healthsyncapp.data.mapNutritionRecord
+import io.github.hitoshura25.healthsyncapp.data.mapBloodPressureRecord
+import io.github.hitoshura25.healthsyncapp.data.mapOxygenSaturationRecord
+import io.github.hitoshura25.healthsyncapp.data.mapRespiratoryRateRecord
+
 
 @HiltWorker
 class HealthDataFetcherWorker @AssistedInject constructor(
     @Assisted private val appContext: Context, 
     @Assisted workerParams: WorkerParameters,
     private val healthConnectClient: HealthConnectClient,
-    private val mapper: HealthConnectToAvroMapper, 
-    private val fileHandler: FileHandler
+     
+    private val fileHandler: FileHandler,
+    private val distanceRecordDao: DistanceRecordDao,
+    private val elevationGainedRecordDao: ElevationGainedRecordDao,
+    private val exerciseSessionRecordDao: ExerciseSessionRecordDao,
+    private val floorsClimbedRecordDao: FloorsClimbedRecordDao,
+    private val heartRateVariabilityRmssdRecordDao: HeartRateVariabilityRmssdRecordDao,
+    private val powerRecordDao: PowerRecordDao,
+    private val restingHeartRateRecordDao: RestingHeartRateRecordDao,
+    private val speedRecordDao: SpeedRecordDao,
+    private val stepsCadenceRecordDao: StepsCadenceRecordDao,
+    private val totalCaloriesBurnedRecordDao: TotalCaloriesBurnedRecordDao,
+    private val vo2MaxRecordDao: Vo2MaxRecordDao,
+    private val bodyFatRecordDao: BodyFatRecordDao,
+    private val bodyTemperatureRecordDao: BodyTemperatureRecordDao,
+    private val bodyWaterMassRecordDao: BodyWaterMassRecordDao,
+    private val boneMassRecordDao: BoneMassRecordDao,
+    private val heightRecordDao: HeightRecordDao,
+    private val leanBodyMassRecordDao: LeanBodyMassRecordDao,
+    private val hydrationRecordDao: HydrationRecordDao,
+    private val nutritionRecordDao: NutritionRecordDao,
+    private val bloodPressureRecordDao: BloodPressureRecordDao,
+    private val oxygenSaturationRecordDao: OxygenSaturationRecordDao,
+    private val respiratoryRateRecordDao: RespiratoryRateRecordDao
 ) : CoroutineWorker(appContext, workerParams) {
 
     companion object {
@@ -44,7 +146,32 @@ class HealthDataFetcherWorker @AssistedInject constructor(
             StepsRecord::class,
             HeartRateRecord::class,
             SleepSessionRecord::class,
-            BloodGlucoseRecord::class
+            BloodGlucoseRecord::class,
+            WeightRecord::class,
+            ActiveCaloriesBurnedRecord::class,
+            BasalBodyTemperatureRecord::class,
+            DistanceRecord::class,
+            ElevationGainedRecord::class,
+            ExerciseSessionRecord::class,
+            FloorsClimbedRecord::class,
+            HeartRateVariabilityRmssdRecord::class,
+            PowerRecord::class,
+            RestingHeartRateRecord::class,
+            SpeedRecord::class,
+            StepsCadenceRecord::class,
+            TotalCaloriesBurnedRecord::class,
+            Vo2MaxRecord::class,
+            BodyFatRecord::class,
+            BodyTemperatureRecord::class,
+            BodyWaterMassRecord::class,
+            BoneMassRecord::class,
+            HeightRecord::class,
+            LeanBodyMassRecord::class,
+            HydrationRecord::class,
+            NutritionRecord::class,
+            BloodPressureRecord::class,
+            OxygenSaturationRecord::class,
+            RespiratoryRateRecord::class
         )
     }
 
@@ -134,16 +261,91 @@ class HealthDataFetcherWorker @AssistedInject constructor(
 
             val mappedAvroRecords: List<Any> = when (recordType) {
                 StepsRecord::class -> (response.records as List<StepsRecord>).map {
-                    mapper.mapStepsRecord(it, timestampForFileNameAndMapping)
+                    mapStepsRecord(it, timestampForFileNameAndMapping)
                 }
                 HeartRateRecord::class -> (response.records as List<HeartRateRecord>).map {
-                    mapper.mapHeartRateRecord(it, timestampForFileNameAndMapping)
+                    mapHeartRateRecord(it, timestampForFileNameAndMapping)
                 }
                 SleepSessionRecord::class -> (response.records as List<SleepSessionRecord>).map {
-                    mapper.mapSleepSessionRecord(it, timestampForFileNameAndMapping)
+                    mapSleepSessionRecord(it, timestampForFileNameAndMapping)
                 }
                 BloodGlucoseRecord::class -> (response.records as List<BloodGlucoseRecord>).map {
-                    mapper.mapBloodGlucoseRecord(it, timestampForFileNameAndMapping)
+                    mapBloodGlucoseRecord(it, timestampForFileNameAndMapping)
+                }
+                WeightRecord::class -> (response.records as List<WeightRecord>).map {
+                    mapWeightRecord(it, timestampForFileNameAndMapping)
+                }
+                ActiveCaloriesBurnedRecord::class -> (response.records as List<ActiveCaloriesBurnedRecord>).map {
+                    mapActiveCaloriesBurnedRecord(it, timestampForFileNameAndMapping)
+                }
+                BasalBodyTemperatureRecord::class -> (response.records as List<BasalBodyTemperatureRecord>).map {
+                    mapBasalBodyTemperatureRecord(it, timestampForFileNameAndMapping)
+                }
+                DistanceRecord::class -> (response.records as List<DistanceRecord>).map {
+                    mapDistanceRecord(it, timestampForFileNameAndMapping)
+                }
+                ElevationGainedRecord::class -> (response.records as List<ElevationGainedRecord>).map {
+                    mapElevationGainedRecord(it, timestampForFileNameAndMapping)
+                }
+                ExerciseSessionRecord::class -> (response.records as List<ExerciseSessionRecord>).map {
+                    mapExerciseSessionRecord(it, timestampForFileNameAndMapping)
+                }
+                FloorsClimbedRecord::class -> (response.records as List<FloorsClimbedRecord>).map {
+                    mapFloorsClimbedRecord(it, timestampForFileNameAndMapping)
+                }
+                HeartRateVariabilityRmssdRecord::class -> (response.records as List<HeartRateVariabilityRmssdRecord>).map {
+                    mapHeartRateVariabilityRmssdRecord(it, timestampForFileNameAndMapping)
+                }
+                PowerRecord::class -> (response.records as List<PowerRecord>).map {
+                    mapPowerRecord(it, timestampForFileNameAndMapping)
+                }
+                RestingHeartRateRecord::class -> (response.records as List<RestingHeartRateRecord>).map {
+                    mapRestingHeartRateRecord(it, timestampForFileNameAndMapping)
+                }
+                SpeedRecord::class -> (response.records as List<SpeedRecord>).map {
+                    mapSpeedRecord(it, timestampForFileNameAndMapping)
+                }
+                StepsCadenceRecord::class -> (response.records as List<StepsCadenceRecord>).map {
+                    mapStepsCadenceRecord(it, timestampForFileNameAndMapping)
+                }
+                TotalCaloriesBurnedRecord::class -> (response.records as List<TotalCaloriesBurnedRecord>).map {
+                    mapTotalCaloriesBurnedRecord(it, timestampForFileNameAndMapping)
+                }
+                Vo2MaxRecord::class -> (response.records as List<Vo2MaxRecord>).map {
+                    mapVo2MaxRecord(it, timestampForFileNameAndMapping)
+                }
+                BodyFatRecord::class -> (response.records as List<BodyFatRecord>).map {
+                    mapBodyFatRecord(it, timestampForFileNameAndMapping)
+                }
+                BodyTemperatureRecord::class -> (response.records as List<BodyTemperatureRecord>).map {
+                    mapBodyTemperatureRecord(it, timestampForFileNameAndMapping)
+                }
+                BodyWaterMassRecord::class -> (response.records as List<BodyWaterMassRecord>).map {
+                    mapBodyWaterMassRecord(it, timestampForFileNameAndMapping)
+                }
+                BoneMassRecord::class -> (response.records as List<BoneMassRecord>).map {
+                    mapBoneMassRecord(it, timestampForFileNameAndMapping)
+                }
+                HeightRecord::class -> (response.records as List<HeightRecord>).map {
+                    mapHeightRecord(it, timestampForFileNameAndMapping)
+                }
+                LeanBodyMassRecord::class -> (response.records as List<LeanBodyMassRecord>).map {
+                    mapLeanBodyMassRecord(it, timestampForFileNameAndMapping)
+                }
+                HydrationRecord::class -> (response.records as List<HydrationRecord>).map {
+                    mapHydrationRecord(it, timestampForFileNameAndMapping)
+                }
+                NutritionRecord::class -> (response.records as List<NutritionRecord>).map {
+                    mapNutritionRecord(it, timestampForFileNameAndMapping)
+                }
+                BloodPressureRecord::class -> (response.records as List<BloodPressureRecord>).map {
+                    mapBloodPressureRecord(it, timestampForFileNameAndMapping)
+                }
+                OxygenSaturationRecord::class -> (response.records as List<OxygenSaturationRecord>).map {
+                    mapOxygenSaturationRecord(it, timestampForFileNameAndMapping)
+                }
+                RespiratoryRateRecord::class -> (response.records as List<RespiratoryRateRecord>).map {
+                    mapRespiratoryRateRecord(it, timestampForFileNameAndMapping)
                 }
                 else -> {
                     Log.w(TAG, "Unsupported record type for mapping: ${recordType.simpleName}")
