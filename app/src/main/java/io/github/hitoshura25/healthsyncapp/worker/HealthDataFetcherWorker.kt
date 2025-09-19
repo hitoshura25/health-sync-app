@@ -1,20 +1,45 @@
 package io.github.hitoshura25.healthsyncapp.worker
 
+
 import android.content.Context
 import android.util.Log
-import androidx.hilt.work.HiltWorker
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.BasalBodyTemperatureRecord
+import androidx.health.connect.client.records.BasalMetabolicRateRecord
 import androidx.health.connect.client.records.BloodGlucoseRecord
+import androidx.health.connect.client.records.BloodPressureRecord
+import androidx.health.connect.client.records.BodyFatRecord
+import androidx.health.connect.client.records.BodyTemperatureRecord
+import androidx.health.connect.client.records.BodyWaterMassRecord
+import androidx.health.connect.client.records.BoneMassRecord
+import androidx.health.connect.client.records.CyclingPedalingCadenceRecord
+import androidx.health.connect.client.records.DistanceRecord
+import androidx.health.connect.client.records.ElevationGainedRecord
+import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.FloorsClimbedRecord
 import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
+import androidx.health.connect.client.records.HeightRecord
+import androidx.health.connect.client.records.HydrationRecord
+import androidx.health.connect.client.records.LeanBodyMassRecord
+import androidx.health.connect.client.records.NutritionRecord
+import androidx.health.connect.client.records.OxygenSaturationRecord
+import androidx.health.connect.client.records.PowerRecord
 import androidx.health.connect.client.records.Record
+import androidx.health.connect.client.records.RespiratoryRateRecord
+import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
+import androidx.health.connect.client.records.SpeedRecord
+import androidx.health.connect.client.records.StepsCadenceRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
+import androidx.health.connect.client.records.Vo2MaxRecord
 import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
+import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -22,90 +47,43 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-
+import io.github.hitoshura25.healthsyncapp.data.HealthConnectConstants.RECORD_TYPES_SUPPORTED
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapActiveCaloriesBurnedRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapBasalBodyTemperatureRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapBasalMetabolicRateRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapBloodGlucoseRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapBloodPressureRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapBodyFatRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapBodyTemperatureRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapBodyWaterMassRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapBoneMassRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapCyclingPedalingCadenceRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapDistanceRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapElevationGainedRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapExerciseSessionRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapFloorsClimbedRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapHeartRateRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapHeartRateVariabilityRmssdRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapHeightRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapHydrationRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapLeanBodyMassRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapNutritionRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapOxygenSaturationRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapPowerRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapRespiratoryRateRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapRestingHeartRateRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapSleepSessionRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapSpeedRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapStepsCadenceRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapStepsRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapTotalCaloriesBurnedRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapVo2MaxRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapWeightRecord
 import io.github.hitoshura25.healthsyncapp.file.FileHandler
 import java.io.File
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlin.reflect.KClass
-import androidx.health.connect.client.records.DistanceRecord
-import androidx.health.connect.client.records.ElevationGainedRecord
-import androidx.health.connect.client.records.ExerciseSessionRecord
-import androidx.health.connect.client.records.FloorsClimbedRecord
-import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
-import androidx.health.connect.client.records.PowerRecord
-import androidx.health.connect.client.records.RestingHeartRateRecord
-import androidx.health.connect.client.records.SpeedRecord
-import androidx.health.connect.client.records.StepsCadenceRecord
-import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
-import androidx.health.connect.client.records.Vo2MaxRecord
-import androidx.health.connect.client.records.BodyFatRecord
-import androidx.health.connect.client.records.BodyTemperatureRecord
-import androidx.health.connect.client.records.BodyWaterMassRecord
-import androidx.health.connect.client.records.BoneMassRecord
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.DistanceRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.ElevationGainedRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.ExerciseSessionRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.FloorsClimbedRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HeartRateVariabilityRmssdRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.PowerRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.RestingHeartRateRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.SpeedRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.StepsCadenceRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.TotalCaloriesBurnedRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.Vo2MaxRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BodyFatRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BodyTemperatureRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BodyWaterMassRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BoneMassRecordDao
-
-
-import androidx.health.connect.client.records.HeightRecord
-import androidx.health.connect.client.records.LeanBodyMassRecord
-import androidx.health.connect.client.records.HydrationRecord
-import androidx.health.connect.client.records.NutritionRecord
-import androidx.health.connect.client.records.BloodPressureRecord
-import androidx.health.connect.client.records.OxygenSaturationRecord
-import androidx.health.connect.client.records.RespiratoryRateRecord
-import io.github.hitoshura25.healthsyncapp.data.HealthConnectConstants
-import io.github.hitoshura25.healthsyncapp.data.HealthConnectConstants.RECORD_TYPES_SUPPORTED
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HeightRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.LeanBodyMassRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HydrationRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.NutritionRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BloodPressureRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.OxygenSaturationRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.RespiratoryRateRecordDao
-
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapStepsRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapHeartRateRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapSleepSessionRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapBloodGlucoseRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapWeightRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapActiveCaloriesBurnedRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapBasalBodyTemperatureRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapDistanceRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapElevationGainedRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapExerciseSessionRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapFloorsClimbedRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapHeartRateVariabilityRmssdRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapPowerRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapRestingHeartRateRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapSpeedRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapStepsCadenceRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapTotalCaloriesBurnedRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapVo2MaxRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapBodyFatRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapBodyTemperatureRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapBodyWaterMassRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapBoneMassRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapHeightRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapLeanBodyMassRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapHydrationRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapNutritionRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapBloodPressureRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapOxygenSaturationRecord
-import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapRespiratoryRateRecord
 
 
 @HiltWorker
@@ -113,30 +91,7 @@ class HealthDataFetcherWorker @AssistedInject constructor(
     @Assisted private val appContext: Context, 
     @Assisted workerParams: WorkerParameters,
     private val healthConnectClient: HealthConnectClient,
-     
     private val fileHandler: FileHandler,
-    private val distanceRecordDao: DistanceRecordDao,
-    private val elevationGainedRecordDao: ElevationGainedRecordDao,
-    private val exerciseSessionRecordDao: ExerciseSessionRecordDao,
-    private val floorsClimbedRecordDao: FloorsClimbedRecordDao,
-    private val heartRateVariabilityRmssdRecordDao: HeartRateVariabilityRmssdRecordDao,
-    private val powerRecordDao: PowerRecordDao,
-    private val restingHeartRateRecordDao: RestingHeartRateRecordDao,
-    private val speedRecordDao: SpeedRecordDao,
-    private val stepsCadenceRecordDao: StepsCadenceRecordDao,
-    private val totalCaloriesBurnedRecordDao: TotalCaloriesBurnedRecordDao,
-    private val vo2MaxRecordDao: Vo2MaxRecordDao,
-    private val bodyFatRecordDao: BodyFatRecordDao,
-    private val bodyTemperatureRecordDao: BodyTemperatureRecordDao,
-    private val bodyWaterMassRecordDao: BodyWaterMassRecordDao,
-    private val boneMassRecordDao: BoneMassRecordDao,
-    private val heightRecordDao: HeightRecordDao,
-    private val leanBodyMassRecordDao: LeanBodyMassRecordDao,
-    private val hydrationRecordDao: HydrationRecordDao,
-    private val nutritionRecordDao: NutritionRecordDao,
-    private val bloodPressureRecordDao: BloodPressureRecordDao,
-    private val oxygenSaturationRecordDao: OxygenSaturationRecordDao,
-    private val respiratoryRateRecordDao: RespiratoryRateRecordDao
 ) : CoroutineWorker(appContext, workerParams) {
 
     companion object {
@@ -249,6 +204,12 @@ class HealthDataFetcherWorker @AssistedInject constructor(
                 }
                 BasalBodyTemperatureRecord::class -> (response.records as List<BasalBodyTemperatureRecord>).map {
                     mapBasalBodyTemperatureRecord(it, timestampForFileNameAndMapping)
+                }
+                BasalMetabolicRateRecord::class -> (response.records as List<BasalMetabolicRateRecord>).map {
+                    mapBasalMetabolicRateRecord(it, timestampForFileNameAndMapping)
+                }
+                CyclingPedalingCadenceRecord::class -> (response.records as List<CyclingPedalingCadenceRecord>).map {
+                    mapCyclingPedalingCadenceRecord(it, timestampForFileNameAndMapping)
                 }
                 DistanceRecord::class -> (response.records as List<DistanceRecord>).map {
                     mapDistanceRecord(it, timestampForFileNameAndMapping)
