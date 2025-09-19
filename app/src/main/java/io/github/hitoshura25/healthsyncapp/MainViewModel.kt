@@ -140,41 +140,42 @@ class MainViewModel(
 
         private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
 
-        val PERMISSIONS = setOf(
-            HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
-            HealthPermission.getReadPermission(BasalBodyTemperatureRecord::class),
-            HealthPermission.getReadPermission(BasalMetabolicRateRecord::class),
-            HealthPermission.getReadPermission(BloodGlucoseRecord::class),
-            HealthPermission.getReadPermission(BloodPressureRecord::class),
-            HealthPermission.getReadPermission(BodyFatRecord::class),
-            HealthPermission.getReadPermission(BodyTemperatureRecord::class),
-            HealthPermission.getReadPermission(BodyWaterMassRecord::class),
-            HealthPermission.getReadPermission(BoneMassRecord::class),
-            HealthPermission.getReadPermission(CyclingPedalingCadenceRecord::class),
-            HealthPermission.getReadPermission(DistanceRecord::class),
-            HealthPermission.getReadPermission(ElevationGainedRecord::class),
-            HealthPermission.getReadPermission(ExerciseSessionRecord::class),
-            HealthPermission.getReadPermission(FloorsClimbedRecord::class),
-            HealthPermission.getReadPermission(HeartRateRecord::class),
-            HealthPermission.getReadPermission(HeartRateVariabilityRmssdRecord::class),
-            HealthPermission.getReadPermission(HeightRecord::class),
-            HealthPermission.getReadPermission(HydrationRecord::class),
-            HealthPermission.getReadPermission(LeanBodyMassRecord::class),
-            HealthPermission.getReadPermission(NutritionRecord::class),
-            HealthPermission.getReadPermission(OxygenSaturationRecord::class),
-            HealthPermission.getReadPermission(PowerRecord::class),
-            HealthPermission.getReadPermission(RespiratoryRateRecord::class),
-            HealthPermission.getReadPermission(RestingHeartRateRecord::class),
-            HealthPermission.getReadPermission(SleepSessionRecord::class),
-            HealthPermission.getReadPermission(SpeedRecord::class),
-            HealthPermission.getReadPermission(StepsCadenceRecord::class),
-            HealthPermission.getReadPermission(StepsRecord::class),
-            HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class),
-            HealthPermission.getReadPermission(Vo2MaxRecord::class),
-            HealthPermission.getReadPermission(WeightRecord::class)
+        val RECORD_TYPES_SUPPORTED = setOf(
+            ActiveCaloriesBurnedRecord::class,
+            BasalBodyTemperatureRecord::class,
+            BasalMetabolicRateRecord::class,
+            BloodGlucoseRecord::class,
+            BloodPressureRecord::class,
+            BodyFatRecord::class,
+            BodyTemperatureRecord::class,
+            BodyWaterMassRecord::class,
+            BoneMassRecord::class,
+            CyclingPedalingCadenceRecord::class,
+            DistanceRecord::class,
+            ElevationGainedRecord::class,
+            ExerciseSessionRecord::class,
+            FloorsClimbedRecord::class,
+            HeartRateRecord::class,
+            HeartRateVariabilityRmssdRecord::class,
+            HeightRecord::class,
+            HydrationRecord::class,
+            LeanBodyMassRecord::class,
+            NutritionRecord::class,
+            OxygenSaturationRecord::class,
+            PowerRecord::class,
+            RespiratoryRateRecord::class,
+            RestingHeartRateRecord::class,
+            SleepSessionRecord::class,
+            SpeedRecord::class,
+            StepsCadenceRecord::class,
+            StepsRecord::class,
+            TotalCaloriesBurnedRecord::class,
+            Vo2MaxRecord::class,
+            WeightRecord::class
         )
-    }
 
+        val PERMISSIONS = RECORD_TYPES_SUPPORTED.map { HealthPermission.getReadPermission(it) }.toSet() + HealthPermission.PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND
+    }
 
     val stepsCadenceData: StateFlow<String> = stepsCadenceRecordDao.getAllObservable()
         .map { recordsWithSamples ->

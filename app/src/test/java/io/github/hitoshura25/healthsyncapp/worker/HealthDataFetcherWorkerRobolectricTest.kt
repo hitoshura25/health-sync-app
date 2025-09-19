@@ -8,7 +8,7 @@ import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.HeartRateRecord
-import androidx.health.connect.client.records.SleepSessionRecord
+import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.BasalBodyTemperatureRecord
@@ -32,6 +32,7 @@ import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.PowerRecord
 import androidx.health.connect.client.records.RespiratoryRateRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
+import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.SpeedRecord
 import androidx.health.connect.client.records.StepsCadenceRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
@@ -58,6 +59,7 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
 import dagger.hilt.android.testing.UninstallModules
 import dagger.hilt.components.SingletonComponent
+import io.github.hitoshura25.healthsyncapp.MainViewModel
 import io.github.hitoshura25.healthsyncapp.di.HealthConnectModule
 import io.github.hitoshura25.healthsyncapp.file.FileHandler
 import kotlinx.coroutines.runBlocking
@@ -68,13 +70,16 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.argThat
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mock
 import org.mockito.MockedStatic
 import org.mockito.Mockito
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.mockito.invocation.InvocationOnMock
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.io.File
@@ -126,43 +131,12 @@ class HealthDataFetcherWorkerRobolectricTest {
 
     private val FIXED_INSTANT = Instant.ofEpochMilli(1678886400000L)
 
-    private val allDataPermissions = setOf(
-        HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
-        HealthPermission.getReadPermission(BasalBodyTemperatureRecord::class),
-        HealthPermission.getReadPermission(BasalMetabolicRateRecord::class),
-        HealthPermission.getReadPermission(BloodGlucoseRecord::class),
-        HealthPermission.getReadPermission(BloodPressureRecord::class),
-        HealthPermission.getReadPermission(BodyFatRecord::class),
-        HealthPermission.getReadPermission(BodyTemperatureRecord::class),
-        HealthPermission.getReadPermission(BodyWaterMassRecord::class),
-        HealthPermission.getReadPermission(BoneMassRecord::class),
-        HealthPermission.getReadPermission(CyclingPedalingCadenceRecord::class),
-        HealthPermission.getReadPermission(DistanceRecord::class),
-        HealthPermission.getReadPermission(ElevationGainedRecord::class),
-        HealthPermission.getReadPermission(ExerciseSessionRecord::class),
-        HealthPermission.getReadPermission(FloorsClimbedRecord::class),
-        HealthPermission.getReadPermission(HeartRateRecord::class),
-        HealthPermission.getReadPermission(HeartRateVariabilityRmssdRecord::class),
-        HealthPermission.getReadPermission(HeightRecord::class),
-        HealthPermission.getReadPermission(HydrationRecord::class),
-        HealthPermission.getReadPermission(LeanBodyMassRecord::class),
-        HealthPermission.getReadPermission(NutritionRecord::class),
-        HealthPermission.getReadPermission(OxygenSaturationRecord::class),
-        HealthPermission.getReadPermission(PowerRecord::class),
-        HealthPermission.getReadPermission(RespiratoryRateRecord::class),
-        HealthPermission.getReadPermission(RestingHeartRateRecord::class),
-        HealthPermission.getReadPermission(SleepSessionRecord::class),
-        HealthPermission.getReadPermission(SpeedRecord::class),
-        HealthPermission.getReadPermission(StepsCadenceRecord::class),
-        HealthPermission.getReadPermission(StepsRecord::class),
-        HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class),
-        HealthPermission.getReadPermission(Vo2MaxRecord::class),
-        HealthPermission.getReadPermission(WeightRecord::class)
-    )
+    private val allDataPermissions = MainViewModel.PERMISSIONS - HealthPermission.PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND
+
     private lateinit var synchronousExecutor: Executor
 
     @Before
-    fun setUp() {
+    fun setUp()  {
         MockitoAnnotations.openMocks(this)
         TestHealthConnectClientModule.mockClient = mockHealthConnectClient
         hiltRule.inject() // fileHandler is injected here
@@ -196,6 +170,72 @@ class HealthDataFetcherWorkerRobolectricTest {
         val completedDir = fileHandler.getCompletedDirectory()
         if (completedDir.exists()) completedDir.deleteRecursively()
         completedDir.mkdirs()
+
+        runBlocking {
+            // Mock empty responses for all record types in setup()
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BloodGlucoseRecord>? -> req != null && req.recordType == BloodGlucoseRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<ActiveCaloriesBurnedRecord>? -> req != null && req.recordType == ActiveCaloriesBurnedRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BasalBodyTemperatureRecord>? -> req != null && req.recordType == BasalBodyTemperatureRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BasalMetabolicRateRecord>? -> req != null && req.recordType == BasalMetabolicRateRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BloodPressureRecord>? -> req != null && req.recordType == BloodPressureRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BodyFatRecord>? -> req != null && req.recordType == BodyFatRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BodyTemperatureRecord>? -> req != null && req.recordType == BodyTemperatureRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BodyWaterMassRecord>? -> req != null && req.recordType == BodyWaterMassRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BoneMassRecord>? -> req != null && req.recordType == BoneMassRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<CyclingPedalingCadenceRecord>? -> req != null && req.recordType == CyclingPedalingCadenceRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<DistanceRecord>? -> req != null && req.recordType == DistanceRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<ElevationGainedRecord>? -> req != null && req.recordType == ElevationGainedRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<ExerciseSessionRecord>? -> req != null && req.recordType == ExerciseSessionRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<FloorsClimbedRecord>? -> req != null && req.recordType == FloorsClimbedRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<HeartRateRecord>? -> req != null && req.recordType == HeartRateRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<HeartRateVariabilityRmssdRecord>? -> req != null && req.recordType == HeartRateVariabilityRmssdRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<HeightRecord>? -> req != null && req.recordType == HeightRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<HydrationRecord>? -> req != null && req.recordType == HydrationRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<LeanBodyMassRecord>? -> req != null && req.recordType == LeanBodyMassRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<NutritionRecord>? -> req != null && req.recordType == NutritionRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<OxygenSaturationRecord>? -> req != null && req.recordType == OxygenSaturationRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<PowerRecord>? -> req != null && req.recordType == PowerRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<RespiratoryRateRecord>? -> req != null && req.recordType == RespiratoryRateRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<RestingHeartRateRecord>? -> req != null && req.recordType == RestingHeartRateRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<SleepSessionRecord>? -> req != null && req.recordType == SleepSessionRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<SpeedRecord>? -> req != null && req.recordType == SpeedRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<StepsCadenceRecord>? -> req != null && req.recordType == StepsCadenceRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<StepsRecord>? -> req != null && req.recordType == StepsRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<TotalCaloriesBurnedRecord>? -> req != null && req.recordType == TotalCaloriesBurnedRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<Vo2MaxRecord>? -> req != null && req.recordType == Vo2MaxRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<WeightRecord>? -> req != null && req.recordType == WeightRecord::class }))
+                .thenReturn(ReadRecordsResponse(emptyList(), null))
+        }
     }
 
     @After
@@ -240,31 +280,6 @@ class HealthDataFetcherWorkerRobolectricTest {
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<StepsRecord>? -> req != null && req.recordType == StepsRecord::class }))
             .thenReturn(stepsResponse)
 
-        val emptyHeartRateResponse = mock<ReadRecordsResponse<HeartRateRecord>>()
-        `when`(emptyHeartRateResponse.records).thenReturn(emptyList())
-        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<HeartRateRecord>? -> req != null && req.recordType == HeartRateRecord::class }))
-            .thenReturn(emptyHeartRateResponse)
-        val emptySleepResponse = mock<ReadRecordsResponse<SleepSessionRecord>>()
-        `when`(emptySleepResponse.records).thenReturn(emptyList())
-        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<SleepSessionRecord>? -> req != null && req.recordType == SleepSessionRecord::class }))
-            .thenReturn(emptySleepResponse)
-        val emptyBgResponse = mock<ReadRecordsResponse<BloodGlucoseRecord>>()
-        `when`(emptyBgResponse.records).thenReturn(emptyList())
-        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BloodGlucoseRecord>? -> req != null && req.recordType == BloodGlucoseRecord::class }))
-            .thenReturn(emptyBgResponse)
-
-        // Add mock responses for all other record types
-        val allRecordTypes = io.github.hitoshura25.healthsyncapp.MainViewModel.PERMISSIONS.map { it.recordType }
-        for (recordType in allRecordTypes) {
-            if (recordType != StepsRecord::class && recordType != HeartRateRecord::class &&
-                recordType != SleepSessionRecord::class && recordType != BloodGlucoseRecord::class) {
-                val emptyResponse = mock<ReadRecordsResponse<*>>()
-                `when`(emptyResponse.records).thenReturn(emptyList<Any>())
-                `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<*>? -> req != null && req.recordType == recordType }))
-                    .thenReturn(emptyResponse as ReadRecordsResponse<out androidx.health.connect.client.records.Record>)
-            }
-        }
-
         val worker = createWorker()
         val result = worker.doWork()
         assertTrue("Worker should succeed.", result is ListenableWorker.Result.Success)
@@ -295,31 +310,6 @@ class HealthDataFetcherWorkerRobolectricTest {
         `when`(heartRateResponse.records).thenReturn(heartRateRecords)
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<HeartRateRecord>? -> req != null && req.recordType == HeartRateRecord::class }))
             .thenReturn(heartRateResponse)
-
-        val emptyStepsResponse = mock<ReadRecordsResponse<StepsRecord>>()
-        `when`(emptyStepsResponse.records).thenReturn(emptyList())
-        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<StepsRecord>? -> req != null && req.recordType == StepsRecord::class }))
-            .thenReturn(emptyStepsResponse)
-        val emptySleepResponse = mock<ReadRecordsResponse<SleepSessionRecord>>()
-        `when`(emptySleepResponse.records).thenReturn(emptyList())
-        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<SleepSessionRecord>? -> req != null && req.recordType == SleepSessionRecord::class }))
-            .thenReturn(emptySleepResponse)
-        val emptyBgResponse = mock<ReadRecordsResponse<BloodGlucoseRecord>>()
-        `when`(emptyBgResponse.records).thenReturn(emptyList())
-        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BloodGlucoseRecord>? -> req != null && req.recordType == BloodGlucoseRecord::class }))
-            .thenReturn(emptyBgResponse)
-
-        // Add mock responses for all other record types
-        val allRecordTypes = io.github.hitoshura25.healthsyncapp.MainViewModel.PERMISSIONS.map { it.recordType }
-        for (recordType in allRecordTypes) {
-            if (recordType != StepsRecord::class && recordType != HeartRateRecord::class &&
-                recordType != SleepSessionRecord::class && recordType != BloodGlucoseRecord::class) {
-                val emptyResponse = mock<ReadRecordsResponse<*>>()
-                `when`(emptyResponse.records).thenReturn(emptyList<Any>())
-                `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<*>? -> req != null && req.recordType == recordType }))
-                    .thenReturn(emptyResponse as ReadRecordsResponse<out androidx.health.connect.client.records.Record>)
-            }
-        }
 
         val worker = createWorker()
         val result = worker.doWork()
@@ -365,18 +355,6 @@ class HealthDataFetcherWorkerRobolectricTest {
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BloodGlucoseRecord>? -> req != null && req.recordType == BloodGlucoseRecord::class }))
             .thenReturn(bgResponse)
 
-        // Add mock responses for all other record types
-        val allRecordTypes = io.github.hitoshura25.healthsyncapp.MainViewModel.PERMISSIONS.map { it.recordType }
-        for (recordType in allRecordTypes) {
-            if (recordType != StepsRecord::class && recordType != HeartRateRecord::class &&
-                recordType != SleepSessionRecord::class && recordType != BloodGlucoseRecord::class) {
-                val emptyResponse = mock<ReadRecordsResponse<*>>()
-                `when`(emptyResponse.records).thenReturn(emptyList<Any>())
-                `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<*>? -> req != null && req.recordType == recordType }))
-                    .thenReturn(emptyResponse as ReadRecordsResponse<out androidx.health.connect.client.records.Record>)
-            }
-        }
-
         val worker = createWorker()
         val result = worker.doWork()
         assertTrue("Worker should succeed when all types have data.", result is ListenableWorker.Result.Success)
@@ -398,15 +376,6 @@ class HealthDataFetcherWorkerRobolectricTest {
     @Test
     fun `doWork returns success and does not enqueue processor when no permissions are granted`() = runBlocking {
         `when`(mockPermissionController.getGrantedPermissions()).thenReturn(emptySet())
-        
-        // Mock empty responses for all record types
-        val allRecordTypes = io.github.hitoshura25.healthsyncapp.MainViewModel.PERMISSIONS.map { it.recordType }
-        for (recordType in allRecordTypes) {
-            val emptyResponse = mock<ReadRecordsResponse<*>>()
-            `when`(emptyResponse.records).thenReturn(emptyList<Any>())
-            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<*>? -> req != null && req.recordType == recordType }))
-                .thenReturn(emptyResponse as ReadRecordsResponse<out androidx.health.connect.client.records.Record>)
-        }
 
         val worker = createWorker()
         val result = worker.doWork()
@@ -419,15 +388,6 @@ class HealthDataFetcherWorkerRobolectricTest {
     @Test
     fun `doWork succeeds and does not enqueue processor when permissions granted but no data`() = runBlocking {
         `when`(mockPermissionController.getGrantedPermissions()).thenReturn(allDataPermissions)
-        
-        // Mock empty responses for all record types
-        val allRecordTypes = io.github.hitoshura25.healthsyncapp.MainViewModel.PERMISSIONS.map { it.recordType }
-        for (recordType in allRecordTypes) {
-            val emptyResponse = mock<ReadRecordsResponse<*>>()
-            `when`(emptyResponse.records).thenReturn(emptyList<Any>())
-            `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<*>? -> req != null && req.recordType == recordType }))
-                .thenReturn(emptyResponse as ReadRecordsResponse<out androidx.health.connect.client.records.Record>)
-        }
 
         val worker = createWorker()
         val result = worker.doWork()
@@ -457,11 +417,6 @@ class HealthDataFetcherWorkerRobolectricTest {
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<HeartRateRecord>? -> req?.recordType == HeartRateRecord::class }))
             .thenAnswer { throw IOException("Simulated network error reading HeartRate") } // MODIFIED LINE
 
-        val emptySleepResponse = mock<ReadRecordsResponse<SleepSessionRecord>>()
-        `when`(emptySleepResponse.records).thenReturn(emptyList())
-        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<SleepSessionRecord>? -> req?.recordType == SleepSessionRecord::class }))
-            .thenReturn(emptySleepResponse)
-
         val hcBgRecord = BloodGlucoseRecord(
             time = testStartTime, zoneOffset = ZoneOffset.UTC,
             level = androidx.health.connect.client.units.BloodGlucose.milligramsPerDeciliter(95.0),
@@ -471,18 +426,6 @@ class HealthDataFetcherWorkerRobolectricTest {
         `when`(bgResponse.records).thenReturn(listOf(hcBgRecord))
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BloodGlucoseRecord>? -> req?.recordType == BloodGlucoseRecord::class }))
             .thenReturn(bgResponse)
-
-        // Add mock responses for all other record types
-        val allRecordTypes = io.github.hitoshura25.healthsyncapp.MainViewModel.PERMISSIONS.map { it.recordType }
-        for (recordType in allRecordTypes) {
-            if (recordType != StepsRecord::class && recordType != HeartRateRecord::class &&
-                recordType != SleepSessionRecord::class && recordType != BloodGlucoseRecord::class) {
-                val emptyResponse = mock<ReadRecordsResponse<*>>()
-                `when`(emptyResponse.records).thenReturn(emptyList<Any>())
-                `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<*>? -> req != null && req.recordType == recordType }))
-                    .thenReturn(emptyResponse as ReadRecordsResponse<out androidx.health.connect.client.records.Record>)
-            }
-        }
 
         val worker = createWorker()
         val result = worker.doWork()
@@ -526,22 +469,6 @@ class HealthDataFetcherWorkerRobolectricTest {
         val bgResponse = mock<ReadRecordsResponse<BloodGlucoseRecord>>()
         `when`(bgResponse.records).thenReturn(listOf(hcBgRecord))
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BloodGlucoseRecord>? -> req?.recordType == BloodGlucoseRecord::class })).thenReturn(bgResponse)
-        
-        val emptySleepResponse = mock<ReadRecordsResponse<SleepSessionRecord>>()
-        `when`(emptySleepResponse.records).thenReturn(emptyList())
-        `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<SleepSessionRecord>? -> req?.recordType == SleepSessionRecord::class })).thenReturn(emptySleepResponse)
-
-        // Add mock responses for all other record types
-        val allRecordTypes = io.github.hitoshura25.healthsyncapp.MainViewModel.PERMISSIONS.map { it.recordType }
-        for (recordType in allRecordTypes) {
-            if (recordType != StepsRecord::class && recordType != HeartRateRecord::class &&
-                recordType != SleepSessionRecord::class && recordType != BloodGlucoseRecord::class) {
-                val emptyResponse = mock<ReadRecordsResponse<*>>()
-                `when`(emptyResponse.records).thenReturn(emptyList<Any>())
-                `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<*>? -> req != null && req.recordType == recordType }))
-                    .thenReturn(emptyResponse as ReadRecordsResponse<out androidx.health.connect.client.records.Record>)
-            }
-        }
 
         // --- Induce failure for StepsRecord write --- 
         val stepsFileNameToFail = "StepsRecord_${simulatedFetchedTimeMillis}.avro"
