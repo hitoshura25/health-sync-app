@@ -47,6 +47,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType
 import io.github.hitoshura25.healthsyncapp.data.HealthConnectConstants.RECORD_TYPES_SUPPORTED
 import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapActiveCaloriesBurnedRecord
 import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapBasalBodyTemperatureRecord
@@ -83,7 +84,6 @@ import io.github.hitoshura25.healthsyncapp.file.FileHandler
 import java.io.File
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import kotlin.reflect.KClass
 
 
 @HiltWorker
@@ -119,27 +119,26 @@ class HealthDataFetcherWorker @AssistedInject constructor(
 
             var overallProcessingSuccess = true
 
-            RECORD_TYPES_SUPPORTED.forEach { recordType ->
-                val readPermission = HealthPermission.getReadPermission(recordType)
+            RECORD_TYPES_SUPPORTED.forEach { healthRecordType ->
+                val readPermission = HealthPermission.getReadPermission(healthRecordType.recordKClass)
                 if (grantedPermissions.contains(readPermission)) {
-                    Log.d(TAG, "Read permission GRANTED for ${recordType.simpleName}")
+                    Log.d(TAG, "Read permission GRANTED for ${healthRecordType.recordKClass.simpleName}")
                     try {
                         val recordTypeProcessingSuccess = fetchAndMapRecords(
-                            recordType,
+                            healthRecordType, // Pass the HealthRecordType object
                             timeRangeFilter,
                             timestampForFilesAndMapping
                         )
                         if (!recordTypeProcessingSuccess) {
-                            Log.w(TAG, "Failed to process or write data for ${recordType.simpleName}.")
-                            overallProcessingSuccess = false 
+                            Log.w(TAG, "Failed to process or write data for ${healthRecordType.recordKClass.simpleName}.")
+                            overallProcessingSuccess = false
                         }
                     } catch (e: Exception) {
-                        Log.e(TAG, "Error processing ${recordType.simpleName}: ${e.message}", e)
-                        overallProcessingSuccess = false 
+                        Log.e(TAG, "Error processing ${healthRecordType.recordKClass.simpleName}: ${e.message}", e)
+                        overallProcessingSuccess = false
                     }
                 } else {
-                    Log.w(TAG, "Read permission DENIED for ${recordType.simpleName}. Skipping.")
-                    // Denied permission for a type is not a worker failure, just skip that type.
+                    Log.w(TAG, "Read permission DENIED for ${healthRecordType.recordKClass.simpleName}. Skipping.")
                 }
             }
             
@@ -165,13 +164,13 @@ class HealthDataFetcherWorker @AssistedInject constructor(
 
     @Suppress("UNCHECKED_CAST")
     private suspend fun <T : Record> fetchAndMapRecords(
-        recordType: KClass<T>,
+        healthRecordType: SupportedHealthRecordType<T>, // Changed parameter type
         timeRangeFilter: TimeRangeFilter,
         timestampForFileNameAndMapping: Long
     ): Boolean {
-        val request = ReadRecordsRequest(recordType, timeRangeFilter)
+        val request = ReadRecordsRequest(healthRecordType.recordKClass, timeRangeFilter)
         val response = healthConnectClient.readRecords(request)
-        Log.d(TAG, "Fetched ${response.records.size} records for ${recordType.simpleName}")
+        Log.d(TAG, "Fetched ${response.records.size} records for ${healthRecordType.recordKClass.simpleName}")
 
         if (response.records.isNotEmpty()) {
             val stagingDir = fileHandler.getStagingDirectory()
@@ -184,121 +183,117 @@ class HealthDataFetcherWorker @AssistedInject constructor(
                 Log.d(TAG, "Created staging directory via worker: ${stagingDir.path}")
             }
 
-            val mappedAvroRecords: List<Any> = when (recordType) {
-                StepsRecord::class -> (response.records as List<StepsRecord>).map {
+            val mappedAvroRecords: List<Any> = when (healthRecordType) { // Now 'when' on HealthRecordType
+                SupportedHealthRecordType.Steps -> (response.records as List<StepsRecord>).map {
                     mapStepsRecord(it, timestampForFileNameAndMapping)
                 }
-                HeartRateRecord::class -> (response.records as List<HeartRateRecord>).map {
+                SupportedHealthRecordType.HeartRate -> (response.records as List<HeartRateRecord>).map {
                     mapHeartRateRecord(it, timestampForFileNameAndMapping)
                 }
-                SleepSessionRecord::class -> (response.records as List<SleepSessionRecord>).map {
+                SupportedHealthRecordType.SleepSession -> (response.records as List<SleepSessionRecord>).map {
                     mapSleepSessionRecord(it, timestampForFileNameAndMapping)
                 }
-                BloodGlucoseRecord::class -> (response.records as List<BloodGlucoseRecord>).map {
+                SupportedHealthRecordType.BloodGlucose -> (response.records as List<BloodGlucoseRecord>).map {
                     mapBloodGlucoseRecord(it, timestampForFileNameAndMapping)
                 }
-                WeightRecord::class -> (response.records as List<WeightRecord>).map {
+                SupportedHealthRecordType.Weight -> (response.records as List<WeightRecord>).map {
                     mapWeightRecord(it, timestampForFileNameAndMapping)
                 }
-                ActiveCaloriesBurnedRecord::class -> (response.records as List<ActiveCaloriesBurnedRecord>).map {
+                SupportedHealthRecordType.ActiveCaloriesBurned -> (response.records as List<ActiveCaloriesBurnedRecord>).map {
                     mapActiveCaloriesBurnedRecord(it, timestampForFileNameAndMapping)
                 }
-                BasalBodyTemperatureRecord::class -> (response.records as List<BasalBodyTemperatureRecord>).map {
+                SupportedHealthRecordType.BasalBodyTemperature -> (response.records as List<BasalBodyTemperatureRecord>).map {
                     mapBasalBodyTemperatureRecord(it, timestampForFileNameAndMapping)
                 }
-                BasalMetabolicRateRecord::class -> (response.records as List<BasalMetabolicRateRecord>).map {
+                SupportedHealthRecordType.BasalMetabolicRate -> (response.records as List<BasalMetabolicRateRecord>).map {
                     mapBasalMetabolicRateRecord(it, timestampForFileNameAndMapping)
                 }
-                CyclingPedalingCadenceRecord::class -> (response.records as List<CyclingPedalingCadenceRecord>).map {
+                SupportedHealthRecordType.CyclingPedalingCadence -> (response.records as List<CyclingPedalingCadenceRecord>).map {
                     mapCyclingPedalingCadenceRecord(it, timestampForFileNameAndMapping)
                 }
-                DistanceRecord::class -> (response.records as List<DistanceRecord>).map {
+                SupportedHealthRecordType.Distance -> (response.records as List<DistanceRecord>).map {
                     mapDistanceRecord(it, timestampForFileNameAndMapping)
                 }
-                ElevationGainedRecord::class -> (response.records as List<ElevationGainedRecord>).map {
+                SupportedHealthRecordType.ElevationGained -> (response.records as List<ElevationGainedRecord>).map {
                     mapElevationGainedRecord(it, timestampForFileNameAndMapping)
                 }
-                ExerciseSessionRecord::class -> (response.records as List<ExerciseSessionRecord>).map {
+                SupportedHealthRecordType.ExerciseSession -> (response.records as List<ExerciseSessionRecord>).map {
                     mapExerciseSessionRecord(it, timestampForFileNameAndMapping)
                 }
-                FloorsClimbedRecord::class -> (response.records as List<FloorsClimbedRecord>).map {
+                SupportedHealthRecordType.FloorsClimbed -> (response.records as List<FloorsClimbedRecord>).map {
                     mapFloorsClimbedRecord(it, timestampForFileNameAndMapping)
                 }
-                HeartRateVariabilityRmssdRecord::class -> (response.records as List<HeartRateVariabilityRmssdRecord>).map {
+                SupportedHealthRecordType.HeartRateVariabilityRmssd -> (response.records as List<HeartRateVariabilityRmssdRecord>).map {
                     mapHeartRateVariabilityRmssdRecord(it, timestampForFileNameAndMapping)
                 }
-                PowerRecord::class -> (response.records as List<PowerRecord>).map {
+                SupportedHealthRecordType.Power -> (response.records as List<PowerRecord>).map {
                     mapPowerRecord(it, timestampForFileNameAndMapping)
                 }
-                RestingHeartRateRecord::class -> (response.records as List<RestingHeartRateRecord>).map {
+                SupportedHealthRecordType.RestingHeartRate -> (response.records as List<RestingHeartRateRecord>).map {
                     mapRestingHeartRateRecord(it, timestampForFileNameAndMapping)
                 }
-                SpeedRecord::class -> (response.records as List<SpeedRecord>).map {
+                SupportedHealthRecordType.Speed -> (response.records as List<SpeedRecord>).map {
                     mapSpeedRecord(it, timestampForFileNameAndMapping)
                 }
-                StepsCadenceRecord::class -> (response.records as List<StepsCadenceRecord>).map {
+                SupportedHealthRecordType.StepsCadence -> (response.records as List<StepsCadenceRecord>).map {
                     mapStepsCadenceRecord(it, timestampForFileNameAndMapping)
                 }
-                TotalCaloriesBurnedRecord::class -> (response.records as List<TotalCaloriesBurnedRecord>).map {
+                SupportedHealthRecordType.TotalCaloriesBurned -> (response.records as List<TotalCaloriesBurnedRecord>).map {
                     mapTotalCaloriesBurnedRecord(it, timestampForFileNameAndMapping)
                 }
-                Vo2MaxRecord::class -> (response.records as List<Vo2MaxRecord>).map {
+                SupportedHealthRecordType.Vo2Max -> (response.records as List<Vo2MaxRecord>).map {
                     mapVo2MaxRecord(it, timestampForFileNameAndMapping)
                 }
-                BodyFatRecord::class -> (response.records as List<BodyFatRecord>).map {
+                SupportedHealthRecordType.BodyFat -> (response.records as List<BodyFatRecord>).map {
                     mapBodyFatRecord(it, timestampForFileNameAndMapping)
                 }
-                BodyTemperatureRecord::class -> (response.records as List<BodyTemperatureRecord>).map {
+                SupportedHealthRecordType.BodyTemperature -> (response.records as List<BodyTemperatureRecord>).map {
                     mapBodyTemperatureRecord(it, timestampForFileNameAndMapping)
                 }
-                BodyWaterMassRecord::class -> (response.records as List<BodyWaterMassRecord>).map {
+                SupportedHealthRecordType.BodyWaterMass -> (response.records as List<BodyWaterMassRecord>).map {
                     mapBodyWaterMassRecord(it, timestampForFileNameAndMapping)
                 }
-                BoneMassRecord::class -> (response.records as List<BoneMassRecord>).map {
+                SupportedHealthRecordType.BoneMass -> (response.records as List<BoneMassRecord>).map {
                     mapBoneMassRecord(it, timestampForFileNameAndMapping)
                 }
-                HeightRecord::class -> (response.records as List<HeightRecord>).map {
+                SupportedHealthRecordType.Height -> (response.records as List<HeightRecord>).map {
                     mapHeightRecord(it, timestampForFileNameAndMapping)
                 }
-                LeanBodyMassRecord::class -> (response.records as List<LeanBodyMassRecord>).map {
-                    mapLeanBodyMassRecord(it, timestampForFileNameAndMapping)
-                }
-                HydrationRecord::class -> (response.records as List<HydrationRecord>).map {
+                SupportedHealthRecordType.Hydration -> (response.records as List<HydrationRecord>).map {
                     mapHydrationRecord(it, timestampForFileNameAndMapping)
                 }
-                NutritionRecord::class -> (response.records as List<NutritionRecord>).map {
+                SupportedHealthRecordType.LeanBodyMass -> (response.records as List<LeanBodyMassRecord>).map {
+                    mapLeanBodyMassRecord(it, timestampForFileNameAndMapping)
+                }
+                SupportedHealthRecordType.Nutrition -> (response.records as List<NutritionRecord>).map {
                     mapNutritionRecord(it, timestampForFileNameAndMapping)
                 }
-                BloodPressureRecord::class -> (response.records as List<BloodPressureRecord>).map {
+                SupportedHealthRecordType.BloodPressure -> (response.records as List<BloodPressureRecord>).map {
                     mapBloodPressureRecord(it, timestampForFileNameAndMapping)
                 }
-                OxygenSaturationRecord::class -> (response.records as List<OxygenSaturationRecord>).map {
+                SupportedHealthRecordType.OxygenSaturation -> (response.records as List<OxygenSaturationRecord>).map {
                     mapOxygenSaturationRecord(it, timestampForFileNameAndMapping)
                 }
-                RespiratoryRateRecord::class -> (response.records as List<RespiratoryRateRecord>).map {
+                SupportedHealthRecordType.RespiratoryRate -> (response.records as List<RespiratoryRateRecord>).map {
                     mapRespiratoryRateRecord(it, timestampForFileNameAndMapping)
-                }
-                else -> {
-                    Log.w(TAG, "Unsupported record type for mapping: ${recordType.simpleName}")
-                    return false // Error for this record type
                 }
             }
 
-            Log.d(TAG, "For ${recordType.simpleName}: HC records count = ${response.records.size}, Mapped Avro records count = ${mappedAvroRecords.size}")
+            Log.d(TAG, "For ${healthRecordType.recordKClass.simpleName}: HC records count = ${response.records.size}, Mapped Avro records count = ${mappedAvroRecords.size}")
 
             if (mappedAvroRecords.isEmpty() && response.records.isNotEmpty()) {
-                 Log.w(TAG, "Mapping resulted in empty list for ${recordType.simpleName}, though HC records were present. This might indicate an issue.")
+                 Log.w(TAG, "Mapping resulted in empty list for ${healthRecordType.recordKClass.simpleName}, though HC records were present. This might indicate an issue.")
                  // Depending on requirements, this could be 'false' (an error for this type) or 'true' (not an error, just no output).
                  // For now, let's treat it as not an error for the overall processing of this type, but no file will be written.
                  return true 
             }
             
             if (mappedAvroRecords.isEmpty()) {
-                Log.d(TAG, "No Avro records to write for ${recordType.simpleName} after mapping.")
+                Log.d(TAG, "No Avro records to write for ${healthRecordType.recordKClass.simpleName} after mapping.")
                 return true // Not an error, just nothing to write for this type
             }
 
-            val outputFileName = "${recordType.simpleName}_${timestampForFileNameAndMapping}.avro"
+            val outputFileName = "${healthRecordType.recordKClass.simpleName}_${timestampForFileNameAndMapping}.avro"
             val outputFile = File(stagingDir, outputFileName)
             Log.d(TAG, "Attempting to write ${mappedAvroRecords.size} Avro records to: ${outputFile.path}")
 
@@ -311,7 +306,7 @@ class HealthDataFetcherWorker @AssistedInject constructor(
             this.anyFilesWrittenSuccessfully = true // Set the flag here
             return true // Successfully processed and wrote this record type
         } else {
-            Log.d(TAG, "No new records to process for ${recordType.simpleName}.")
+            Log.d(TAG, "No new records to process for ${healthRecordType.recordKClass.simpleName}.")
             return true // Not an error, just no data for this type
         }
     }
