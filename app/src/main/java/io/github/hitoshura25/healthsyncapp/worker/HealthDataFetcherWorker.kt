@@ -163,6 +163,7 @@ class HealthDataFetcherWorker @AssistedInject constructor(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private suspend fun <T : Record> fetchAndMapRecords(
         recordType: KClass<T>,
         timeRangeFilter: TimeRangeFilter,
