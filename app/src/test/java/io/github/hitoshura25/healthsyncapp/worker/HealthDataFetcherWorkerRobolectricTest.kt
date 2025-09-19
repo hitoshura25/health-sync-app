@@ -60,6 +60,8 @@ import dagger.hilt.android.testing.HiltTestApplication
 import dagger.hilt.android.testing.UninstallModules
 import dagger.hilt.components.SingletonComponent
 import io.github.hitoshura25.healthsyncapp.MainViewModel
+import io.github.hitoshura25.healthsyncapp.data.HealthConnectConstants
+import io.github.hitoshura25.healthsyncapp.data.HealthConnectConstants.RECORD_PERMISSIONS
 import io.github.hitoshura25.healthsyncapp.di.HealthConnectModule
 import io.github.hitoshura25.healthsyncapp.file.FileHandler
 import kotlinx.coroutines.runBlocking
@@ -130,8 +132,6 @@ class HealthDataFetcherWorkerRobolectricTest {
     private lateinit var mockPermissionController: PermissionController
 
     private val FIXED_INSTANT = Instant.ofEpochMilli(1678886400000L)
-
-    private val allDataPermissions = MainViewModel.PERMISSIONS - HealthPermission.PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND
 
     private lateinit var synchronousExecutor: Executor
 
@@ -261,7 +261,7 @@ class HealthDataFetcherWorkerRobolectricTest {
     @OptIn(ExperimentalAvro4kApi::class)
     @Test
     fun `doWork processes StepsRecord data and writes file successfully and enqueues processor`() = runBlocking {
-        `when`(mockPermissionController.getGrantedPermissions()).thenReturn(allDataPermissions)
+        `when`(mockPermissionController.getGrantedPermissions()).thenReturn(RECORD_PERMISSIONS)
         val testEndTime = FIXED_INSTANT
         val testStartTime = testEndTime.minusSeconds(3600)
         val simulatedFetchedTimeMillis = FIXED_INSTANT.toEpochMilli()
@@ -295,7 +295,7 @@ class HealthDataFetcherWorkerRobolectricTest {
     @OptIn(ExperimentalAvro4kApi::class)
     @Test
     fun `doWork processes HeartRateRecord data and writes file successfully and enqueues processor`() = runBlocking {
-        `when`(mockPermissionController.getGrantedPermissions()).thenReturn(allDataPermissions)
+        `when`(mockPermissionController.getGrantedPermissions()).thenReturn(RECORD_PERMISSIONS)
         val testEndTime = FIXED_INSTANT
         val testStartTime = testEndTime.minusSeconds(3600)
         val simulatedFetchedTimeMillis = FIXED_INSTANT.toEpochMilli()
@@ -326,7 +326,7 @@ class HealthDataFetcherWorkerRobolectricTest {
     @OptIn(ExperimentalAvro4kApi::class)
     @Test
     fun `doWork processes all data types and writes multiple files successfully and enqueues processor`() = runBlocking {
-        `when`(mockPermissionController.getGrantedPermissions()).thenReturn(allDataPermissions)
+        `when`(mockPermissionController.getGrantedPermissions()).thenReturn(RECORD_PERMISSIONS)
         val testEndTime = FIXED_INSTANT
         val testStartTime = testEndTime.minusSeconds(3600)
         val simulatedFetchedTimeMillis = FIXED_INSTANT.toEpochMilli()
@@ -387,7 +387,7 @@ class HealthDataFetcherWorkerRobolectricTest {
 
     @Test
     fun `doWork succeeds and does not enqueue processor when permissions granted but no data`() = runBlocking {
-        `when`(mockPermissionController.getGrantedPermissions()).thenReturn(allDataPermissions)
+        `when`(mockPermissionController.getGrantedPermissions()).thenReturn(RECORD_PERMISSIONS)
 
         val worker = createWorker()
         val result = worker.doWork()
@@ -400,7 +400,7 @@ class HealthDataFetcherWorkerRobolectricTest {
     @OptIn(ExperimentalAvro4kApi::class)
     @Test
     fun `doWork when readRecords fails for one type returns Failure and processes others`() = runBlocking {
-        `when`(mockPermissionController.getGrantedPermissions()).thenReturn(allDataPermissions)
+        `when`(mockPermissionController.getGrantedPermissions()).thenReturn(RECORD_PERMISSIONS)
         val testEndTime = FIXED_INSTANT
         val testStartTime = testEndTime.minusSeconds(3600)
         val simulatedFetchedTimeMillis = FIXED_INSTANT.toEpochMilli()
@@ -450,7 +450,7 @@ class HealthDataFetcherWorkerRobolectricTest {
     @OptIn(ExperimentalAvro4kApi::class)
     @Test
     fun `doWork when fileHandler writeAvroFile fails for one type returns Failure and processes others`() = runBlocking {
-        `when`(mockPermissionController.getGrantedPermissions()).thenReturn(allDataPermissions)
+        `when`(mockPermissionController.getGrantedPermissions()).thenReturn(RECORD_PERMISSIONS)
         val simulatedFetchedTimeMillis = FIXED_INSTANT.toEpochMilli()
         val stagingDir = fileHandler.getStagingDirectory()
 

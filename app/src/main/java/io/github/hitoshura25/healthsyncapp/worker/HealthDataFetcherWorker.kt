@@ -67,6 +67,8 @@ import androidx.health.connect.client.records.NutritionRecord
 import androidx.health.connect.client.records.BloodPressureRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.RespiratoryRateRecord
+import io.github.hitoshura25.healthsyncapp.data.HealthConnectConstants
+import io.github.hitoshura25.healthsyncapp.data.HealthConnectConstants.RECORD_TYPES_SUPPORTED
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HeightRecordDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.LeanBodyMassRecordDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HydrationRecordDao
@@ -140,39 +142,6 @@ class HealthDataFetcherWorker @AssistedInject constructor(
     companion object {
         const val WORK_NAME = "HealthDataFetcherWorker"
         private const val TAG = "HealthDataFetcherWorker"
-        // AVRO_STAGING_SUBDIR is not directly used here anymore, FileHandler handles paths
-
-        private val PROCESSED_RECORD_TYPES: List<KClass<out Record>> = listOf(
-            StepsRecord::class,
-            HeartRateRecord::class,
-            SleepSessionRecord::class,
-            BloodGlucoseRecord::class,
-            WeightRecord::class,
-            ActiveCaloriesBurnedRecord::class,
-            BasalBodyTemperatureRecord::class,
-            DistanceRecord::class,
-            ElevationGainedRecord::class,
-            ExerciseSessionRecord::class,
-            FloorsClimbedRecord::class,
-            HeartRateVariabilityRmssdRecord::class,
-            PowerRecord::class,
-            RestingHeartRateRecord::class,
-            SpeedRecord::class,
-            StepsCadenceRecord::class,
-            TotalCaloriesBurnedRecord::class,
-            Vo2MaxRecord::class,
-            BodyFatRecord::class,
-            BodyTemperatureRecord::class,
-            BodyWaterMassRecord::class,
-            BoneMassRecord::class,
-            HeightRecord::class,
-            LeanBodyMassRecord::class,
-            HydrationRecord::class,
-            NutritionRecord::class,
-            BloodPressureRecord::class,
-            OxygenSaturationRecord::class,
-            RespiratoryRateRecord::class
-        )
     }
 
     private var anyFilesWrittenSuccessfully = false
@@ -195,7 +164,7 @@ class HealthDataFetcherWorker @AssistedInject constructor(
 
             var overallProcessingSuccess = true
 
-            PROCESSED_RECORD_TYPES.forEach { recordType ->
+            RECORD_TYPES_SUPPORTED.forEach { recordType ->
                 val readPermission = HealthPermission.getReadPermission(recordType)
                 if (grantedPermissions.contains(readPermission)) {
                     Log.d(TAG, "Read permission GRANTED for ${recordType.simpleName}")

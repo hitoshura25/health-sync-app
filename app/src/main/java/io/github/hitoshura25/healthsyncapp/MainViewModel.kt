@@ -4,40 +4,6 @@ import android.app.Application
 import android.content.Context
 import android.util.Log
 import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.permission.HealthPermission
-// Explicit Health Connect Record type imports
-import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
-import androidx.health.connect.client.records.BasalBodyTemperatureRecord
-import androidx.health.connect.client.records.BasalMetabolicRateRecord
-import androidx.health.connect.client.records.BloodGlucoseRecord
-import androidx.health.connect.client.records.BloodPressureRecord
-import androidx.health.connect.client.records.BodyFatRecord
-import androidx.health.connect.client.records.BodyTemperatureRecord
-import androidx.health.connect.client.records.BodyWaterMassRecord
-import androidx.health.connect.client.records.BoneMassRecord
-import androidx.health.connect.client.records.CyclingPedalingCadenceRecord
-import androidx.health.connect.client.records.DistanceRecord
-import androidx.health.connect.client.records.ElevationGainedRecord
-import androidx.health.connect.client.records.ExerciseSessionRecord
-import androidx.health.connect.client.records.FloorsClimbedRecord
-import androidx.health.connect.client.records.HeartRateRecord
-import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
-import androidx.health.connect.client.records.HeightRecord
-import androidx.health.connect.client.records.HydrationRecord
-import androidx.health.connect.client.records.LeanBodyMassRecord
-import androidx.health.connect.client.records.NutritionRecord
-import androidx.health.connect.client.records.OxygenSaturationRecord
-import androidx.health.connect.client.records.PowerRecord
-import androidx.health.connect.client.records.RespiratoryRateRecord
-import androidx.health.connect.client.records.RestingHeartRateRecord
-import androidx.health.connect.client.records.SleepSessionRecord
-import androidx.health.connect.client.records.SpeedRecord
-import androidx.health.connect.client.records.StepsCadenceRecord
-import androidx.health.connect.client.records.StepsRecord
-import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
-import androidx.health.connect.client.records.Vo2MaxRecord
-import androidx.health.connect.client.records.WeightRecord
-// Lifecycle and coroutines imports
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -46,20 +12,12 @@ import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-// Import DAOs
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BloodGlucoseDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HeartRateSampleDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.SleepSessionDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.SleepStageDao // Added import
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.StepsRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.WeightRecordDao
+import io.github.hitoshura25.healthsyncapp.data.HealthConnectConstants.ALL_PERMISSIONS
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.ActiveCaloriesBurnedRecordDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BasalBodyTemperatureRecordDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BasalMetabolicRateRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BloodGlucoseDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BloodPressureRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.StepsCadenceRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.TotalCaloriesBurnedRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.dao.Vo2MaxRecordDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BodyFatRecordDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BodyTemperatureRecordDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.BodyWaterMassRecordDao
@@ -68,6 +26,7 @@ import io.github.hitoshura25.healthsyncapp.data.local.database.dao.DistanceRecor
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.ElevationGainedRecordDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.ExerciseSessionRecordDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.FloorsClimbedRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HeartRateSampleDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HeartRateVariabilityRmssdRecordDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HeightRecordDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.HydrationRecordDao
@@ -77,7 +36,14 @@ import io.github.hitoshura25.healthsyncapp.data.local.database.dao.OxygenSaturat
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.PowerRecordDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.RespiratoryRateRecordDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.RestingHeartRateRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.SleepSessionDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.SleepStageDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.SpeedRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.StepsCadenceRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.StepsRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.TotalCaloriesBurnedRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.Vo2MaxRecordDao
+import io.github.hitoshura25.healthsyncapp.data.local.database.dao.WeightRecordDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.BloodPressureRecordEntity
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.HeightRecordEntity
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.HydrationRecordEntity
@@ -85,13 +51,12 @@ import io.github.hitoshura25.healthsyncapp.data.local.database.entity.LeanBodyMa
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.NutritionRecordEntity
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.OxygenSaturationRecordEntity
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.RespiratoryRateRecordEntity
-import io.github.hitoshura25.healthsyncapp.worker.HealthDataFetcherWorker // Changed import
+import io.github.hitoshura25.healthsyncapp.worker.HealthDataFetcherWorker
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-// Java time imports
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -139,43 +104,7 @@ class MainViewModel(
         private const val KEY_INITIAL_WORKER_SCHEDULED = "initialWorkerScheduled"
 
         private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
-
-        val RECORD_TYPES_SUPPORTED = setOf(
-            ActiveCaloriesBurnedRecord::class,
-            BasalBodyTemperatureRecord::class,
-            BasalMetabolicRateRecord::class,
-            BloodGlucoseRecord::class,
-            BloodPressureRecord::class,
-            BodyFatRecord::class,
-            BodyTemperatureRecord::class,
-            BodyWaterMassRecord::class,
-            BoneMassRecord::class,
-            CyclingPedalingCadenceRecord::class,
-            DistanceRecord::class,
-            ElevationGainedRecord::class,
-            ExerciseSessionRecord::class,
-            FloorsClimbedRecord::class,
-            HeartRateRecord::class,
-            HeartRateVariabilityRmssdRecord::class,
-            HeightRecord::class,
-            HydrationRecord::class,
-            LeanBodyMassRecord::class,
-            NutritionRecord::class,
-            OxygenSaturationRecord::class,
-            PowerRecord::class,
-            RespiratoryRateRecord::class,
-            RestingHeartRateRecord::class,
-            SleepSessionRecord::class,
-            SpeedRecord::class,
-            StepsCadenceRecord::class,
-            StepsRecord::class,
-            TotalCaloriesBurnedRecord::class,
-            Vo2MaxRecord::class,
-            WeightRecord::class
-        )
-
-        val PERMISSIONS = RECORD_TYPES_SUPPORTED.map { HealthPermission.getReadPermission(it) }.toSet() + HealthPermission.PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND
-    }
+   }
 
     val stepsCadenceData: StateFlow<String> = stepsCadenceRecordDao.getAllObservable()
         .map { recordsWithSamples ->
@@ -501,14 +430,14 @@ class MainViewModel(
         viewModelScope.launch {
             try {
                 val currentlyGrantedPermissions = healthConnectClient.permissionController.getGrantedPermissions()
-                if (currentlyGrantedPermissions.containsAll(PERMISSIONS)) {
+                if (currentlyGrantedPermissions.containsAll(ALL_PERMISSIONS)) {
                     Log.d(TAG, "All permissions already granted.")
                     _allPermissionsGranted.postValue(true)
                     handleInitialWorkerScheduling() 
                 } else {
                     Log.d(TAG, "Not all permissions granted; triggering request.")
                     _allPermissionsGranted.postValue(false)
-                    val permissionsToRequest = PERMISSIONS.filterNot { currentlyGrantedPermissions.contains(it) }.toSet()
+                    val permissionsToRequest = ALL_PERMISSIONS.filterNot { currentlyGrantedPermissions.contains(it) }.toSet()
                     if (permissionsToRequest.isNotEmpty()){
                         _requestPermissionsLauncherEvent.postValue(permissionsToRequest)
                     } else { // Should not happen if previous check failed
@@ -524,13 +453,13 @@ class MainViewModel(
     }
 
     fun onPermissionsResult(grantedPermissions: Set<String>) {
-        if (grantedPermissions.containsAll(PERMISSIONS)) {
+        if (grantedPermissions.containsAll(ALL_PERMISSIONS)) {
             Log.d(TAG, "All required permissions granted from launcher result.")
             _allPermissionsGranted.postValue(true)
             handleInitialWorkerScheduling()
         } else {
             _allPermissionsGranted.postValue(false)
-            val deniedPermissions = PERMISSIONS.filterNot { grantedPermissions.contains(it) }
+            val deniedPermissions = ALL_PERMISSIONS.filterNot { grantedPermissions.contains(it) }
             Log.w(TAG, "Some permissions denied: $deniedPermissions. Background sync may be affected.")
         }
     }
