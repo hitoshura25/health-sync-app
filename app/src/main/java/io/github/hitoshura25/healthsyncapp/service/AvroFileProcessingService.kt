@@ -73,37 +73,36 @@ import io.github.hitoshura25.healthsyncapp.data.local.database.dao.TotalCalories
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.Vo2MaxRecordDao
 
 // Explicit Mapper imports
-import io.github.hitoshura25.healthsyncapp.data.mapper.toBloodGlucoseEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toHeartRateSampleEntities
-import io.github.hitoshura25.healthsyncapp.data.mapper.toSleepSessionEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toSleepStageEntity // Added
-import io.github.hitoshura25.healthsyncapp.data.mapper.toStepsRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toWeightRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toActiveCaloriesBurnedRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toBasalBodyTemperatureRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toBasalMetabolicRateRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toDistanceRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toElevationGainedRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toExerciseSessionRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toFloorsClimbedRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toHeartRateVariabilityRmssdRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toPowerRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toRestingHeartRateRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toSpeedRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toStepsCadenceRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toTotalCaloriesBurnedRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toVo2MaxRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toBodyFatRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toBodyTemperatureRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toBodyWaterMassRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toBoneMassRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toHeightRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toLeanBodyMassRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toHydrationRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toNutritionRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toBloodPressureRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toOxygenSaturationRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.mapper.toRespiratoryRateRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toBloodGlucoseEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toHeartRateSampleEntities
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toSleepSessionEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toSleepStageEntity // Added
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toStepsRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toWeightRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toActiveCaloriesBurnedRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toBasalBodyTemperatureRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toBasalMetabolicRateRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toDistanceRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toElevationGainedRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toExerciseSessionRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toFloorsClimbedRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toHeartRateVariabilityRmssdRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toPowerRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toRestingHeartRateRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toSpeedRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toStepsCadenceRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toTotalCaloriesBurnedRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toVo2MaxRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toBodyFatRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toBodyTemperatureRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toBodyWaterMassRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toBoneMassRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toHeightRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toLeanBodyMassRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toHydrationRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toNutritionRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toBloodPressureRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toOxygenSaturationRecordEntity
 
 import io.github.hitoshura25.healthsyncapp.file.FileHandler
 import kotlinx.coroutines.Dispatchers

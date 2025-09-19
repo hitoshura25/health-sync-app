@@ -12,6 +12,11 @@ import io.github.hitoshura25.healthsyncapp.avro.AvroSleepSessionRecord
 import io.github.hitoshura25.healthsyncapp.avro.AvroSleepStageRecord
 import io.github.hitoshura25.healthsyncapp.avro.AvroSleepStageType
 import io.github.hitoshura25.healthsyncapp.avro.AvroStepsRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toBloodGlucoseEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toHeartRateSampleEntities
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toSleepSessionEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toSleepStageEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toStepsRecordEntity
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.Instant

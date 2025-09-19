@@ -3,7 +3,6 @@ package io.github.hitoshura25.healthsyncapp.data
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
-import androidx.health.connect.client.records.metadata.Device
 import androidx.health.connect.client.records.metadata.Device.Companion.TYPE_PHONE
 import androidx.health.connect.client.records.metadata.Metadata
 import io.github.hitoshura25.healthsyncapp.avro.AvroSleepStageType
@@ -13,9 +12,9 @@ import java.time.Instant
 import java.time.ZoneOffset
 import androidx.health.connect.client.records.metadata.Device as HcDevice
 
-import io.github.hitoshura25.healthsyncapp.data.mapStepsRecord
-import io.github.hitoshura25.healthsyncapp.data.mapHeartRateRecord
-import io.github.hitoshura25.healthsyncapp.data.mapSleepSessionRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapStepsRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapHeartRateRecord
+import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapSleepSessionRecord
 
 class HealthConnectToAvroMapperTest {
 
