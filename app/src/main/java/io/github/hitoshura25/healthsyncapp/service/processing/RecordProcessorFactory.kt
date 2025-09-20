@@ -7,7 +7,7 @@ import javax.inject.Provider
 import kotlin.reflect.KClass
 
 class RecordProcessorFactory @Inject constructor(
-    private val processors: Map<KClass<out Record>, @JvmSuppressWildcards Provider<RecordProcessor>>
+    private val processors: Map<KClass<out Record>, Provider<out RecordProcessor>>
 ) {
     fun create(type: SupportedHealthRecordType<*>): RecordProcessor {
         val processorProvider = processors[type.recordKClass]

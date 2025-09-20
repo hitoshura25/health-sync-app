@@ -84,28 +84,6 @@ import io.github.hitoshura25.healthsyncapp.data.local.database.dao.RestingHeartR
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.TotalCaloriesBurnedRecordDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.Vo2MaxRecordDao
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.WeightRecordDao
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.BasalMetabolicRateRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.BloodGlucoseEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.BloodPressureRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.BodyFatRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.BodyTemperatureRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.BodyWaterMassRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.BoneMassRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.DistanceRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.ElevationGainedRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.ExerciseSessionRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.FloorsClimbedRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.HeartRateVariabilityRmssdRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.HeightRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.HydrationRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.LeanBodyMassRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.NutritionRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.OxygenSaturationRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.RespiratoryRateRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.RestingHeartRateRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.TotalCaloriesBurnedRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.Vo2MaxRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.WeightRecordEntity
 import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toActiveCaloriesBurnedRecordEntity
 import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toBasalBodyTemperatureRecordEntity
 import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toBasalMetabolicRateRecordEntity
@@ -151,7 +129,7 @@ object ProcessingModule {
     @Provides
     @Singleton
     fun provideRecordProcessorFactory(
-        processors: Map<KClass<out Record>, @JvmSuppressWildcards Provider<RecordProcessor>>
+        processors: Map<KClass<out Record>, @JvmSuppressWildcards Provider<out RecordProcessor>>
     ): RecordProcessorFactory {
         return RecordProcessorFactory(processors)
     }
@@ -193,17 +171,17 @@ object ProcessingModule {
         powerRecordProcessor: Provider<PowerRecordProcessor>,
         speedRecordProcessor: Provider<SpeedRecordProcessor>,
         stepsCadenceRecordProcessor: Provider<StepsCadenceRecordProcessor>
-    ): Map<KClass<out Record>,  Provider<RecordProcessor>> {
-        val processors = mutableMapOf<KClass<out Record>, Provider<RecordProcessor>>()
+    ): Map<KClass<out Record>,  Provider<out RecordProcessor>> {
+        val processors = mutableMapOf<KClass<out Record>, Provider<out RecordProcessor>>()
 
         // Specific Processors
-        processors[StepsRecord::class] = stepsRecordProcessor as Provider<RecordProcessor>
-        processors[SleepSessionRecord::class] = sleepSessionProcessor as Provider<RecordProcessor>
-        processors[CyclingPedalingCadenceRecord::class] = cyclingPedalingCadenceRecordProcessor as Provider<RecordProcessor>
-        processors[HeartRateRecord::class] = heartRateRecordProcessor as Provider<RecordProcessor>
-        processors[PowerRecord::class] = powerRecordProcessor as Provider<RecordProcessor>
-        processors[SpeedRecord::class] = speedRecordProcessor as Provider<RecordProcessor>
-        processors[StepsCadenceRecord::class] = stepsCadenceRecordProcessor as Provider<RecordProcessor>
+        processors[StepsRecord::class] = stepsRecordProcessor
+        processors[SleepSessionRecord::class] = sleepSessionProcessor
+        processors[CyclingPedalingCadenceRecord::class] = cyclingPedalingCadenceRecordProcessor
+        processors[HeartRateRecord::class] = heartRateRecordProcessor
+        processors[PowerRecord::class] = powerRecordProcessor
+        processors[SpeedRecord::class] = speedRecordProcessor
+        processors[StepsCadenceRecord::class] = stepsCadenceRecordProcessor
 
         // Generic Processors
         processors[ActiveCaloriesBurnedRecord::class] = Provider {
@@ -225,175 +203,175 @@ object ProcessingModule {
         processors[BasalMetabolicRateRecord::class] = Provider {
             SingleRecordTypeProcessor(
                 toEntityMapper = { avro -> avro.toBasalMetabolicRateRecordEntity() },
-                daoInsertFunction = { entities -> basalMetabolicRateRecordDao.insertAll(entities as List<BasalMetabolicRateRecordEntity>) },
+                daoInsertFunction = { entities -> basalMetabolicRateRecordDao.insertAll(entities) },
                 recordTypeName = "BasalMetabolicRateRecord",
                 avroTypeClass = AvroBasalMetabolicRateRecord::class.java
             )
         }
         processors[BloodGlucoseRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroBloodGlucoseRecord).toBloodGlucoseEntity() },
-                daoInsertFunction = { entities -> bloodGlucoseDao.insertAll(entities as List<BloodGlucoseEntity>) },
+                toEntityMapper = { avro -> avro.toBloodGlucoseEntity() },
+                daoInsertFunction = { entities -> bloodGlucoseDao.insertAll(entities) },
                 recordTypeName = "BloodGlucoseRecord",
                 avroTypeClass = AvroBloodGlucoseRecord::class.java
             )
         }
         processors[BloodPressureRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroBloodPressureRecord).toBloodPressureRecordEntity() },
-                daoInsertFunction = { entities -> bloodPressureRecordDao.insertAll(entities as List<BloodPressureRecordEntity>) },
+                toEntityMapper = { avro -> avro.toBloodPressureRecordEntity() },
+                daoInsertFunction = { entities -> bloodPressureRecordDao.insertAll(entities) },
                 recordTypeName = "BloodPressureRecord",
                 avroTypeClass = AvroBloodPressureRecord::class.java
             )
         }
         processors[BodyFatRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroBodyFatRecord).toBodyFatRecordEntity() },
-                daoInsertFunction = { entities -> bodyFatRecordDao.insertAll(entities as List<BodyFatRecordEntity>) },
+                toEntityMapper = { avro -> avro.toBodyFatRecordEntity() },
+                daoInsertFunction = { entities -> bodyFatRecordDao.insertAll(entities) },
                 recordTypeName = "BodyFatRecord",
                 avroTypeClass = AvroBodyFatRecord::class.java
             )
         }
         processors[BodyTemperatureRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroBodyTemperatureRecord).toBodyTemperatureRecordEntity() },
-                daoInsertFunction = { entities -> bodyTemperatureRecordDao.insertAll(entities as List<BodyTemperatureRecordEntity>) },
+                toEntityMapper = { avro -> avro.toBodyTemperatureRecordEntity() },
+                daoInsertFunction = { entities -> bodyTemperatureRecordDao.insertAll(entities) },
                 recordTypeName = "BodyTemperatureRecord",
                 avroTypeClass = AvroBodyTemperatureRecord::class.java
             )
         }
         processors[BodyWaterMassRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroBodyWaterMassRecord).toBodyWaterMassRecordEntity() },
-                daoInsertFunction = { entities -> bodyWaterMassRecordDao.insertAll(entities as List<BodyWaterMassRecordEntity>) },
+                toEntityMapper = { avro -> avro.toBodyWaterMassRecordEntity() },
+                daoInsertFunction = { entities -> bodyWaterMassRecordDao.insertAll(entities) },
                 recordTypeName = "BodyWaterMassRecord",
                 avroTypeClass = AvroBodyWaterMassRecord::class.java
             )
         }
         processors[BoneMassRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroBoneMassRecord).toBoneMassRecordEntity() },
-                daoInsertFunction = { entities -> boneMassRecordDao.insertAll(entities as List<BoneMassRecordEntity>) },
+                toEntityMapper = { avro -> avro.toBoneMassRecordEntity() },
+                daoInsertFunction = { entities -> boneMassRecordDao.insertAll(entities) },
                 recordTypeName = "BoneMassRecord",
                 avroTypeClass = AvroBoneMassRecord::class.java
             )
         }
         processors[DistanceRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroDistanceRecord).toDistanceRecordEntity() },
-                daoInsertFunction = { entities -> distanceRecordDao.insertAll(entities as List<DistanceRecordEntity>) },
+                toEntityMapper = { avro -> avro.toDistanceRecordEntity() },
+                daoInsertFunction = { entities -> distanceRecordDao.insertAll(entities) },
                 recordTypeName = "DistanceRecord",
                 avroTypeClass = AvroDistanceRecord::class.java
             )
         }
         processors[ElevationGainedRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroElevationGainedRecord).toElevationGainedRecordEntity() },
-                daoInsertFunction = { entities -> elevationGainedRecordDao.insertAll(entities as List<ElevationGainedRecordEntity>) },
+                toEntityMapper = { avro -> avro.toElevationGainedRecordEntity() },
+                daoInsertFunction = { entities -> elevationGainedRecordDao.insertAll(entities) },
                 recordTypeName = "ElevationGainedRecord",
                 avroTypeClass = AvroElevationGainedRecord::class.java
             )
         }
         processors[ExerciseSessionRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroExerciseSessionRecord).toExerciseSessionRecordEntity() },
-                daoInsertFunction = { entities -> exerciseSessionRecordDao.insertAll(entities as List<ExerciseSessionRecordEntity>) },
+                toEntityMapper = { avro -> avro.toExerciseSessionRecordEntity() },
+                daoInsertFunction = { entities -> exerciseSessionRecordDao.insertAll(entities) },
                 recordTypeName = "ExerciseSessionRecord",
                 avroTypeClass = AvroExerciseSessionRecord::class.java
             )
         }
         processors[FloorsClimbedRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroFloorsClimbedRecord).toFloorsClimbedRecordEntity() },
-                daoInsertFunction = { entities -> floorsClimbedRecordDao.insertAll(entities as List<FloorsClimbedRecordEntity>) },
+                toEntityMapper = { avro -> avro.toFloorsClimbedRecordEntity() },
+                daoInsertFunction = { entities -> floorsClimbedRecordDao.insertAll(entities) },
                 recordTypeName = "FloorsClimbedRecord",
                 avroTypeClass = AvroFloorsClimbedRecord::class.java
             )
         }
         processors[HeartRateVariabilityRmssdRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroHeartRateVariabilityRmssdRecord).toHeartRateVariabilityRmssdRecordEntity() },
-                daoInsertFunction = { entities -> heartRateVariabilityRmssdRecordDao.insertAll(entities as List<HeartRateVariabilityRmssdRecordEntity>) },
+                toEntityMapper = { avro -> avro.toHeartRateVariabilityRmssdRecordEntity() },
+                daoInsertFunction = { entities -> heartRateVariabilityRmssdRecordDao.insertAll(entities) },
                 recordTypeName = "HeartRateVariabilityRmssdRecord",
                 avroTypeClass = AvroHeartRateVariabilityRmssdRecord::class.java
             )
         }
         processors[HeightRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroHeightRecord).toHeightRecordEntity() },
-                daoInsertFunction = { entities -> heightRecordDao.insertAll(entities as List<HeightRecordEntity>) },
+                toEntityMapper = { avro -> avro.toHeightRecordEntity() },
+                daoInsertFunction = { entities -> heightRecordDao.insertAll(entities) },
                 recordTypeName = "HeightRecord",
                 avroTypeClass = AvroHeightRecord::class.java
             )
         }
         processors[HydrationRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroHydrationRecord).toHydrationRecordEntity() },
-                daoInsertFunction = { entities -> hydrationRecordDao.insertAll(entities as List<HydrationRecordEntity>) },
+                toEntityMapper = { avro -> avro.toHydrationRecordEntity() },
+                daoInsertFunction = { entities -> hydrationRecordDao.insertAll(entities) },
                 recordTypeName = "HydrationRecord",
                 avroTypeClass = AvroHydrationRecord::class.java
             )
         }
         processors[LeanBodyMassRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroLeanBodyMassRecord).toLeanBodyMassRecordEntity() },
-                daoInsertFunction = { entities -> leanBodyMassRecordDao.insertAll(entities as List<LeanBodyMassRecordEntity>) },
+                toEntityMapper = { avro -> avro.toLeanBodyMassRecordEntity() },
+                daoInsertFunction = { entities -> leanBodyMassRecordDao.insertAll(entities) },
                 recordTypeName = "LeanBodyMassRecord",
                 avroTypeClass = AvroLeanBodyMassRecord::class.java
             )
         }
         processors[NutritionRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroNutritionRecord).toNutritionRecordEntity() },
-                daoInsertFunction = { entities -> nutritionRecordDao.insertAll(entities as List<NutritionRecordEntity>) },
+                toEntityMapper = { avro -> avro.toNutritionRecordEntity() },
+                daoInsertFunction = { entities -> nutritionRecordDao.insertAll(entities) },
                 recordTypeName = "NutritionRecord",
                 avroTypeClass = AvroNutritionRecord::class.java
             )
         }
         processors[OxygenSaturationRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroOxygenSaturationRecord).toOxygenSaturationRecordEntity() },
-                daoInsertFunction = { entities -> oxygenSaturationRecordDao.insertAll(entities as List<OxygenSaturationRecordEntity>) },
+                toEntityMapper = { avro -> avro.toOxygenSaturationRecordEntity() },
+                daoInsertFunction = { entities -> oxygenSaturationRecordDao.insertAll(entities) },
                 recordTypeName = "OxygenSaturationRecord",
                 avroTypeClass = AvroOxygenSaturationRecord::class.java
             )
         }
         processors[RespiratoryRateRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroRespiratoryRateRecord).toRespiratoryRateRecordEntity() },
-                daoInsertFunction = { entities -> respiratoryRateRecordDao.insertAll(entities as List<RespiratoryRateRecordEntity>) },
+                toEntityMapper = { avro -> avro.toRespiratoryRateRecordEntity() },
+                daoInsertFunction = { entities -> respiratoryRateRecordDao.insertAll(entities) },
                 recordTypeName = "RespiratoryRateRecord",
                 avroTypeClass = AvroRespiratoryRateRecord::class.java
             )
         }
         processors[RestingHeartRateRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroRestingHeartRateRecord).toRestingHeartRateRecordEntity() },
-                daoInsertFunction = { entities -> restingHeartRateRecordDao.insertAll(entities as List<RestingHeartRateRecordEntity>) },
+                toEntityMapper = { avro -> avro.toRestingHeartRateRecordEntity() },
+                daoInsertFunction = { entities -> restingHeartRateRecordDao.insertAll(entities) },
                 recordTypeName = "RestingHeartRateRecord",
                 avroTypeClass = AvroRestingHeartRateRecord::class.java
             )
         }
         processors[TotalCaloriesBurnedRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroTotalCaloriesBurnedRecord).toTotalCaloriesBurnedRecordEntity() },
-                daoInsertFunction = { entities -> totalCaloriesBurnedRecordDao.insertAll(entities as List<TotalCaloriesBurnedRecordEntity>) },
+                toEntityMapper = { avro -> avro.toTotalCaloriesBurnedRecordEntity() },
+                daoInsertFunction = { entities -> totalCaloriesBurnedRecordDao.insertAll(entities) },
                 recordTypeName = "TotalCaloriesBurnedRecord",
                 avroTypeClass = AvroTotalCaloriesBurnedRecord::class.java
             )
         }
         processors[Vo2MaxRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroVo2MaxRecord).toVo2MaxRecordEntity() },
-                daoInsertFunction = { entities -> vo2MaxRecordDao.insertAll(entities as List<Vo2MaxRecordEntity>) },
+                toEntityMapper = { avro -> avro.toVo2MaxRecordEntity() },
+                daoInsertFunction = { entities -> vo2MaxRecordDao.insertAll(entities) },
                 recordTypeName = "Vo2MaxRecord",
                 avroTypeClass = AvroVo2MaxRecord::class.java
             )
         }
         processors[WeightRecord::class] = Provider {
             SingleRecordTypeProcessor(
-                toEntityMapper = { avro -> (avro as AvroWeightRecord).toWeightRecordEntity() },
-                daoInsertFunction = { entities -> weightRecordDao.insertAll(entities as List<WeightRecordEntity>) },
+                toEntityMapper = { avro -> avro.toWeightRecordEntity() },
+                daoInsertFunction = { entities -> weightRecordDao.insertAll(entities) },
                 recordTypeName = "WeightRecord",
                 avroTypeClass = AvroWeightRecord::class.java
             )
