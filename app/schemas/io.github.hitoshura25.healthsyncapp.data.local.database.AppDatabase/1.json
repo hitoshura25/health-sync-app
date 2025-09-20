@@ -1,0 +1,3381 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "a195b8a890fa3eea29e6a305718c7106",
+    "entities": [
+      {
+        "tableName": "steps_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `health_connect_uid` TEXT NOT NULL, `count` INTEGER NOT NULL, `start_time_epoch_millis` INTEGER NOT NULL, `end_time_epoch_millis` INTEGER NOT NULL, `zone_offset_id` TEXT, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "count",
+            "columnName": "count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startTimeEpochMillis",
+            "columnName": "start_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endTimeEpochMillis",
+            "columnName": "end_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneOffsetId",
+            "columnName": "zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_steps_records_health_connect_uid",
+            "unique": true,
+            "columnNames": [
+              "health_connect_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_steps_records_health_connect_uid` ON `${TABLE_NAME}` (`health_connect_uid`)"
+          }
+        ]
+      },
+      {
+        "tableName": "heart_rate_samples",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `hc_record_uid` TEXT NOT NULL, `sample_time_epoch_millis` INTEGER NOT NULL, `beats_per_minute` INTEGER NOT NULL, `zone_offset_id` TEXT, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcRecordUid",
+            "columnName": "hc_record_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sampleTimeEpochMillis",
+            "columnName": "sample_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "beatsPerMinute",
+            "columnName": "beats_per_minute",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneOffsetId",
+            "columnName": "zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_heart_rate_samples_sample_time_epoch_millis",
+            "unique": false,
+            "columnNames": [
+              "sample_time_epoch_millis"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_heart_rate_samples_sample_time_epoch_millis` ON `${TABLE_NAME}` (`sample_time_epoch_millis`)"
+          }
+        ]
+      },
+      {
+        "tableName": "sleep_sessions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `health_connect_uid` TEXT NOT NULL, `title` TEXT, `notes` TEXT, `start_time_epoch_millis` INTEGER NOT NULL, `start_zone_offset_id` TEXT, `end_time_epoch_millis` INTEGER NOT NULL, `end_zone_offset_id` TEXT, `duration_millis` INTEGER, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "startTimeEpochMillis",
+            "columnName": "start_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startZoneOffsetId",
+            "columnName": "start_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "endTimeEpochMillis",
+            "columnName": "end_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endZoneOffsetId",
+            "columnName": "end_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "durationMillis",
+            "columnName": "duration_millis",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_sleep_sessions_health_connect_uid",
+            "unique": true,
+            "columnNames": [
+              "health_connect_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_sleep_sessions_health_connect_uid` ON `${TABLE_NAME}` (`health_connect_uid`)"
+          },
+          {
+            "name": "index_sleep_sessions_start_time_epoch_millis",
+            "unique": false,
+            "columnNames": [
+              "start_time_epoch_millis"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sleep_sessions_start_time_epoch_millis` ON `${TABLE_NAME}` (`start_time_epoch_millis`)"
+          }
+        ]
+      },
+      {
+        "tableName": "sleep_stages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `session_hc_uid` TEXT NOT NULL, `start_time_epoch_millis` INTEGER NOT NULL, `end_time_epoch_millis` INTEGER NOT NULL, `stage` TEXT NOT NULL, FOREIGN KEY(`session_hc_uid`) REFERENCES `sleep_sessions`(`health_connect_uid`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionHcUid",
+            "columnName": "session_hc_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startTimeEpochMillis",
+            "columnName": "start_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endTimeEpochMillis",
+            "columnName": "end_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stage",
+            "columnName": "stage",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_sleep_stages_session_hc_uid",
+            "unique": false,
+            "columnNames": [
+              "session_hc_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sleep_stages_session_hc_uid` ON `${TABLE_NAME}` (`session_hc_uid`)"
+          },
+          {
+            "name": "index_sleep_stages_start_time_epoch_millis",
+            "unique": false,
+            "columnNames": [
+              "start_time_epoch_millis"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sleep_stages_start_time_epoch_millis` ON `${TABLE_NAME}` (`start_time_epoch_millis`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "sleep_sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "session_hc_uid"
+            ],
+            "referencedColumns": [
+              "health_connect_uid"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "blood_glucose_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `health_connect_uid` TEXT NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `zone_offset_id` TEXT, `level_in_milligrams_per_deciliter` REAL NOT NULL, `specimen_source` INTEGER NOT NULL, `meal_type` INTEGER NOT NULL, `relation_to_meal` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL DEFAULT 0, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneOffsetId",
+            "columnName": "zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "levelInMilligramsPerDeciliter",
+            "columnName": "level_in_milligrams_per_deciliter",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "specimenSource",
+            "columnName": "specimen_source",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mealType",
+            "columnName": "meal_type",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "relationToMeal",
+            "columnName": "relation_to_meal",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_blood_glucose_records_health_connect_uid",
+            "unique": true,
+            "columnNames": [
+              "health_connect_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_blood_glucose_records_health_connect_uid` ON `${TABLE_NAME}` (`health_connect_uid`)"
+          },
+          {
+            "name": "index_blood_glucose_records_time_epoch_millis",
+            "unique": false,
+            "columnNames": [
+              "time_epoch_millis"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_blood_glucose_records_time_epoch_millis` ON `${TABLE_NAME}` (`time_epoch_millis`)"
+          },
+          {
+            "name": "index_blood_glucose_records_hc_last_modified_time_epoch_millis",
+            "unique": false,
+            "columnNames": [
+              "hc_last_modified_time_epoch_millis"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_blood_glucose_records_hc_last_modified_time_epoch_millis` ON `${TABLE_NAME}` (`hc_last_modified_time_epoch_millis`)"
+          }
+        ]
+      },
+      {
+        "tableName": "weight_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `health_connect_uid` TEXT NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `zone_offset_id` TEXT, `weight_in_kilograms` REAL NOT NULL, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneOffsetId",
+            "columnName": "zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "weightInKilograms",
+            "columnName": "weight_in_kilograms",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_weight_records_health_connect_uid",
+            "unique": true,
+            "columnNames": [
+              "health_connect_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_weight_records_health_connect_uid` ON `${TABLE_NAME}` (`health_connect_uid`)"
+          }
+        ]
+      },
+      {
+        "tableName": "active_calories_burned_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `health_connect_uid` TEXT NOT NULL, `start_time_epoch_millis` INTEGER NOT NULL, `end_time_epoch_millis` INTEGER NOT NULL, `start_zone_offset_id` TEXT, `end_zone_offset_id` TEXT, `energy_in_kilocalories` REAL NOT NULL, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startTimeEpochMillis",
+            "columnName": "start_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endTimeEpochMillis",
+            "columnName": "end_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startZoneOffsetId",
+            "columnName": "start_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "endZoneOffsetId",
+            "columnName": "end_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "energyInKilocalories",
+            "columnName": "energy_in_kilocalories",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_active_calories_burned_records_health_connect_uid",
+            "unique": true,
+            "columnNames": [
+              "health_connect_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_active_calories_burned_records_health_connect_uid` ON `${TABLE_NAME}` (`health_connect_uid`)"
+          }
+        ]
+      },
+      {
+        "tableName": "basal_body_temperature_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `health_connect_uid` TEXT NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `zone_offset_id` TEXT, `temperature_in_celsius` REAL NOT NULL, `measurement_location` INTEGER NOT NULL, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneOffsetId",
+            "columnName": "zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "temperatureInCelsius",
+            "columnName": "temperature_in_celsius",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "measurementLocation",
+            "columnName": "measurement_location",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_basal_body_temperature_records_health_connect_uid",
+            "unique": true,
+            "columnNames": [
+              "health_connect_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_basal_body_temperature_records_health_connect_uid` ON `${TABLE_NAME}` (`health_connect_uid`)"
+          }
+        ]
+      },
+      {
+        "tableName": "basal_metabolic_rate_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `health_connect_uid` TEXT NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `zone_offset_id` TEXT, `basal_metabolic_rate_in_kilocalories_per_day` REAL NOT NULL, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneOffsetId",
+            "columnName": "zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "basalMetabolicRateInKilocaloriesPerDay",
+            "columnName": "basal_metabolic_rate_in_kilocalories_per_day",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_basal_metabolic_rate_records_health_connect_uid",
+            "unique": true,
+            "columnNames": [
+              "health_connect_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_basal_metabolic_rate_records_health_connect_uid` ON `${TABLE_NAME}` (`health_connect_uid`)"
+          }
+        ]
+      },
+      {
+        "tableName": "cycling_pedaling_cadence_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`health_connect_uid` TEXT NOT NULL, `start_time_epoch_millis` INTEGER NOT NULL, `end_time_epoch_millis` INTEGER NOT NULL, `start_zone_offset_id` TEXT, `end_zone_offset_id` TEXT, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT, PRIMARY KEY(`health_connect_uid`))",
+        "fields": [
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startTimeEpochMillis",
+            "columnName": "start_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endTimeEpochMillis",
+            "columnName": "end_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startZoneOffsetId",
+            "columnName": "start_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "endZoneOffsetId",
+            "columnName": "end_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "health_connect_uid"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_cycling_pedaling_cadence_records_health_connect_uid",
+            "unique": true,
+            "columnNames": [
+              "health_connect_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_cycling_pedaling_cadence_records_health_connect_uid` ON `${TABLE_NAME}` (`health_connect_uid`)"
+          }
+        ]
+      },
+      {
+        "tableName": "cycling_pedaling_cadence_samples",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `parent_record_uid` TEXT NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `revolutions_per_minute` REAL NOT NULL, FOREIGN KEY(`parent_record_uid`) REFERENCES `cycling_pedaling_cadence_records`(`health_connect_uid`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "parentRecordUid",
+            "columnName": "parent_record_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revolutionsPerMinute",
+            "columnName": "revolutions_per_minute",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_cycling_pedaling_cadence_samples_parent_record_uid",
+            "unique": false,
+            "columnNames": [
+              "parent_record_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_cycling_pedaling_cadence_samples_parent_record_uid` ON `${TABLE_NAME}` (`parent_record_uid`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "cycling_pedaling_cadence_records",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "parent_record_uid"
+            ],
+            "referencedColumns": [
+              "health_connect_uid"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "distance_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `health_connect_uid` TEXT NOT NULL, `distance_in_meters` REAL NOT NULL, `start_time_epoch_millis` INTEGER NOT NULL, `end_time_epoch_millis` INTEGER NOT NULL, `start_zone_offset_id` TEXT, `end_zone_offset_id` TEXT, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "distanceInMeters",
+            "columnName": "distance_in_meters",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startTimeEpochMillis",
+            "columnName": "start_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endTimeEpochMillis",
+            "columnName": "end_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startZoneOffsetId",
+            "columnName": "start_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "endZoneOffsetId",
+            "columnName": "end_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_distance_records_health_connect_uid",
+            "unique": true,
+            "columnNames": [
+              "health_connect_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_distance_records_health_connect_uid` ON `${TABLE_NAME}` (`health_connect_uid`)"
+          }
+        ]
+      },
+      {
+        "tableName": "elevation_gained_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`health_connect_uid` TEXT NOT NULL, `start_time_epoch_millis` INTEGER NOT NULL, `end_time_epoch_millis` INTEGER NOT NULL, `start_zone_offset_id` TEXT, `end_zone_offset_id` TEXT, `elevation_in_meters` REAL NOT NULL, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT, PRIMARY KEY(`health_connect_uid`))",
+        "fields": [
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startTimeEpochMillis",
+            "columnName": "start_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endTimeEpochMillis",
+            "columnName": "end_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startZoneOffsetId",
+            "columnName": "start_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "endZoneOffsetId",
+            "columnName": "end_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "elevationInMeters",
+            "columnName": "elevation_in_meters",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "health_connect_uid"
+          ]
+        }
+      },
+      {
+        "tableName": "exercise_session_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`health_connect_uid` TEXT NOT NULL, `start_time_epoch_millis` INTEGER NOT NULL, `end_time_epoch_millis` INTEGER NOT NULL, `start_zone_offset_id` TEXT, `end_zone_offset_id` TEXT, `exercise_type` INTEGER NOT NULL, `title` TEXT, `notes` TEXT, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT, PRIMARY KEY(`health_connect_uid`))",
+        "fields": [
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startTimeEpochMillis",
+            "columnName": "start_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endTimeEpochMillis",
+            "columnName": "end_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startZoneOffsetId",
+            "columnName": "start_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "endZoneOffsetId",
+            "columnName": "end_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "exerciseType",
+            "columnName": "exercise_type",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "health_connect_uid"
+          ]
+        }
+      },
+      {
+        "tableName": "floors_climbed_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `health_connect_uid` TEXT NOT NULL, `floors` REAL NOT NULL, `start_time_epoch_millis` INTEGER NOT NULL, `end_time_epoch_millis` INTEGER NOT NULL, `start_zone_offset_id` TEXT, `end_zone_offset_id` TEXT, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "floors",
+            "columnName": "floors",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startTimeEpochMillis",
+            "columnName": "start_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endTimeEpochMillis",
+            "columnName": "end_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startZoneOffsetId",
+            "columnName": "start_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "endZoneOffsetId",
+            "columnName": "end_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_floors_climbed_records_health_connect_uid",
+            "unique": true,
+            "columnNames": [
+              "health_connect_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_floors_climbed_records_health_connect_uid` ON `${TABLE_NAME}` (`health_connect_uid`)"
+          }
+        ]
+      },
+      {
+        "tableName": "heart_rate_variability_rmssd_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `health_connect_uid` TEXT NOT NULL, `heart_rate_variability_rmssd` REAL NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `zone_offset_id` TEXT, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "heartRateVariabilityRmssd",
+            "columnName": "heart_rate_variability_rmssd",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneOffsetId",
+            "columnName": "zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_heart_rate_variability_rmssd_records_health_connect_uid",
+            "unique": true,
+            "columnNames": [
+              "health_connect_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_heart_rate_variability_rmssd_records_health_connect_uid` ON `${TABLE_NAME}` (`health_connect_uid`)"
+          }
+        ]
+      },
+      {
+        "tableName": "power_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`health_connect_uid` TEXT NOT NULL, `start_time_epoch_millis` INTEGER NOT NULL, `end_time_epoch_millis` INTEGER NOT NULL, `start_zone_offset_id` TEXT, `end_zone_offset_id` TEXT, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT, PRIMARY KEY(`health_connect_uid`))",
+        "fields": [
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startTimeEpochMillis",
+            "columnName": "start_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endTimeEpochMillis",
+            "columnName": "end_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startZoneOffsetId",
+            "columnName": "start_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "endZoneOffsetId",
+            "columnName": "end_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "health_connect_uid"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_power_records_health_connect_uid",
+            "unique": true,
+            "columnNames": [
+              "health_connect_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_power_records_health_connect_uid` ON `${TABLE_NAME}` (`health_connect_uid`)"
+          }
+        ]
+      },
+      {
+        "tableName": "power_samples",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `parent_record_uid` TEXT NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `power_in_watts` REAL NOT NULL, FOREIGN KEY(`parent_record_uid`) REFERENCES `power_records`(`health_connect_uid`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "parentRecordUid",
+            "columnName": "parent_record_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "powerInWatts",
+            "columnName": "power_in_watts",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_power_samples_parent_record_uid",
+            "unique": false,
+            "columnNames": [
+              "parent_record_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_power_samples_parent_record_uid` ON `${TABLE_NAME}` (`parent_record_uid`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "power_records",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "parent_record_uid"
+            ],
+            "referencedColumns": [
+              "health_connect_uid"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "resting_heart_rate_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `health_connect_uid` TEXT NOT NULL, `beats_per_minute` INTEGER NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `zone_offset_id` TEXT, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "beatsPerMinute",
+            "columnName": "beats_per_minute",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneOffsetId",
+            "columnName": "zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_resting_heart_rate_records_health_connect_uid",
+            "unique": true,
+            "columnNames": [
+              "health_connect_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_resting_heart_rate_records_health_connect_uid` ON `${TABLE_NAME}` (`health_connect_uid`)"
+          }
+        ]
+      },
+      {
+        "tableName": "speed_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`health_connect_uid` TEXT NOT NULL, `start_time_epoch_millis` INTEGER NOT NULL, `end_time_epoch_millis` INTEGER NOT NULL, `start_zone_offset_id` TEXT, `end_zone_offset_id` TEXT, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT, PRIMARY KEY(`health_connect_uid`))",
+        "fields": [
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startTimeEpochMillis",
+            "columnName": "start_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endTimeEpochMillis",
+            "columnName": "end_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startZoneOffsetId",
+            "columnName": "start_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "endZoneOffsetId",
+            "columnName": "end_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "health_connect_uid"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_speed_records_health_connect_uid",
+            "unique": true,
+            "columnNames": [
+              "health_connect_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_speed_records_health_connect_uid` ON `${TABLE_NAME}` (`health_connect_uid`)"
+          }
+        ]
+      },
+      {
+        "tableName": "speed_samples",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `parent_record_uid` TEXT NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `speed_in_meters_per_second` REAL NOT NULL, FOREIGN KEY(`parent_record_uid`) REFERENCES `speed_records`(`health_connect_uid`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "parentRecordUid",
+            "columnName": "parent_record_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "speedInMetersPerSecond",
+            "columnName": "speed_in_meters_per_second",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_speed_samples_parent_record_uid",
+            "unique": false,
+            "columnNames": [
+              "parent_record_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_speed_samples_parent_record_uid` ON `${TABLE_NAME}` (`parent_record_uid`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "speed_records",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "parent_record_uid"
+            ],
+            "referencedColumns": [
+              "health_connect_uid"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "steps_cadence_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`health_connect_uid` TEXT NOT NULL, `start_time_epoch_millis` INTEGER NOT NULL, `end_time_epoch_millis` INTEGER NOT NULL, `start_zone_offset_id` TEXT, `end_zone_offset_id` TEXT, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT, PRIMARY KEY(`health_connect_uid`))",
+        "fields": [
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startTimeEpochMillis",
+            "columnName": "start_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endTimeEpochMillis",
+            "columnName": "end_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startZoneOffsetId",
+            "columnName": "start_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "endZoneOffsetId",
+            "columnName": "end_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "health_connect_uid"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_steps_cadence_records_health_connect_uid",
+            "unique": true,
+            "columnNames": [
+              "health_connect_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_steps_cadence_records_health_connect_uid` ON `${TABLE_NAME}` (`health_connect_uid`)"
+          }
+        ]
+      },
+      {
+        "tableName": "steps_cadence_samples",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `parent_record_uid` TEXT NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `rate` REAL NOT NULL, FOREIGN KEY(`parent_record_uid`) REFERENCES `steps_cadence_records`(`health_connect_uid`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "parentRecordUid",
+            "columnName": "parent_record_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rate",
+            "columnName": "rate",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_steps_cadence_samples_parent_record_uid",
+            "unique": false,
+            "columnNames": [
+              "parent_record_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_steps_cadence_samples_parent_record_uid` ON `${TABLE_NAME}` (`parent_record_uid`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "steps_cadence_records",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "parent_record_uid"
+            ],
+            "referencedColumns": [
+              "health_connect_uid"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "total_calories_burned_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `health_connect_uid` TEXT NOT NULL, `energy_in_kilocalories` REAL NOT NULL, `start_time_epoch_millis` INTEGER NOT NULL, `end_time_epoch_millis` INTEGER NOT NULL, `start_zone_offset_id` TEXT, `end_zone_offset_id` TEXT, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "energyInKilocalories",
+            "columnName": "energy_in_kilocalories",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startTimeEpochMillis",
+            "columnName": "start_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endTimeEpochMillis",
+            "columnName": "end_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startZoneOffsetId",
+            "columnName": "start_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "endZoneOffsetId",
+            "columnName": "end_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_total_calories_burned_records_health_connect_uid",
+            "unique": true,
+            "columnNames": [
+              "health_connect_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_total_calories_burned_records_health_connect_uid` ON `${TABLE_NAME}` (`health_connect_uid`)"
+          }
+        ]
+      },
+      {
+        "tableName": "vo2_max_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `health_connect_uid` TEXT NOT NULL, `vo2_max` REAL NOT NULL, `measurement_method` INTEGER NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `zone_offset_id` TEXT, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vo2Max",
+            "columnName": "vo2_max",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "measurementMethod",
+            "columnName": "measurement_method",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneOffsetId",
+            "columnName": "zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_vo2_max_records_health_connect_uid",
+            "unique": true,
+            "columnNames": [
+              "health_connect_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_vo2_max_records_health_connect_uid` ON `${TABLE_NAME}` (`health_connect_uid`)"
+          }
+        ]
+      },
+      {
+        "tableName": "body_fat_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `health_connect_uid` TEXT NOT NULL, `percentage` REAL NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `zone_offset_id` TEXT, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "percentage",
+            "columnName": "percentage",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneOffsetId",
+            "columnName": "zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_body_fat_records_health_connect_uid",
+            "unique": true,
+            "columnNames": [
+              "health_connect_uid"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_body_fat_records_health_connect_uid` ON `${TABLE_NAME}` (`health_connect_uid`)"
+          }
+        ]
+      },
+      {
+        "tableName": "body_temperature_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`health_connect_uid` TEXT NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `zone_offset_id` TEXT, `temperature_in_celsius` REAL NOT NULL, `measurement_location` INTEGER NOT NULL, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT, PRIMARY KEY(`health_connect_uid`))",
+        "fields": [
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneOffsetId",
+            "columnName": "zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "temperatureInCelsius",
+            "columnName": "temperature_in_celsius",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "measurementLocation",
+            "columnName": "measurement_location",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "health_connect_uid"
+          ]
+        }
+      },
+      {
+        "tableName": "body_water_mass_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`health_connect_uid` TEXT NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `zone_offset_id` TEXT, `mass_in_kilograms` REAL NOT NULL, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT, PRIMARY KEY(`health_connect_uid`))",
+        "fields": [
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneOffsetId",
+            "columnName": "zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "massInKilograms",
+            "columnName": "mass_in_kilograms",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "health_connect_uid"
+          ]
+        }
+      },
+      {
+        "tableName": "bone_mass_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`health_connect_uid` TEXT NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `zone_offset_id` TEXT, `mass_in_kilograms` REAL NOT NULL, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT, PRIMARY KEY(`health_connect_uid`))",
+        "fields": [
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneOffsetId",
+            "columnName": "zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "massInKilograms",
+            "columnName": "mass_in_kilograms",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "health_connect_uid"
+          ]
+        }
+      },
+      {
+        "tableName": "height_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`health_connect_uid` TEXT NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `zone_offset_id` TEXT, `height_in_meters` REAL NOT NULL, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT, PRIMARY KEY(`health_connect_uid`))",
+        "fields": [
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneOffsetId",
+            "columnName": "zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "heightInMeters",
+            "columnName": "height_in_meters",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "health_connect_uid"
+          ]
+        }
+      },
+      {
+        "tableName": "lean_body_mass_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`health_connect_uid` TEXT NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `zone_offset_id` TEXT, `mass_in_kilograms` REAL NOT NULL, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT, PRIMARY KEY(`health_connect_uid`))",
+        "fields": [
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneOffsetId",
+            "columnName": "zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "massInKilograms",
+            "columnName": "mass_in_kilograms",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "health_connect_uid"
+          ]
+        }
+      },
+      {
+        "tableName": "hydration_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`health_connect_uid` TEXT NOT NULL, `start_time_epoch_millis` INTEGER NOT NULL, `end_time_epoch_millis` INTEGER NOT NULL, `start_zone_offset_id` TEXT, `end_zone_offset_id` TEXT, `volume_in_milliliters` REAL NOT NULL, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT, PRIMARY KEY(`health_connect_uid`))",
+        "fields": [
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startTimeEpochMillis",
+            "columnName": "start_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endTimeEpochMillis",
+            "columnName": "end_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startZoneOffsetId",
+            "columnName": "start_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "endZoneOffsetId",
+            "columnName": "end_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "volumeInMilliliters",
+            "columnName": "volume_in_milliliters",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "health_connect_uid"
+          ]
+        }
+      },
+      {
+        "tableName": "nutrition_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`health_connect_uid` TEXT NOT NULL, `start_time_epoch_millis` INTEGER NOT NULL, `end_time_epoch_millis` INTEGER NOT NULL, `start_zone_offset_id` TEXT, `end_zone_offset_id` TEXT, `name` TEXT, `calories` REAL, `carbohydrates` REAL, `protein` REAL, `total_fat` REAL, `saturated_fat` REAL, `unsaturated_fat` REAL, `trans_fat` REAL, `sodium` REAL, `potassium` REAL, `cholesterol` REAL, `fiber` REAL, `sugar` REAL, `vitamin_c` REAL, `vitamin_d` REAL, `calcium` REAL, `iron` REAL, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT, PRIMARY KEY(`health_connect_uid`))",
+        "fields": [
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startTimeEpochMillis",
+            "columnName": "start_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endTimeEpochMillis",
+            "columnName": "end_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startZoneOffsetId",
+            "columnName": "start_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "endZoneOffsetId",
+            "columnName": "end_zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "calories",
+            "columnName": "calories",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "carbohydrates",
+            "columnName": "carbohydrates",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "protein",
+            "columnName": "protein",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "totalFat",
+            "columnName": "total_fat",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "saturatedFat",
+            "columnName": "saturated_fat",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "unsaturatedFat",
+            "columnName": "unsaturated_fat",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "transFat",
+            "columnName": "trans_fat",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "sodium",
+            "columnName": "sodium",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "potassium",
+            "columnName": "potassium",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "cholesterol",
+            "columnName": "cholesterol",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "fiber",
+            "columnName": "fiber",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "sugar",
+            "columnName": "sugar",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "vitaminC",
+            "columnName": "vitamin_c",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "vitaminD",
+            "columnName": "vitamin_d",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "calcium",
+            "columnName": "calcium",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "iron",
+            "columnName": "iron",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "health_connect_uid"
+          ]
+        }
+      },
+      {
+        "tableName": "blood_pressure_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`health_connect_uid` TEXT NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `zone_offset_id` TEXT, `systolic` REAL NOT NULL, `diastolic` REAL NOT NULL, `body_position` INTEGER NOT NULL, `measurement_location` INTEGER NOT NULL, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT, PRIMARY KEY(`health_connect_uid`))",
+        "fields": [
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneOffsetId",
+            "columnName": "zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "systolic",
+            "columnName": "systolic",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "diastolic",
+            "columnName": "diastolic",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bodyPosition",
+            "columnName": "body_position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "measurementLocation",
+            "columnName": "measurement_location",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "health_connect_uid"
+          ]
+        }
+      },
+      {
+        "tableName": "oxygen_saturation_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`health_connect_uid` TEXT NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `zone_offset_id` TEXT, `percentage` REAL NOT NULL, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT, PRIMARY KEY(`health_connect_uid`))",
+        "fields": [
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneOffsetId",
+            "columnName": "zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "percentage",
+            "columnName": "percentage",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "health_connect_uid"
+          ]
+        }
+      },
+      {
+        "tableName": "respiratory_rate_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`health_connect_uid` TEXT NOT NULL, `time_epoch_millis` INTEGER NOT NULL, `zone_offset_id` TEXT, `rate` REAL NOT NULL, `app_record_fetch_time_epoch_millis` INTEGER NOT NULL, `data_origin_package_name` TEXT NOT NULL, `hc_last_modified_time_epoch_millis` INTEGER NOT NULL, `client_record_id` TEXT, `client_record_version` INTEGER NOT NULL, `device_manufacturer` TEXT, `device_model` TEXT, `device_type` TEXT, PRIMARY KEY(`health_connect_uid`))",
+        "fields": [
+          {
+            "fieldPath": "hcUid",
+            "columnName": "health_connect_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeEpochMillis",
+            "columnName": "time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneOffsetId",
+            "columnName": "zone_offset_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rate",
+            "columnName": "rate",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appRecordFetchTimeEpochMillis",
+            "columnName": "app_record_fetch_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataOriginPackageName",
+            "columnName": "data_origin_package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hcLastModifiedTimeEpochMillis",
+            "columnName": "hc_last_modified_time_epoch_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientRecordId",
+            "columnName": "client_record_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientRecordVersion",
+            "columnName": "client_record_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceManufacturer",
+            "columnName": "device_manufacturer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "health_connect_uid"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a195b8a890fa3eea29e6a305718c7106')"
+    ]
+  }
+}

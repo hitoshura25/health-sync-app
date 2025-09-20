@@ -111,7 +111,7 @@ import io.github.hitoshura25.healthsyncapp.data.local.database.entity.StepsCaden
         RespiratoryRateRecordEntity::class
     ],
     version = 1,
-    exportSchema = false
+    exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
 
