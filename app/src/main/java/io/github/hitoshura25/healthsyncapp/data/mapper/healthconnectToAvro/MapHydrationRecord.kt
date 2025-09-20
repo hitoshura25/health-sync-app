@@ -1,7 +1,7 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.HydrationRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroHydrationRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroHydrationRecord
 
 fun mapHydrationRecord(record: HydrationRecord, fetchedTimeEpochMillis: Long): AvroHydrationRecord {
     return AvroHydrationRecord(

@@ -1,7 +1,7 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.BasalBodyTemperatureRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroBasalBodyTemperatureRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroBasalBodyTemperatureRecord
 
 fun mapBasalBodyTemperatureRecord(record: BasalBodyTemperatureRecord, fetchedTimeEpochMillis: Long): AvroBasalBodyTemperatureRecord {
     return AvroBasalBodyTemperatureRecord(

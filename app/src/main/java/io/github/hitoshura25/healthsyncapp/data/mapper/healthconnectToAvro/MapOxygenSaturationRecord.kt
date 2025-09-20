@@ -1,7 +1,7 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.OxygenSaturationRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroOxygenSaturationRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroOxygenSaturationRecord
 
 fun mapOxygenSaturationRecord(record: OxygenSaturationRecord, fetchedTimeEpochMillis: Long): AvroOxygenSaturationRecord {
     return AvroOxygenSaturationRecord(

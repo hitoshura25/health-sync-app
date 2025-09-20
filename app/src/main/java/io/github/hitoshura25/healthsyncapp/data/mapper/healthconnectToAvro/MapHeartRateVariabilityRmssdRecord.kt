@@ -1,7 +1,7 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroHeartRateVariabilityRmssdRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroHeartRateVariabilityRmssdRecord
 
 fun mapHeartRateVariabilityRmssdRecord(record: HeartRateVariabilityRmssdRecord, fetchedTimeEpochMillis: Long): AvroHeartRateVariabilityRmssdRecord {
     return AvroHeartRateVariabilityRmssdRecord(

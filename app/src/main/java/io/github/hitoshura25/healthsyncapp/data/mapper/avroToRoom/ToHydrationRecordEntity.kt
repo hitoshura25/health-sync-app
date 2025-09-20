@@ -1,6 +1,6 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom
 
-import io.github.hitoshura25.healthsyncapp.avro.AvroHydrationRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroHydrationRecord
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.HydrationRecordEntity
 
 fun AvroHydrationRecord.toHydrationRecordEntity(): HydrationRecordEntity {

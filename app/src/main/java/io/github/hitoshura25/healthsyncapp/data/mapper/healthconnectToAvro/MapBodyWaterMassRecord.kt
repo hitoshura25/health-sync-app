@@ -1,7 +1,7 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.BodyWaterMassRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroBodyWaterMassRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroBodyWaterMassRecord
 
 fun mapBodyWaterMassRecord(record: BodyWaterMassRecord, fetchedTimeEpochMillis: Long): AvroBodyWaterMassRecord {
     return AvroBodyWaterMassRecord(

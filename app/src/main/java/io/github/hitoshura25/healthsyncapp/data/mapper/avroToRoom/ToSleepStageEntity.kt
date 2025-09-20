@@ -1,6 +1,6 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom
 
-import io.github.hitoshura25.healthsyncapp.avro.AvroSleepStageRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroSleepStageRecord
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.SleepStageEntity
 
 fun AvroSleepStageRecord.toSleepStageEntity(sessionHcUidParam: String): SleepStageEntity {

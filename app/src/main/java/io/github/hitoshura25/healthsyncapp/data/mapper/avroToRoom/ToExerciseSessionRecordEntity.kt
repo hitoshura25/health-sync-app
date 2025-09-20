@@ -1,6 +1,6 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom
 
-import io.github.hitoshura25.healthsyncapp.avro.AvroExerciseSessionRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroExerciseSessionRecord
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.ExerciseSessionRecordEntity
 
 fun AvroExerciseSessionRecord.toExerciseSessionRecordEntity(): ExerciseSessionRecordEntity {

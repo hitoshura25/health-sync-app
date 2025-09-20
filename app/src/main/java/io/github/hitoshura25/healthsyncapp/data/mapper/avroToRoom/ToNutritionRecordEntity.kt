@@ -1,6 +1,6 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom
 
-import io.github.hitoshura25.healthsyncapp.avro.AvroNutritionRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroNutritionRecord
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.NutritionRecordEntity
 
 fun AvroNutritionRecord.toNutritionRecordEntity(): NutritionRecordEntity {

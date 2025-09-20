@@ -1,6 +1,6 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom
 
-import io.github.hitoshura25.healthsyncapp.avro.AvroActiveCaloriesBurnedRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroActiveCaloriesBurnedRecord
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.ActiveCaloriesBurnedRecordEntity
 
 fun AvroActiveCaloriesBurnedRecord.toActiveCaloriesBurnedRecordEntity(): ActiveCaloriesBurnedRecordEntity {

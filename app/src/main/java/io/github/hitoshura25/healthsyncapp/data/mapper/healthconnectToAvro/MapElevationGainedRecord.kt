@@ -1,7 +1,7 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.ElevationGainedRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroElevationGainedRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroElevationGainedRecord
 
 fun mapElevationGainedRecord(record: ElevationGainedRecord, fetchedTimeEpochMillis: Long): AvroElevationGainedRecord {
     return AvroElevationGainedRecord(

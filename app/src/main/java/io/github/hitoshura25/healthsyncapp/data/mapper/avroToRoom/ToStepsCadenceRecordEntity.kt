@@ -1,6 +1,6 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom
 
-import io.github.hitoshura25.healthsyncapp.avro.AvroStepsCadenceRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroStepsCadenceRecord
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.StepsCadenceRecordEntity
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.StepsCadenceSampleEntity
 

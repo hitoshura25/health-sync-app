@@ -1,6 +1,6 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom
 
-import io.github.hitoshura25.healthsyncapp.avro.AvroDistanceRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroDistanceRecord
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.DistanceRecordEntity
 
 fun AvroDistanceRecord.toDistanceRecordEntity(): DistanceRecordEntity {

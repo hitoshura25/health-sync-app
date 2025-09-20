@@ -1,8 +1,8 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.Vo2MaxRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroVo2MaxMeasurementMethod
-import io.github.hitoshura25.healthsyncapp.avro.AvroVo2MaxRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroVo2MaxMeasurementMethod
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroVo2MaxRecord
 
 private fun mapHcVo2MaxMeasurementMethodToAvro(hcMeasurementMethod: Int): AvroVo2MaxMeasurementMethod {
     return when (hcMeasurementMethod) {

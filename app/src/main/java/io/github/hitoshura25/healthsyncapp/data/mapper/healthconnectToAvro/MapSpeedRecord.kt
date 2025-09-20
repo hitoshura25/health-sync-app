@@ -1,8 +1,8 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.SpeedRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroSpeedRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroSpeedSample
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroSpeedRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroSpeedSample
 
 fun mapSpeedRecord(record: SpeedRecord, fetchedTimeEpochMillis: Long): AvroSpeedRecord {
     return AvroSpeedRecord(

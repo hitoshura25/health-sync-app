@@ -2,10 +2,10 @@ package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.MealType
-import io.github.hitoshura25.healthsyncapp.avro.AvroBloodGlucoseMealType
-import io.github.hitoshura25.healthsyncapp.avro.AvroBloodGlucoseRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroBloodGlucoseRelationToMeal
-import io.github.hitoshura25.healthsyncapp.avro.AvroBloodGlucoseSpecimenSource
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroBloodGlucoseMealType
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroBloodGlucoseRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroBloodGlucoseRelationToMeal
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroBloodGlucoseSpecimenSource
 
 private fun mapHcSpecimenSourceToAvro(hcSpecimenSource: Int): AvroBloodGlucoseSpecimenSource {
     return when (hcSpecimenSource) {

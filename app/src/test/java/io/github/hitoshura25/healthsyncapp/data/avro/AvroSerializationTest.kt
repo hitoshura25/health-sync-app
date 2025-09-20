@@ -1,4 +1,4 @@
-package io.github.hitoshura25.healthsyncapp.avro
+package io.github.hitoshura25.healthsyncapp.data.avro
 
 import com.github.avrokotlin.avro4k.AvroObjectContainer
 import com.github.avrokotlin.avro4k.ExperimentalAvro4kApi

@@ -1,8 +1,8 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom
 
-import io.github.hitoshura25.healthsyncapp.avro.AvroBloodPressureBodyPosition
-import io.github.hitoshura25.healthsyncapp.avro.AvroBloodPressureMeasurementLocation
-import io.github.hitoshura25.healthsyncapp.avro.AvroBloodPressureRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroBloodPressureBodyPosition
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroBloodPressureMeasurementLocation
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroBloodPressureRecord
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.BloodPressureRecordEntity
 
 private fun mapBloodPressureBodyPositionToInt(avroBodyPosition: AvroBloodPressureBodyPosition): Int {

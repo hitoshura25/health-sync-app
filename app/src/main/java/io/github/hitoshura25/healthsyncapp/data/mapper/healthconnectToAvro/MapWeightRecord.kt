@@ -1,7 +1,7 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.WeightRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroWeightRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroWeightRecord
 
 fun mapWeightRecord(record: WeightRecord, fetchedTimeEpochMillis: Long): AvroWeightRecord {
     return AvroWeightRecord(

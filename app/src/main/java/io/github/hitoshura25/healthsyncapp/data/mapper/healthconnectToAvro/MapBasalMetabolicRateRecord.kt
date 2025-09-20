@@ -1,7 +1,7 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.BasalMetabolicRateRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroBasalMetabolicRateRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroBasalMetabolicRateRecord
 
 fun mapBasalMetabolicRateRecord(record: BasalMetabolicRateRecord, fetchedTimeEpochMillis: Long): AvroBasalMetabolicRateRecord {
     return AvroBasalMetabolicRateRecord(

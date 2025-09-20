@@ -1,8 +1,8 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.ExerciseSessionRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroExerciseSessionRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroExerciseType
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroExerciseSessionRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroExerciseType
 
 private fun mapHcExerciseTypeToAvro(hcExerciseType: Int): AvroExerciseType {
     return when (hcExerciseType) {

@@ -1,7 +1,7 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroActiveCaloriesBurnedRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroActiveCaloriesBurnedRecord
 
 fun mapActiveCaloriesBurnedRecord(record: ActiveCaloriesBurnedRecord, fetchedTimeEpochMillis: Long): AvroActiveCaloriesBurnedRecord {
     return AvroActiveCaloriesBurnedRecord(

@@ -1,6 +1,6 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom
 
-import io.github.hitoshura25.healthsyncapp.avro.AvroSpeedRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroSpeedRecord
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.SpeedRecordEntity
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.SpeedSampleEntity
 

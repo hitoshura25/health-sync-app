@@ -1,7 +1,7 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.DistanceRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroDistanceRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroDistanceRecord
 
 fun mapDistanceRecord(record: DistanceRecord, fetchedTimeEpochMillis: Long): AvroDistanceRecord {
     return AvroDistanceRecord(

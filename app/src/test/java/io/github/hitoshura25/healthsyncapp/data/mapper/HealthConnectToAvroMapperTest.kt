@@ -5,7 +5,7 @@ import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.metadata.Device
 import androidx.health.connect.client.records.metadata.Metadata
-import io.github.hitoshura25.healthsyncapp.avro.AvroSleepStageType
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroSleepStageType
 import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapHeartRateRecord
 import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapSleepSessionRecord
 import io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro.mapStepsRecord

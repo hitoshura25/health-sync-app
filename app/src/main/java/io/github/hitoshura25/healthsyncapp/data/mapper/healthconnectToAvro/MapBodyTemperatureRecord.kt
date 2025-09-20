@@ -2,8 +2,8 @@ package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.BodyTemperatureMeasurementLocation
 import androidx.health.connect.client.records.BodyTemperatureRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroBodyTemperatureMeasurementLocation
-import io.github.hitoshura25.healthsyncapp.avro.AvroBodyTemperatureRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroBodyTemperatureMeasurementLocation
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroBodyTemperatureRecord
 
 private fun mapHcBodyTemperatureMeasurementLocationToAvro(hcMeasurementLocation: Int): AvroBodyTemperatureMeasurementLocation {
     return when (hcMeasurementLocation) {

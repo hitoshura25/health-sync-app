@@ -1,6 +1,6 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom
 
-import io.github.hitoshura25.healthsyncapp.avro.AvroPowerRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroPowerRecord
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.PowerRecordEntity
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.PowerSampleEntity
 

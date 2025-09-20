@@ -1,4 +1,4 @@
-package io.github.hitoshura25.healthsyncapp.avro
+package io.github.hitoshura25.healthsyncapp.data.avro
 
 import kotlinx.serialization.Serializable
 

@@ -1,7 +1,7 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.StepsRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroStepsRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroStepsRecord
 
 fun mapStepsRecord(record: StepsRecord, fetchedTimeEpochMillis: Long): AvroStepsRecord {
     return AvroStepsRecord(

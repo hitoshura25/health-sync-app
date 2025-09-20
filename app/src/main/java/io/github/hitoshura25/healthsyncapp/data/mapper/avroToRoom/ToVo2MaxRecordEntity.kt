@@ -1,6 +1,6 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom
 
-import io.github.hitoshura25.healthsyncapp.avro.AvroVo2MaxRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroVo2MaxRecord
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.Vo2MaxRecordEntity
 
 fun AvroVo2MaxRecord.toVo2MaxRecordEntity(): Vo2MaxRecordEntity {

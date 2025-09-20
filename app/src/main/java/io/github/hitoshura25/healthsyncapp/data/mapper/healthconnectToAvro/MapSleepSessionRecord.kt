@@ -1,9 +1,9 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.SleepSessionRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroSleepSessionRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroSleepStageRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroSleepStageType
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroSleepSessionRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroSleepStageRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroSleepStageType
 
 private fun mapHcSleepStageToAvro(hcStageTypeAsInt: Int): AvroSleepStageType {
     return when (hcStageTypeAsInt) {

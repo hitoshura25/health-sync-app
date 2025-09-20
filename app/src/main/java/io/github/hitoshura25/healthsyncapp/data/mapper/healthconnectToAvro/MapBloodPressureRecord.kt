@@ -1,9 +1,9 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.BloodPressureRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroBloodPressureBodyPosition
-import io.github.hitoshura25.healthsyncapp.avro.AvroBloodPressureMeasurementLocation
-import io.github.hitoshura25.healthsyncapp.avro.AvroBloodPressureRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroBloodPressureBodyPosition
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroBloodPressureMeasurementLocation
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroBloodPressureRecord
 
 private fun mapHcBloodPressureBodyPositionToAvro(hcBodyPosition: Int): AvroBloodPressureBodyPosition {
     return when (hcBodyPosition) {

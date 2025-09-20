@@ -1,7 +1,7 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.NutritionRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroNutritionRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroNutritionRecord
 
 fun mapNutritionRecord(record: NutritionRecord, fetchedTimeEpochMillis: Long): AvroNutritionRecord {
     return AvroNutritionRecord(

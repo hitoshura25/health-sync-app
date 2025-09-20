@@ -1,6 +1,6 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom
 
-import io.github.hitoshura25.healthsyncapp.avro.AvroHeightRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroHeightRecord
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.HeightRecordEntity
 
 fun AvroHeightRecord.toHeightRecordEntity(): HeightRecordEntity {

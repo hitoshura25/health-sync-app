@@ -2,8 +2,8 @@ package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.metadata.Device
 import androidx.health.connect.client.records.metadata.Metadata
-import io.github.hitoshura25.healthsyncapp.avro.AvroDevice
-import io.github.hitoshura25.healthsyncapp.avro.AvroMetadata
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroDevice
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroMetadata
 
 /**
  * Maps Health Connect SDK Metadata object to Avro DTO AvroMetadata.

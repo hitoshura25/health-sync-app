@@ -1,6 +1,6 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom
 
-import io.github.hitoshura25.healthsyncapp.avro.AvroStepsRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroStepsRecord
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.StepsRecordEntity
 
 fun AvroStepsRecord.toStepsRecordEntity(): StepsRecordEntity {

@@ -1,7 +1,7 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.BoneMassRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroBoneMassRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroBoneMassRecord
 
 fun mapBoneMassRecord(record: BoneMassRecord, fetchedTimeEpochMillis: Long): AvroBoneMassRecord {
     return AvroBoneMassRecord(

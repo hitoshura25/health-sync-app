@@ -1,6 +1,6 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom
 
-import io.github.hitoshura25.healthsyncapp.avro.AvroHeartRateVariabilityRmssdRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroHeartRateVariabilityRmssdRecord
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.HeartRateVariabilityRmssdRecordEntity
 
 fun AvroHeartRateVariabilityRmssdRecord.toHeartRateVariabilityRmssdRecordEntity(): HeartRateVariabilityRmssdRecordEntity {

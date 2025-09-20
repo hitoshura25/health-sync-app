@@ -1,8 +1,8 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.PowerRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroPowerRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroPowerSample
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroPowerRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroPowerSample
 
 fun mapPowerRecord(record: PowerRecord, fetchedTimeEpochMillis: Long): AvroPowerRecord {
     return AvroPowerRecord(

@@ -1,7 +1,7 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.FloorsClimbedRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroFloorsClimbedRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroFloorsClimbedRecord
 
 fun mapFloorsClimbedRecord(record: FloorsClimbedRecord, fetchedTimeEpochMillis: Long): AvroFloorsClimbedRecord {
     return AvroFloorsClimbedRecord(

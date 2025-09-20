@@ -1,7 +1,7 @@
 package io.github.hitoshura25.healthsyncapp.data.mapper.healthconnectToAvro
 
 import androidx.health.connect.client.records.RespiratoryRateRecord
-import io.github.hitoshura25.healthsyncapp.avro.AvroRespiratoryRateRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroRespiratoryRateRecord
 
 fun mapRespiratoryRateRecord(record: RespiratoryRateRecord, fetchedTimeEpochMillis: Long): AvroRespiratoryRateRecord {
     return AvroRespiratoryRateRecord(
