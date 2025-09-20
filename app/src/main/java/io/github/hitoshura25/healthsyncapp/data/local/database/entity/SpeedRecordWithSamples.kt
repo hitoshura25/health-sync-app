@@ -7,8 +7,7 @@ data class SpeedRecordWithSamples(
     @Embedded val record: SpeedRecordEntity,
     @Relation(
         parentColumn = "health_connect_uid",
-        entityColumn = "parentRecordUid"
+        entityColumn = "parent_record_uid"
     )
-    @JvmField
     val samples: List<SpeedSampleEntity>
 )

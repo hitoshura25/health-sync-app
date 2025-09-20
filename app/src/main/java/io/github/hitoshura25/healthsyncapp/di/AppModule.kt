@@ -55,9 +55,9 @@ object AppModule {
         return Room.databaseBuilder(
             appContext,
             AppDatabase::class.java,
-            "health_sync_app_database" // Consistent database name
+            "health_sync_app_database"
         )
-            .fallbackToDestructiveMigration(false) // Added back for development convenience
+            .fallbackToDestructiveMigration(true) // DB is not a priority, Avro files are
         .build()
     }
 

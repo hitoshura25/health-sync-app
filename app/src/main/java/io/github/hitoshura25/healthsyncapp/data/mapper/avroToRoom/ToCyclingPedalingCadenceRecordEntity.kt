@@ -25,7 +25,7 @@ fun AvroCyclingPedalingCadenceRecord.toCyclingPedalingCadenceRecordEntity(): Pai
         CyclingPedalingCadenceSampleEntity(
             parentRecordUid = this.metadata.id,
             timeEpochMillis = sample.timeEpochMillis,
-            revolutions = sample.revolutionsPerMinute
+            revolutionsPerMinute = sample.revolutionsPerMinute
         )
     }
     return Pair(

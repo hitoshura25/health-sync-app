@@ -7,7 +7,7 @@ data class CyclingPedalingCadenceRecordWithSamples(
     @Embedded val record: CyclingPedalingCadenceRecordEntity,
     @Relation(
         parentColumn = "health_connect_uid",
-        entityColumn = "parentRecordUid"
+        entityColumn = "parent_record_uid"
     )
     val samples: List<CyclingPedalingCadenceSampleEntity>
 )

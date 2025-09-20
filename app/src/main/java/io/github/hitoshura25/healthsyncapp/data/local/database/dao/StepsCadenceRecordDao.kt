@@ -28,4 +28,10 @@ interface StepsCadenceRecordDao {
     @Transaction
     @Query("SELECT * FROM steps_cadence_records ORDER BY start_time_epoch_millis DESC")
     fun getAllObservable(): Flow<List<StepsCadenceRecordWithSamples>>
+
+    @Query("SELECT * FROM steps_cadence_records WHERE health_connect_uid = :hcUid LIMIT 1")
+    suspend fun getRecordByHcUid(hcUid: String): StepsCadenceRecordEntity?
+
+    @Query("SELECT * FROM steps_cadence_samples WHERE parent_record_uid = :parentRecordUid ORDER BY time_epoch_millis ASC")
+    suspend fun getSamplesForRecord(parentRecordUid: String): List<StepsCadenceSampleEntity>
 }

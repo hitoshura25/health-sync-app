@@ -15,9 +15,12 @@ interface HydrationRecordDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(record: HydrationRecordEntity)
 
-    @Query("SELECT * FROM hydration_records ORDER BY startTimeEpochMillis DESC")
+    @Query("SELECT * FROM hydration_records ORDER BY start_time_epoch_millis DESC")
     fun getAllObservable(): Flow<List<HydrationRecordEntity>>
 
-    @Query("SELECT * FROM hydration_records ORDER BY startTimeEpochMillis DESC LIMIT 1")
+    @Query("SELECT * FROM hydration_records ORDER BY start_time_epoch_millis DESC LIMIT 1")
     suspend fun getLastRecord(): HydrationRecordEntity?
+
+    @Query("SELECT * FROM hydration_records WHERE health_connect_uid = :hcUid LIMIT 1")
+    suspend fun getRecordByHcUid(hcUid: String): HydrationRecordEntity?
 }

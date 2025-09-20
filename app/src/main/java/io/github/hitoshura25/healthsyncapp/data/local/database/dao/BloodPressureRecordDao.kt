@@ -15,9 +15,12 @@ interface BloodPressureRecordDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(record: BloodPressureRecordEntity)
 
-    @Query("SELECT * FROM blood_pressure_records ORDER BY timeEpochMillis DESC")
+    @Query("SELECT * FROM blood_pressure_records ORDER BY time_epoch_millis DESC")
     fun getAllObservable(): Flow<List<BloodPressureRecordEntity>>
 
-    @Query("SELECT * FROM blood_pressure_records ORDER BY timeEpochMillis DESC LIMIT 1")
+    @Query("SELECT * FROM blood_pressure_records ORDER BY time_epoch_millis DESC LIMIT 1")
     suspend fun getLastRecord(): BloodPressureRecordEntity?
+
+    @Query("SELECT * FROM blood_pressure_records WHERE health_connect_uid = :hcUid LIMIT 1")
+    suspend fun getRecordByHcUid(hcUid: String): BloodPressureRecordEntity?
 }

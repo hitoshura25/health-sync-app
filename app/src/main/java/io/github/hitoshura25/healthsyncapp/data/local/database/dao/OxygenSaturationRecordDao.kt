@@ -15,9 +15,12 @@ interface OxygenSaturationRecordDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(record: OxygenSaturationRecordEntity)
 
-    @Query("SELECT * FROM oxygen_saturation_records ORDER BY timeEpochMillis DESC")
+    @Query("SELECT * FROM oxygen_saturation_records ORDER BY time_epoch_millis DESC")
     fun getAllObservable(): Flow<List<OxygenSaturationRecordEntity>>
 
-    @Query("SELECT * FROM oxygen_saturation_records ORDER BY timeEpochMillis DESC LIMIT 1")
+    @Query("SELECT * FROM oxygen_saturation_records ORDER BY time_epoch_millis DESC LIMIT 1")
     suspend fun getLastRecord(): OxygenSaturationRecordEntity?
+
+    @Query("SELECT * FROM oxygen_saturation_records WHERE health_connect_uid = :hcUid LIMIT 1")
+    suspend fun getRecordByHcUid(hcUid: String): OxygenSaturationRecordEntity?
 }

@@ -15,9 +15,12 @@ interface RespiratoryRateRecordDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(record: RespiratoryRateRecordEntity)
 
-    @Query("SELECT * FROM respiratory_rate_records ORDER BY timeEpochMillis DESC")
+    @Query("SELECT * FROM respiratory_rate_records ORDER BY time_epoch_millis DESC")
     fun getAllObservable(): Flow<List<RespiratoryRateRecordEntity>>
 
-    @Query("SELECT * FROM respiratory_rate_records ORDER BY timeEpochMillis DESC LIMIT 1")
+    @Query("SELECT * FROM respiratory_rate_records ORDER BY time_epoch_millis DESC LIMIT 1")
     suspend fun getLastRecord(): RespiratoryRateRecordEntity?
+
+    @Query("SELECT * FROM respiratory_rate_records WHERE health_connect_uid = :hcUid LIMIT 1")
+    suspend fun getRecordByHcUid(hcUid: String): RespiratoryRateRecordEntity?
 }

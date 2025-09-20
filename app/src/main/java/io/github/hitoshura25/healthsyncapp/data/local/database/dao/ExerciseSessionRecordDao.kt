@@ -15,9 +15,12 @@ interface ExerciseSessionRecordDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(record: ExerciseSessionRecordEntity)
 
-    @Query("SELECT * FROM exercise_session_records ORDER BY startTimeEpochMillis DESC")
+    @Query("SELECT * FROM exercise_session_records ORDER BY start_time_epoch_millis DESC")
     fun getAllObservable(): Flow<List<ExerciseSessionRecordEntity>>
 
-    @Query("SELECT * FROM exercise_session_records ORDER BY startTimeEpochMillis DESC LIMIT 1")
+    @Query("SELECT * FROM exercise_session_records ORDER BY start_time_epoch_millis DESC LIMIT 1")
     suspend fun getLastRecord(): ExerciseSessionRecordEntity?
+
+    @Query("SELECT * FROM exercise_session_records WHERE health_connect_uid = :hcUid LIMIT 1")
+    suspend fun getRecordByHcUid(hcUid: String): ExerciseSessionRecordEntity?
 }

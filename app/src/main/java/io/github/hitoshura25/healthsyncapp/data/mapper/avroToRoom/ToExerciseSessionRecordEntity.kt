@@ -10,7 +10,7 @@ fun AvroExerciseSessionRecord.toExerciseSessionRecordEntity(): ExerciseSessionRe
         endTimeEpochMillis = this.endTimeEpochMillis,
         startZoneOffsetId = this.startZoneOffsetId,
         endZoneOffsetId = this.endZoneOffsetId,
-        exerciseType = this.exerciseType.name,
+        exerciseType = this.exerciseType.ordinal,
         title = this.title,
         notes = this.notes,
         appRecordFetchTimeEpochMillis = this.appRecordFetchTimeEpochMillis,

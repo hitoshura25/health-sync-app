@@ -15,9 +15,12 @@ interface HeightRecordDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(record: HeightRecordEntity)
 
-    @Query("SELECT * FROM height_records ORDER BY timeEpochMillis DESC")
+    @Query("SELECT * FROM height_records ORDER BY time_epoch_millis DESC")
     fun getAllObservable(): Flow<List<HeightRecordEntity>>
 
-    @Query("SELECT * FROM height_records ORDER BY timeEpochMillis DESC LIMIT 1")
+    @Query("SELECT * FROM height_records ORDER BY time_epoch_millis DESC LIMIT 1")
     suspend fun getLastRecord(): HeightRecordEntity?
+
+    @Query("SELECT * FROM height_records WHERE health_connect_uid = :hcUid LIMIT 1")
+    suspend fun getRecordByHcUid(hcUid: String): HeightRecordEntity?
 }

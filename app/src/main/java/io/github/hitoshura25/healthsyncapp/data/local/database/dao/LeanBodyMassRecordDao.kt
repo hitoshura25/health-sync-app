@@ -15,9 +15,12 @@ interface LeanBodyMassRecordDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(record: LeanBodyMassRecordEntity)
 
-    @Query("SELECT * FROM lean_body_mass_records ORDER BY timeEpochMillis DESC")
+    @Query("SELECT * FROM lean_body_mass_records ORDER BY time_epoch_millis DESC")
     fun getAllObservable(): Flow<List<LeanBodyMassRecordEntity>>
 
-    @Query("SELECT * FROM lean_body_mass_records ORDER BY timeEpochMillis DESC LIMIT 1")
+    @Query("SELECT * FROM lean_body_mass_records ORDER BY time_epoch_millis DESC LIMIT 1")
     suspend fun getLastRecord(): LeanBodyMassRecordEntity?
+
+    @Query("SELECT * FROM lean_body_mass_records WHERE health_connect_uid = :hcUid LIMIT 1")
+    suspend fun getRecordByHcUid(hcUid: String): LeanBodyMassRecordEntity?
 }

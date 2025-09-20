@@ -7,7 +7,7 @@ data class PowerRecordWithSamples(
     @Embedded val record: PowerRecordEntity,
     @Relation(
         parentColumn = "health_connect_uid",
-        entityColumn = "parentRecordUid"
+        entityColumn = "parent_record_uid"
     )
-    @JvmField val samples: List<PowerSampleEntity>
+    val samples: List<PowerSampleEntity>
 )

@@ -15,9 +15,12 @@ interface ElevationGainedRecordDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(record: ElevationGainedRecordEntity)
 
-    @Query("SELECT * FROM elevation_gained_records ORDER BY startTimeEpochMillis DESC")
+    @Query("SELECT * FROM elevation_gained_records ORDER BY start_time_epoch_millis DESC")
     fun getAllObservable(): Flow<List<ElevationGainedRecordEntity>>
 
-    @Query("SELECT * FROM elevation_gained_records ORDER BY startTimeEpochMillis DESC LIMIT 1")
+    @Query("SELECT * FROM elevation_gained_records ORDER BY start_time_epoch_millis DESC LIMIT 1")
     suspend fun getLastRecord(): ElevationGainedRecordEntity?
+
+    @Query("SELECT * FROM elevation_gained_records WHERE health_connect_uid = :hcUid LIMIT 1")
+    suspend fun getRecordByHcUid(hcUid: String): ElevationGainedRecordEntity?
 }

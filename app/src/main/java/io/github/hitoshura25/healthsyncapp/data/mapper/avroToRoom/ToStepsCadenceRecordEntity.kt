@@ -25,7 +25,7 @@ fun AvroStepsCadenceRecord.toStepsCadenceRecordEntity(): Pair<StepsCadenceRecord
         StepsCadenceSampleEntity(
             parentRecordUid = this.metadata.id,
             timeEpochMillis = sample.timeEpochMillis,
-            rateInStepsPerMinute = sample.rateInStepsPerMinute
+            rate = sample.rateInStepsPerMinute
         )
     }
     return Pair(recordEntity, sampleEntities)

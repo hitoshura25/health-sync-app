@@ -25,12 +25,12 @@ interface CyclingPedalingCadenceRecordDao {
     }
 
     @Transaction
-    @Query("SELECT * FROM cycling_pedaling_cadence_records ORDER BY startTimeEpochMillis DESC")
+    @Query("SELECT * FROM cycling_pedaling_cadence_records ORDER BY start_time_epoch_millis DESC")
     fun getAllObservable(): Flow<List<CyclingPedalingCadenceRecordWithSamples>>
 
-    @Query("SELECT * FROM cycling_pedaling_cadence_records ORDER BY startTimeEpochMillis DESC LIMIT :limit")
-    suspend fun getLatest(limit: Int): List<CyclingPedalingCadenceRecordEntity>
+    @Query("SELECT * FROM cycling_pedaling_cadence_records WHERE health_connect_uid = :hcUid LIMIT 1")
+    suspend fun getRecordByHcUid(hcUid: String): CyclingPedalingCadenceRecordEntity?
 
-    @Query("DELETE FROM cycling_pedaling_cadence_records")
-    suspend fun deleteAll()
+    @Query("SELECT * FROM cycling_pedaling_cadence_samples WHERE parent_record_uid = :parentRecordUid ORDER BY time_epoch_millis ASC")
+    suspend fun getSamplesForRecord(parentRecordUid: String): List<CyclingPedalingCadenceSampleEntity>
 }

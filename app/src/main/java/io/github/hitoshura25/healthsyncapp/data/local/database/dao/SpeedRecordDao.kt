@@ -28,4 +28,10 @@ interface SpeedRecordDao {
     @Transaction
     @Query("SELECT * FROM speed_records ORDER BY start_time_epoch_millis DESC")
     fun getAllObservable(): Flow<List<SpeedRecordWithSamples>>
+
+    @Query("SELECT * FROM speed_records WHERE health_connect_uid = :hcUid LIMIT 1")
+    suspend fun getRecordByHcUid(hcUid: String): SpeedRecordEntity?
+
+    @Query("SELECT * FROM speed_samples WHERE parent_record_uid = :parentRecordUid ORDER BY time_epoch_millis ASC")
+    suspend fun getSamplesForRecord(parentRecordUid: String): List<SpeedSampleEntity>
 }

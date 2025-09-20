@@ -112,7 +112,7 @@ class MainViewModel(
                 recordsWithSamples.maxByOrNull { it.record.endTimeEpochMillis }?.let { latestRecordWithSamples ->
                     val latestSample = latestRecordWithSamples.samples.maxByOrNull { it.timeEpochMillis }
                     if (latestSample != null) {
-                        "Latest Steps Cadence (DB): ${String.format("%.2f", latestSample.rateInStepsPerMinute)} steps/min (ends ${formatter.format(Instant.ofEpochMilli(latestRecordWithSamples.record.endTimeEpochMillis))})"
+                        "Latest Steps Cadence (DB): ${String.format("%.2f", latestSample.rate)} steps/min (ends ${formatter.format(Instant.ofEpochMilli(latestRecordWithSamples.record.endTimeEpochMillis))})"
                     } else {
                         "Steps Cadence: No samples in latest record"
                     }
@@ -126,7 +126,7 @@ class MainViewModel(
     // Observe data from DAOs using Flow and convert to StateFlow for UI
     val stepsData: StateFlow<String> = stepsDao.getAllObservable()
         .map { records ->
-            if (records.isNotEmpty()) "Steps (from DB): ${records.sumOf { it.count }}" 
+            if (records.isNotEmpty()) "Steps (from DB): ${records.sumOf { it.count }}"
             else "Steps: No data in DB"
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Steps: Loading...")
@@ -433,7 +433,7 @@ class MainViewModel(
                 if (currentlyGrantedPermissions.containsAll(ALL_PERMISSIONS)) {
                     Log.d(TAG, "All permissions already granted.")
                     _allPermissionsGranted.postValue(true)
-                    handleInitialWorkerScheduling() 
+                    handleInitialWorkerScheduling()
                 } else {
                     Log.d(TAG, "Not all permissions granted; triggering request.")
                     _allPermissionsGranted.postValue(false)
@@ -441,7 +441,7 @@ class MainViewModel(
                     if (permissionsToRequest.isNotEmpty()){
                         _requestPermissionsLauncherEvent.postValue(permissionsToRequest)
                     } else { // Should not happen if previous check failed
-                         _allPermissionsGranted.postValue(true) 
+                         _allPermissionsGranted.postValue(true)
                          handleInitialWorkerScheduling()
                     }
                 }
@@ -473,15 +473,15 @@ class MainViewModel(
                 Log.i(TAG, "Initial HealthDataFetcherWorker not yet scheduled. Enqueuing OneTimeWorkRequest.")
                 // Changed to enqueue HealthDataFetcherWorker directly
                 val constraints = Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED) 
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
                     .build()
                 val oneTimeFetchRequest = OneTimeWorkRequestBuilder<HealthDataFetcherWorker>()
                     .setConstraints(constraints)
-                    .addTag("InitialPermissionHealthDataFetcherWorker") 
+                    .addTag("InitialPermissionHealthDataFetcherWorker")
                     .build()
                 WorkManager.getInstance(application).enqueue(oneTimeFetchRequest)
                 Log.d(TAG, "Enqueued OneTimeWorkRequest for HealthDataFetcherWorker with tag: InitialPermissionHealthDataFetcherWorker")
-                
+
                 prefs.edit().putBoolean(KEY_INITIAL_WORKER_SCHEDULED, true).apply()
                 Log.i(TAG, "Initial HealthDataFetcherWorker OneTimeWorkRequest enqueued and preference updated.")
             } else {
@@ -504,11 +504,11 @@ class MainViewModel(
     // Renamed from triggerDataRefreshWorker and changed to enqueue HealthDataFetcherWorker
     private fun enqueueHealthDataFetcherWorker(tag: String) {
         val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED) 
+            .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
         val oneTimeFetchRequest = OneTimeWorkRequestBuilder<HealthDataFetcherWorker>() // Changed to HealthDataFetcherWorker
             .setConstraints(constraints)
-            .addTag(tag) 
+            .addTag(tag)
             .build()
         WorkManager.getInstance(application).enqueue(oneTimeFetchRequest)
         Log.d(TAG, "Enqueued OneTimeWorkRequest for HealthDataFetcherWorker with tag: $tag")

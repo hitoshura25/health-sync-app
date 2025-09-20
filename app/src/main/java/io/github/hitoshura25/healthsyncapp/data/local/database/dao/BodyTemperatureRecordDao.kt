@@ -15,9 +15,12 @@ interface BodyTemperatureRecordDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(record: BodyTemperatureRecordEntity)
 
-    @Query("SELECT * FROM body_temperature_records ORDER BY timeEpochMillis DESC")
+    @Query("SELECT * FROM body_temperature_records ORDER BY time_epoch_millis DESC")
     fun getAllObservable(): Flow<List<BodyTemperatureRecordEntity>>
 
-    @Query("SELECT * FROM body_temperature_records ORDER BY timeEpochMillis DESC LIMIT 1")
+    @Query("SELECT * FROM body_temperature_records ORDER BY time_epoch_millis DESC LIMIT 1")
     suspend fun getLastRecord(): BodyTemperatureRecordEntity?
+
+    @Query("SELECT * FROM body_temperature_records WHERE health_connect_uid = :hcUid LIMIT 1")
+    suspend fun getRecordByHcUid(hcUid: String): BodyTemperatureRecordEntity?
 }

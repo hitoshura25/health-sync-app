@@ -28,4 +28,10 @@ interface PowerRecordDao {
     @Transaction
     @Query("SELECT * FROM power_records ORDER BY start_time_epoch_millis DESC")
     fun getAllObservable(): Flow<List<PowerRecordWithSamples>>
+
+    @Query("SELECT * FROM power_records WHERE health_connect_uid = :hcUid LIMIT 1")
+    suspend fun getRecordByHcUid(hcUid: String): PowerRecordEntity?
+
+    @Query("SELECT * FROM power_samples WHERE parent_record_uid = :parentRecordUid ORDER BY time_epoch_millis ASC")
+    suspend fun getSamplesForRecord(parentRecordUid: String): List<PowerSampleEntity>
 }

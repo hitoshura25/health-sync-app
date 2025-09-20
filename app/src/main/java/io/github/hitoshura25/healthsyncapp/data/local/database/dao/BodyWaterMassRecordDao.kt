@@ -15,9 +15,12 @@ interface BodyWaterMassRecordDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(record: BodyWaterMassRecordEntity)
 
-    @Query("SELECT * FROM body_water_mass_records ORDER BY timeEpochMillis DESC")
+    @Query("SELECT * FROM body_water_mass_records ORDER BY time_epoch_millis DESC")
     fun getAllObservable(): Flow<List<BodyWaterMassRecordEntity>>
 
-    @Query("SELECT * FROM body_water_mass_records ORDER BY timeEpochMillis DESC LIMIT 1")
+    @Query("SELECT * FROM body_water_mass_records ORDER BY time_epoch_millis DESC LIMIT 1")
     suspend fun getLastRecord(): BodyWaterMassRecordEntity?
+
+    @Query("SELECT * FROM body_water_mass_records WHERE health_connect_uid = :hcUid LIMIT 1")
+    suspend fun getRecordByHcUid(hcUid: String): BodyWaterMassRecordEntity?
 }

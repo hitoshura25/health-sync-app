@@ -7,8 +7,7 @@ data class StepsCadenceRecordWithSamples(
     @Embedded val record: StepsCadenceRecordEntity,
     @Relation(
         parentColumn = "health_connect_uid",
-        entityColumn = "parentRecordUid"
+        entityColumn = "parent_record_uid"
     )
-    @JvmField
     val samples: List<StepsCadenceSampleEntity>
 )
