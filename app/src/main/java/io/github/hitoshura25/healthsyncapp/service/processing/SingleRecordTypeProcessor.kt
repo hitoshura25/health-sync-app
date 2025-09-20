@@ -20,11 +20,15 @@ class SingleRecordTypeProcessor<AvroType : Any, EntityType : Any>(
 
     override suspend fun process(file: File): Boolean {
         return try {
+            @Suppress("UNCHECKED_CAST")
             val avroRecords = Files.newInputStream(file.toPath()).buffered().use { stream ->
-                AvroObjectContainer.decodeFromStream(Avro.serializersModule.serializer(avroTypeClass), stream).toList()
+                AvroObjectContainer.decodeFromStream(
+                    Avro.serializersModule.serializer(avroTypeClass),
+                    stream,
+                ).toList() as List<AvroType>
             }
             if (avroRecords.isNotEmpty()) {
-                val entities = avroRecords.map { toEntityMapper(it as AvroType) }
+                val entities = avroRecords.map { toEntityMapper(it) }
                 daoInsertFunction(entities)
                 Log.i(TAG, "Inserted ${entities.size} $recordTypeName entities from ${file.name}")
             } else {
