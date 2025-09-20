@@ -2,10 +2,9 @@ package io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom
 
 import io.github.hitoshura25.healthsyncapp.data.avro.AvroCyclingPedalingCadenceRecord
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.CyclingPedalingCadenceRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.CyclingPedalingCadenceSampleEntity
 
-fun AvroCyclingPedalingCadenceRecord.toCyclingPedalingCadenceRecordEntity(): Pair<CyclingPedalingCadenceRecordEntity, List<CyclingPedalingCadenceSampleEntity>> {
-    val recordEntity = CyclingPedalingCadenceRecordEntity(
+fun AvroCyclingPedalingCadenceRecord.toCyclingPedalingCadenceRecordEntity(): CyclingPedalingCadenceRecordEntity {
+    return CyclingPedalingCadenceRecordEntity(
         hcUid = this.metadata.id,
         startTimeEpochMillis = this.startTimeEpochMillis,
         endTimeEpochMillis = this.endTimeEpochMillis,
@@ -20,14 +19,4 @@ fun AvroCyclingPedalingCadenceRecord.toCyclingPedalingCadenceRecordEntity(): Pai
         deviceModel = this.metadata.device?.model,
         deviceType = this.metadata.device?.type
     )
-
-    val sampleEntities = this.samples.map { sample ->
-        CyclingPedalingCadenceSampleEntity(
-            parentRecordUid = this.metadata.id,
-            timeEpochMillis = sample.timeEpochMillis,
-            revolutionsPerMinute = sample.revolutionsPerMinute
-        )
-    }
-    return Pair(
-        recordEntity, sampleEntities)
 }

@@ -2,10 +2,9 @@ package io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom
 
 import io.github.hitoshura25.healthsyncapp.data.avro.AvroSpeedRecord
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.SpeedRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.SpeedSampleEntity
 
-fun AvroSpeedRecord.toSpeedRecordEntity(): Pair<SpeedRecordEntity, List<SpeedSampleEntity>> {
-    val recordEntity = SpeedRecordEntity(
+fun AvroSpeedRecord.toSpeedRecordEntity(): SpeedRecordEntity {
+    return SpeedRecordEntity(
         hcUid = this.metadata.id,
         startTimeEpochMillis = this.startTimeEpochMillis,
         endTimeEpochMillis = this.endTimeEpochMillis,
@@ -20,13 +19,4 @@ fun AvroSpeedRecord.toSpeedRecordEntity(): Pair<SpeedRecordEntity, List<SpeedSam
         deviceModel = this.metadata.device?.model,
         deviceType = this.metadata.device?.type
     )
-
-    val sampleEntities = this.samples.map { sample ->
-        SpeedSampleEntity(
-            parentRecordUid = this.metadata.id,
-            timeEpochMillis = sample.timeEpochMillis,
-            speedInMetersPerSecond = sample.speedInMetersPerSecond
-        )
-    }
-    return Pair(recordEntity, sampleEntities)
 }

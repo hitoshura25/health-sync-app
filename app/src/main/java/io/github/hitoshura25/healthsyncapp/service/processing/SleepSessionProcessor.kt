@@ -25,35 +25,39 @@ class SleepSessionProcessor @Inject constructor(
 
     override suspend fun process(file: File): Boolean {
         try {
-            val avroRecords = Files.newInputStream(file.toPath()).buffered().use { stream ->
-                AvroObjectContainer.decodeFromStream<AvroSleepSessionRecord>(stream).toList()
-            }
-            if (avroRecords.isEmpty()) {
-                Log.i(TAG, "No SleepSessionRecord objects found in ${file.name}, file is empty.")
-                return true
-            }
+            Files.newInputStream(file.toPath()).buffered().use { stream ->
+                val avroRecords = AvroObjectContainer.decodeFromStream<AvroSleepSessionRecord>(stream)
+                var recordCount = 0
+                var success = true
 
-            var allTransactionsSucceeded = true
-            for (avroRecord in avroRecords) {
-                try {
-                    val sessionEntity = avroRecord.toSleepSessionEntity()
-                    val stageEntities = avroRecord.stages.map { stageAvro ->
-                        stageAvro.toSleepStageEntity(sessionHcUidParam = sessionEntity.hcUid)
-                    }
-
-                    appDatabase.withTransaction {
-                        sleepSessionDao.insertAll(listOf(sessionEntity))
-                        if (stageEntities.isNotEmpty()) {
-                            sleepStageDao.insertAll(stageEntities)
+                avroRecords.forEach { avroRecord ->
+                    try {
+                        val sessionEntity = avroRecord.toSleepSessionEntity()
+                        val stageEntities = avroRecord.stages.map { stageAvro ->
+                            stageAvro.toSleepStageEntity(sessionHcUidParam = sessionEntity.hcUid)
                         }
+
+                        appDatabase.withTransaction {
+                            sleepSessionDao.insertAll(listOf(sessionEntity))
+                            if (stageEntities.isNotEmpty()) {
+                                sleepStageDao.insertAll(stageEntities)
+                            }
+                        }
+                        recordCount++
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to process and insert session ${avroRecord.metadata.id} from file ${file.name}", e)
+                        success = false
+                        return@forEach // Continue to the next record
                     }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to process and insert session ${avroRecord.metadata.id} from file ${file.name}", e)
-                    allTransactionsSucceeded = false
-                    break // Stop processing this file on the first error
                 }
+
+                if (recordCount > 0) {
+                    Log.i(TAG, "Successfully processed $recordCount sleep sessions from ${file.name}")
+                } else {
+                    Log.i(TAG, "No sleep sessions to process in ${file.name}")
+                }
+                return success
             }
-            return allTransactionsSucceeded
         } catch (e: Exception) {
             Log.e(TAG, "Error processing Avro file ${file.name} for type SleepSession", e)
             return false

@@ -13,26 +13,38 @@ class SingleRecordTypeProcessor<AvroType : Any, EntityType : Any>(
     private val toEntityMapper: (AvroType) -> EntityType,
     private val daoInsertFunction: suspend (List<EntityType>) -> Unit,
     private val recordTypeName: String,
-    private val avroTypeClass: Class<AvroType>
+    private val avroTypeClass: Class<AvroType>,
+    private val batchSize: Int = 1000
 ) : RecordProcessor {
 
     private val TAG = "SingleRecordTypeProcessor"
 
     override suspend fun process(file: File): Boolean {
         return try {
-            @Suppress("UNCHECKED_CAST")
-            val avroRecords = Files.newInputStream(file.toPath()).buffered().use { stream ->
-                AvroObjectContainer.decodeFromStream(
+            Files.newInputStream(file.toPath()).buffered().use { stream ->
+                @Suppress("UNCHECKED_CAST")
+                val avroRecordsSequence = AvroObjectContainer.decodeFromStream(
                     Avro.serializersModule.serializer(avroTypeClass),
                     stream,
-                ).toList() as List<AvroType>
-            }
-            if (avroRecords.isNotEmpty()) {
-                val entities = avroRecords.map { toEntityMapper(it) }
-                daoInsertFunction(entities)
-                Log.i(TAG, "Inserted ${entities.size} $recordTypeName entities from ${file.name}")
-            } else {
-                Log.i(TAG, "No $recordTypeName objects found in ${file.name}, file is empty.")
+                ) as Sequence<AvroType>
+
+                var totalInserted = 0
+                val chunkedSequence = avroRecordsSequence.chunked(batchSize)
+
+                chunkedSequence.forEach { chunk ->
+                    if (chunk.isNotEmpty()) {
+                        val entities = chunk.map { toEntityMapper(it) }
+                        daoInsertFunction(entities)
+                        totalInserted += entities.size
+                        Log.d(TAG, "Inserted a batch of ${entities.size} $recordTypeName entities.")
+                    }
+                }
+
+                if (totalInserted > 0) {
+                    Log.i(TAG, "Successfully inserted a total of $totalInserted $recordTypeName entities from ${file.name}")
+                } else {
+                    Log.i(TAG, "No $recordTypeName objects found to insert in ${file.name}.")
+                }
             }
             true
         } catch (e: Exception) {

@@ -2,10 +2,9 @@ package io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom
 
 import io.github.hitoshura25.healthsyncapp.data.avro.AvroStepsCadenceRecord
 import io.github.hitoshura25.healthsyncapp.data.local.database.entity.StepsCadenceRecordEntity
-import io.github.hitoshura25.healthsyncapp.data.local.database.entity.StepsCadenceSampleEntity
 
-fun AvroStepsCadenceRecord.toStepsCadenceRecordEntity(): Pair<StepsCadenceRecordEntity, List<StepsCadenceSampleEntity>> {
-    val recordEntity = StepsCadenceRecordEntity(
+fun AvroStepsCadenceRecord.toStepsCadenceRecordEntity(): StepsCadenceRecordEntity {
+    return StepsCadenceRecordEntity(
         hcUid = this.metadata.id,
         startTimeEpochMillis = this.startTimeEpochMillis,
         endTimeEpochMillis = this.endTimeEpochMillis,
@@ -20,13 +19,4 @@ fun AvroStepsCadenceRecord.toStepsCadenceRecordEntity(): Pair<StepsCadenceRecord
         deviceModel = this.metadata.device?.model,
         deviceType = this.metadata.device?.type
     )
-
-    val sampleEntities = this.samples.map { sample ->
-        StepsCadenceSampleEntity(
-            parentRecordUid = this.metadata.id,
-            timeEpochMillis = sample.timeEpochMillis,
-            rate = sample.rateInStepsPerMinute
-        )
-    }
-    return Pair(recordEntity, sampleEntities)
 }

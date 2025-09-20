@@ -2,51 +2,45 @@
 package io.github.hitoshura25.healthsyncapp.service.processing
 
 import android.util.Log
-import androidx.room.withTransaction
 import com.github.avrokotlin.avro4k.AvroObjectContainer
 import com.github.avrokotlin.avro4k.ExperimentalAvro4kApi
 import com.github.avrokotlin.avro4k.decodeFromStream
 import io.github.hitoshura25.healthsyncapp.data.avro.AvroCyclingPedalingCadenceRecord
-import io.github.hitoshura25.healthsyncapp.data.local.database.AppDatabase
 import io.github.hitoshura25.healthsyncapp.data.local.database.dao.CyclingPedalingCadenceRecordDao
 import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toCyclingPedalingCadenceRecordEntity
+import io.github.hitoshura25.healthsyncapp.data.mapper.avroToRoom.toCyclingPedalingCadenceSampleEntity
 import java.io.File
 import java.nio.file.Files
 import javax.inject.Inject
 
 class CyclingPedalingCadenceRecordProcessor @Inject constructor(
-    private val appDatabase: AppDatabase,
     private val cyclingPedalingCadenceRecordDao: CyclingPedalingCadenceRecordDao
 ) : RecordProcessor {
     private val TAG = "CyclingPedalingCadenceRecordProcessor"
 
     override suspend fun process(file: File): Boolean {
-        try {
-            val avroRecords = Files.newInputStream(file.toPath()).buffered().use { stream ->
-                AvroObjectContainer.decodeFromStream<AvroCyclingPedalingCadenceRecord>(stream).toList()
-            }
-            if (avroRecords.isEmpty()) {
-                Log.i(TAG, "No CyclingPedalingCadenceRecord objects found in ${file.name}, file is empty.")
-                return true
-            }
-
-            var allTransactionsSucceeded = true
-            for (avroRecord in avroRecords) {
-                try {
-                    val (recordEntity, sampleEntities) = avroRecord.toCyclingPedalingCadenceRecordEntity()
-                    appDatabase.withTransaction {
-                        cyclingPedalingCadenceRecordDao.insertRecordWithSamples(recordEntity, sampleEntities)
+        return try {
+            Files.newInputStream(file.toPath()).buffered().use { stream ->
+                val avroRecords = AvroObjectContainer.decodeFromStream<AvroCyclingPedalingCadenceRecord>(stream)
+                var totalRecordsInserted = 0
+                avroRecords.forEach { avroRecord ->
+                    val recordEntity = avroRecord.toCyclingPedalingCadenceRecordEntity()
+                    val sampleEntities = avroRecord.samples.map {
+                        it.toCyclingPedalingCadenceSampleEntity(parentRecordUid = recordEntity.hcUid)
                     }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to process and insert CyclingPedalingCadenceRecord ${avroRecord.metadata.id} from file ${file.name}", e)
-                    allTransactionsSucceeded = false
-                    break
+                    cyclingPedalingCadenceRecordDao.insertRecordWithSamples(recordEntity, sampleEntities)
+                    totalRecordsInserted++
+                }
+                if (totalRecordsInserted > 0) {
+                    Log.i(TAG, "Inserted $totalRecordsInserted CyclingPedalingCadenceRecord records from ${file.name}")
+                } else {
+                    Log.i(TAG, "No CyclingPedalingCadenceRecord objects found in ${file.name}, file is empty.")
                 }
             }
-            return allTransactionsSucceeded
+            true
         } catch (e: Exception) {
-            Log.e(TAG, "Error processing Avro file ${file.name} for type CyclingPedalingCadence", e)
-            return false
+            Log.e(TAG, "Error processing Avro file ${file.name} for type CyclingPedalingCadenceRecord", e)
+            false
         }
     }
 }
