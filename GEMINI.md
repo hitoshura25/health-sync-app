@@ -1,0 +1,1 @@
+Prefer explicit imports over wildcard imports.
