@@ -1,10 +1,73 @@
 package io.github.hitoshura25.healthsyncapp.di
 
+import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
+import androidx.health.connect.client.records.BasalBodyTemperatureRecord
+import androidx.health.connect.client.records.BasalMetabolicRateRecord
+import androidx.health.connect.client.records.BloodGlucoseRecord
+import androidx.health.connect.client.records.BloodPressureRecord
+import androidx.health.connect.client.records.BodyFatRecord
+import androidx.health.connect.client.records.BodyTemperatureRecord
+import androidx.health.connect.client.records.BodyWaterMassRecord
+import androidx.health.connect.client.records.BoneMassRecord
+import androidx.health.connect.client.records.CyclingPedalingCadenceRecord
+import androidx.health.connect.client.records.DistanceRecord
+import androidx.health.connect.client.records.ElevationGainedRecord
+import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.FloorsClimbedRecord
+import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
+import androidx.health.connect.client.records.HeightRecord
+import androidx.health.connect.client.records.HydrationRecord
+import androidx.health.connect.client.records.LeanBodyMassRecord
+import androidx.health.connect.client.records.NutritionRecord
+import androidx.health.connect.client.records.OxygenSaturationRecord
+import androidx.health.connect.client.records.PowerRecord
 import androidx.health.connect.client.records.Record
+import androidx.health.connect.client.records.RespiratoryRateRecord
+import androidx.health.connect.client.records.RestingHeartRateRecord
+import androidx.health.connect.client.records.SleepSessionRecord
+import androidx.health.connect.client.records.SpeedRecord
+import androidx.health.connect.client.records.StepsCadenceRecord
+import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
+import androidx.health.connect.client.records.Vo2MaxRecord
+import androidx.health.connect.client.records.WeightRecord
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.github.hitoshura25.healthsyncapp.data.HealthConnectConstants
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.ActiveCaloriesBurned
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.BasalBodyTemperature
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.BasalMetabolicRate
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.BloodGlucose
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.BloodPressure
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.BodyFat
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.BodyTemperature
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.BodyWaterMass
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.BoneMass
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.CyclingPedalingCadence
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.Distance
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.ElevationGained
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.ExerciseSession
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.FloorsClimbed
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.HeartRate
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.HeartRateVariabilityRmssd
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.Height
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.Hydration
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.LeanBodyMass
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.Nutrition
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.OxygenSaturation
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.Power
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.RespiratoryRate
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.RestingHeartRate
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.SleepSession
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.Speed
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.Steps
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.StepsCadence
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.TotalCaloriesBurned
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.Vo2Max
+import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.Weight
 import io.github.hitoshura25.healthsyncapp.worker.fetcher.ActiveCaloriesBurnedRecordFetcher
 import io.github.hitoshura25.healthsyncapp.worker.fetcher.BasalBodyTemperatureRecordFetcher
 import io.github.hitoshura25.healthsyncapp.worker.fetcher.BasalMetabolicRateRecordFetcher
@@ -41,37 +104,6 @@ import io.github.hitoshura25.healthsyncapp.worker.fetcher.WeightRecordFetcher
 import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.reflect.KClass
-import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
-import androidx.health.connect.client.records.BasalBodyTemperatureRecord
-import androidx.health.connect.client.records.BasalMetabolicRateRecord
-import androidx.health.connect.client.records.BloodGlucoseRecord
-import androidx.health.connect.client.records.BloodPressureRecord
-import androidx.health.connect.client.records.BodyFatRecord
-import androidx.health.connect.client.records.BodyTemperatureRecord
-import androidx.health.connect.client.records.BodyWaterMassRecord
-import androidx.health.connect.client.records.BoneMassRecord
-import androidx.health.connect.client.records.CyclingPedalingCadenceRecord
-import androidx.health.connect.client.records.DistanceRecord
-import androidx.health.connect.client.records.ElevationGainedRecord
-import androidx.health.connect.client.records.ExerciseSessionRecord
-import androidx.health.connect.client.records.FloorsClimbedRecord
-import androidx.health.connect.client.records.HeartRateRecord
-import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
-import androidx.health.connect.client.records.HeightRecord
-import androidx.health.connect.client.records.HydrationRecord
-import androidx.health.connect.client.records.LeanBodyMassRecord
-import androidx.health.connect.client.records.NutritionRecord
-import androidx.health.connect.client.records.OxygenSaturationRecord
-import androidx.health.connect.client.records.PowerRecord
-import androidx.health.connect.client.records.RespiratoryRateRecord
-import androidx.health.connect.client.records.RestingHeartRateRecord
-import androidx.health.connect.client.records.SleepSessionRecord
-import androidx.health.connect.client.records.SpeedRecord
-import androidx.health.connect.client.records.StepsCadenceRecord
-import androidx.health.connect.client.records.StepsRecord
-import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
-import androidx.health.connect.client.records.Vo2MaxRecord
-import androidx.health.connect.client.records.WeightRecord
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -121,37 +153,41 @@ object FetcherModule {
         weightRecordFetcher: Provider<WeightRecordFetcher>
     ): Map<KClass<out Record>, @JvmSuppressWildcards Provider<out RecordFetcher>> {
         val fetchers = mutableMapOf<KClass<out Record>, Provider<out RecordFetcher>>()
-        fetchers[ActiveCaloriesBurnedRecord::class] = activeCaloriesBurnedRecordFetcher
-        fetchers[BasalBodyTemperatureRecord::class] = basalBodyTemperatureRecordFetcher
-        fetchers[BasalMetabolicRateRecord::class] = basalMetabolicRateRecordFetcher
-        fetchers[BloodGlucoseRecord::class] = bloodGlucoseRecordFetcher
-        fetchers[BloodPressureRecord::class] = bloodPressureRecordFetcher
-        fetchers[BodyFatRecord::class] = bodyFatRecordFetcher
-        fetchers[BodyTemperatureRecord::class] = bodyTemperatureRecordFetcher
-        fetchers[BodyWaterMassRecord::class] = bodyWaterMassRecordFetcher
-        fetchers[BoneMassRecord::class] = boneMassRecordFetcher
-        fetchers[CyclingPedalingCadenceRecord::class] = cyclingPedalingCadenceRecordFetcher
-        fetchers[DistanceRecord::class] = distanceRecordFetcher
-        fetchers[ElevationGainedRecord::class] = elevationGainedRecordFetcher
-        fetchers[ExerciseSessionRecord::class] = exerciseSessionRecordFetcher
-        fetchers[FloorsClimbedRecord::class] = floorsClimbedRecordFetcher
-        fetchers[HeartRateRecord::class] = heartRateRecordFetcher
-        fetchers[HeartRateVariabilityRmssdRecord::class] = heartRateVariabilityRmssdRecordFetcher
-        fetchers[HeightRecord::class] = heightRecordFetcher
-        fetchers[HydrationRecord::class] = hydrationRecordFetcher
-        fetchers[LeanBodyMassRecord::class] = leanBodyMassRecordFetcher
-        fetchers[NutritionRecord::class] = nutritionRecordFetcher
-        fetchers[OxygenSaturationRecord::class] = oxygenSaturationRecordFetcher
-        fetchers[PowerRecord::class] = powerRecordFetcher
-        fetchers[RespiratoryRateRecord::class] = respiratoryRateRecordFetcher
-        fetchers[RestingHeartRateRecord::class] = restingHeartRateRecordFetcher
-        fetchers[SleepSessionRecord::class] = sleepSessionRecordFetcher
-        fetchers[SpeedRecord::class] = speedRecordFetcher
-        fetchers[StepsCadenceRecord::class] = stepsCadenceRecordFetcher
-        fetchers[StepsRecord::class] = stepsRecordFetcher
-        fetchers[TotalCaloriesBurnedRecord::class] = totalCaloriesBurnedRecordFetcher
-        fetchers[Vo2MaxRecord::class] = vo2MaxRecordFetcher
-        fetchers[WeightRecord::class] = weightRecordFetcher
+        HealthConnectConstants.RECORD_TYPES_SUPPORTED.forEach { supportedHealthRecordType ->
+            when (supportedHealthRecordType) {
+                ActiveCaloriesBurned -> fetchers[ActiveCaloriesBurnedRecord::class] = activeCaloriesBurnedRecordFetcher
+                BasalBodyTemperature -> fetchers[BasalBodyTemperatureRecord::class] = basalBodyTemperatureRecordFetcher
+                BasalMetabolicRate -> fetchers[BasalMetabolicRateRecord::class] = basalMetabolicRateRecordFetcher
+                BloodGlucose -> fetchers[BloodGlucoseRecord::class] = bloodGlucoseRecordFetcher
+                BloodPressure -> fetchers[BloodPressureRecord::class] = bloodPressureRecordFetcher
+                BodyFat -> fetchers[BodyFatRecord::class] = bodyFatRecordFetcher
+                BodyTemperature -> fetchers[BodyTemperatureRecord::class] = bodyTemperatureRecordFetcher
+                BodyWaterMass -> fetchers[BodyWaterMassRecord::class] = bodyWaterMassRecordFetcher
+                BoneMass -> fetchers[BoneMassRecord::class] = boneMassRecordFetcher
+                CyclingPedalingCadence -> fetchers[CyclingPedalingCadenceRecord::class] = cyclingPedalingCadenceRecordFetcher
+                Distance -> fetchers[DistanceRecord::class] = distanceRecordFetcher
+                ElevationGained -> fetchers[ElevationGainedRecord::class] = elevationGainedRecordFetcher
+                ExerciseSession -> fetchers[ExerciseSessionRecord::class] = exerciseSessionRecordFetcher
+                FloorsClimbed -> fetchers[FloorsClimbedRecord::class] = floorsClimbedRecordFetcher
+                HeartRate -> fetchers[HeartRateRecord::class] = heartRateRecordFetcher
+                HeartRateVariabilityRmssd -> fetchers[HeartRateVariabilityRmssdRecord::class] = heartRateVariabilityRmssdRecordFetcher
+                Height -> fetchers[HeightRecord::class] = heightRecordFetcher
+                Hydration -> fetchers[HydrationRecord::class] = hydrationRecordFetcher
+                LeanBodyMass -> fetchers[LeanBodyMassRecord::class] = leanBodyMassRecordFetcher
+                Nutrition -> fetchers[NutritionRecord::class] = nutritionRecordFetcher
+                OxygenSaturation -> fetchers[OxygenSaturationRecord::class] = oxygenSaturationRecordFetcher
+                Power -> fetchers[PowerRecord::class] = powerRecordFetcher
+                RespiratoryRate -> fetchers[RespiratoryRateRecord::class] = respiratoryRateRecordFetcher
+                RestingHeartRate -> fetchers[RestingHeartRateRecord::class] = restingHeartRateRecordFetcher
+                SleepSession -> fetchers[SleepSessionRecord::class] = sleepSessionRecordFetcher
+                Speed -> fetchers[SpeedRecord::class] = speedRecordFetcher
+                Steps -> fetchers[StepsRecord::class] = stepsRecordFetcher
+                StepsCadence -> fetchers[StepsCadenceRecord::class] = stepsCadenceRecordFetcher
+                TotalCaloriesBurned -> fetchers[TotalCaloriesBurnedRecord::class] = totalCaloriesBurnedRecordFetcher
+                Vo2Max -> fetchers[Vo2MaxRecord::class] = vo2MaxRecordFetcher
+                Weight -> fetchers[WeightRecord::class] = weightRecordFetcher
+            }
+        }
         return fetchers
     }
 }
