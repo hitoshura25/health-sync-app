@@ -36,7 +36,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.github.hitoshura25.healthsyncapp.data.HealthConnectConstants
+import io.github.hitoshura25.healthsyncapp.data.HealthConnectConstants.RECORD_TYPES_SUPPORTED
 import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.ActiveCaloriesBurned
 import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.BasalBodyTemperature
 import io.github.hitoshura25.healthsyncapp.data.SupportedHealthRecordType.BasalMetabolicRate
@@ -153,7 +153,7 @@ object FetcherModule {
         weightRecordFetcher: Provider<WeightRecordFetcher>
     ): Map<KClass<out Record>, @JvmSuppressWildcards Provider<out RecordFetcher>> {
         val fetchers = mutableMapOf<KClass<out Record>, Provider<out RecordFetcher>>()
-        HealthConnectConstants.RECORD_TYPES_SUPPORTED.forEach { supportedHealthRecordType ->
+        RECORD_TYPES_SUPPORTED.forEach { supportedHealthRecordType ->
             when (supportedHealthRecordType) {
                 ActiveCaloriesBurned -> fetchers[ActiveCaloriesBurnedRecord::class] = activeCaloriesBurnedRecordFetcher
                 BasalBodyTemperature -> fetchers[BasalBodyTemperatureRecord::class] = basalBodyTemperatureRecordFetcher
