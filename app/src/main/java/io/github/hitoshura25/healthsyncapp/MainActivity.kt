@@ -13,6 +13,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -127,18 +133,19 @@ fun PermissionRationaleScreen(onContinue: () -> Unit, onCancel: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
+                .padding(16.dp)
+                .windowInsetsPadding(WindowInsets.systemBars),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "To provide insights into your health and fitness, this app needs to access your health data through Health Connect. This data includes steps, heart rate, sleep, and blood glucose.",
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Start,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             Text(
                 text = "Your data is processed locally on your device and is not shared with any third party without your explicit consent.",
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Start,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
             Button(onClick = onContinue, modifier = Modifier.fillMaxWidth()) {
@@ -200,14 +207,16 @@ fun HealthDataScreen(viewModel: MainViewModel, healthConnectAvailable: Boolean) 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+                .windowInsetsPadding(WindowInsets.systemBars),
+            horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(text = "Health Connect Data (from Local DB)", style = MaterialTheme.typography.headlineSmall)
+            Text(text = "Health Connect Data (from Local DB)", style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Start)
 
             if (!healthConnectAvailable) {
-                Text("Health Connect SDK is not available on this device.")
+                Text("Health Connect SDK is not available on this device.", textAlign = TextAlign.Start)
             } else if (permissionsGranted) {
                 Text(text = steps)
                 Text(text = heartRate)
@@ -241,12 +250,12 @@ fun HealthDataScreen(viewModel: MainViewModel, healthConnectAvailable: Boolean) 
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Button(onClick = { viewModel.triggerDataRefresh() }) { // Changed to triggerDataRefresh
+                Button(onClick = { viewModel.triggerDataRefresh() }, modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally)) { // Changed to triggerDataRefresh
                     Text("Refresh Data from Health Connect")
                 }
                 // "Process Unsynced Data" button and its status Text are removed
             } else {
-                Text("Permissions not granted. Please grant permissions to see data.")
+                Text("Permissions not granted. Please grant permissions to see data.", textAlign = TextAlign.Start)
                 Button(onClick = { viewModel.checkOrRequestPermissions() }) {
                     Text("Request Permissions")
                 }
