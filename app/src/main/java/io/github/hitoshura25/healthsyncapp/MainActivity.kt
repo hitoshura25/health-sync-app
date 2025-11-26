@@ -13,6 +13,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -27,7 +33,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+
 import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
@@ -55,7 +61,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (intent?.action == ACTION_SHOW_PERMISSIONS_RATIONALE) { 
+        if (intent?.action == ACTION_SHOW_PERMISSIONS_RATIONALE) {
             Log.d(TAG, "Activity launched to show permissions rationale.")
             setContent {
                 MaterialTheme {
@@ -87,14 +93,14 @@ class MainActivity : ComponentActivity() {
 
     private fun initializeHealthConnectAndApp() {
         if (HealthConnectClient.getSdkStatus(this) == HealthConnectClient.SDK_AVAILABLE) {
-            if (!::healthConnectClient.isInitialized) { 
+            if (!::healthConnectClient.isInitialized) {
                 healthConnectClient = HealthConnectClient.getOrCreate(this)
             }
 
             requestPermissionsLauncher = registerForActivityResult(
                 PermissionController.createRequestPermissionResultContract()
             ) { grantedPermissions ->
-                mainViewModel.onPermissionsResult(grantedPermissions) 
+                mainViewModel.onPermissionsResult(grantedPermissions)
             }
 
             mainViewModel.requestPermissionsLauncherEvent.observe(this, Observer { permissionsToRequest ->
@@ -126,19 +132,20 @@ fun PermissionRationaleScreen(onContinue: () -> Unit, onCancel: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues) 
-                .padding(16.dp), 
+                .padding(paddingValues)
+                .padding(16.dp)
+                .windowInsetsPadding(WindowInsets.systemBars),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "To provide insights into your health and fitness, this app needs to access your health data through Health Connect. This data includes steps, heart rate, sleep, and blood glucose.",
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Start,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             Text(
                 text = "Your data is processed locally on your device and is not shared with any third party without your explicit consent.",
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Start,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
             Button(onClick = onContinue, modifier = Modifier.fillMaxWidth()) {
@@ -156,12 +163,37 @@ fun PermissionRationaleScreen(onContinue: () -> Unit, onCancel: () -> Unit) {
 fun HealthDataScreen(viewModel: MainViewModel, healthConnectAvailable: Boolean) {
     // Use observeAsState for LiveData (like allPermissionsGranted)
     val permissionsGranted by viewModel.allPermissionsGranted.observeAsState(initial = false)
-    
+
     // Use collectAsState for StateFlow
     val steps by viewModel.stepsData.collectAsState()
     val heartRate by viewModel.heartRateData.collectAsState()
     val sleep by viewModel.sleepData.collectAsState()
     val bloodGlucose by viewModel.bloodGlucoseData.collectAsState()
+    val weight by viewModel.weightData.collectAsState()
+    val activeCaloriesBurned by viewModel.activeCaloriesBurnedData.collectAsState()
+    val basalBodyTemperature by viewModel.basalBodyTemperatureData.collectAsState()
+    val basalMetabolicRate by viewModel.basalMetabolicRateData.collectAsState()
+    val distance by viewModel.distanceData.collectAsState()
+    val elevationGained by viewModel.elevationGainedData.collectAsState()
+    val exerciseSession by viewModel.exerciseSessionData.collectAsState()
+    val floorsClimbed by viewModel.floorsClimbedData.collectAsState()
+    val heartRateVariabilityRmssd by viewModel.heartRateVariabilityRmssdData.collectAsState()
+    val power by viewModel.powerData.collectAsState()
+    val restingHeartRate by viewModel.restingHeartRateData.collectAsState()
+    val speed by viewModel.speedData.collectAsState()
+    val totalCaloriesBurned by viewModel.totalCaloriesBurnedData.collectAsState()
+    val vo2Max by viewModel.vo2MaxData.collectAsState()
+    val bodyFat by viewModel.bodyFatData.collectAsState()
+    val bodyTemperature by viewModel.bodyTemperatureData.collectAsState()
+    val bodyWaterMass by viewModel.bodyWaterMassData.collectAsState()
+    val boneMass by viewModel.boneMassData.collectAsState()
+    val height by viewModel.heightData.collectAsState()
+    val leanBodyMass by viewModel.leanBodyMassData.collectAsState()
+    val hydration by viewModel.hydrationData.collectAsState()
+    val nutrition by viewModel.nutritionData.collectAsState()
+    val bloodPressure by viewModel.bloodPressureData.collectAsState()
+    val oxygenSaturation by viewModel.oxygenSaturationData.collectAsState()
+    val respiratoryRate by viewModel.respiratoryRateData.collectAsState()
     // syncStatusMessage LiveData and its observer are removed
 
     // No LaunchedEffect needed here to call viewModel.fetchHealthData() on permission grant,
@@ -175,92 +207,59 @@ fun HealthDataScreen(viewModel: MainViewModel, healthConnectAvailable: Boolean) 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+                .windowInsetsPadding(WindowInsets.systemBars),
+            horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(text = "Health Connect Data (from Local DB)", style = MaterialTheme.typography.headlineSmall)
+            Text(text = "Health Connect Data (from Local DB)", style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Start)
 
             if (!healthConnectAvailable) {
-                Text("Health Connect SDK is not available on this device.")
+                Text("Health Connect SDK is not available on this device.", textAlign = TextAlign.Start)
             } else if (permissionsGranted) {
                 Text(text = steps)
                 Text(text = heartRate)
                 Text(text = sleep)
                 Text(text = bloodGlucose)
+                Text(text = weight)
+                Text(text = activeCaloriesBurned)
+                Text(text = basalBodyTemperature)
+                Text(text = basalMetabolicRate)
+                Text(text = distance)
+                Text(text = elevationGained)
+                Text(text = exerciseSession)
+                Text(text = floorsClimbed)
+                Text(text = heartRateVariabilityRmssd)
+                Text(text = power)
+                Text(text = restingHeartRate)
+                Text(text = speed)
+                Text(text = totalCaloriesBurned)
+                Text(text = vo2Max)
+                Text(text = bodyFat)
+                Text(text = bodyTemperature)
+                Text(text = bodyWaterMass)
+                Text(text = boneMass)
+                Text(text = height)
+                Text(text = leanBodyMass)
+                Text(text = hydration)
+                Text(text = nutrition)
+                Text(text = bloodPressure)
+                Text(text = oxygenSaturation)
+                Text(text = respiratoryRate)
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Button(onClick = { viewModel.triggerDataRefresh() }) { // Changed to triggerDataRefresh
+                Button(onClick = { viewModel.triggerDataRefresh() }, modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally)) { // Changed to triggerDataRefresh
                     Text("Refresh Data from Health Connect")
                 }
                 // "Process Unsynced Data" button and its status Text are removed
             } else {
-                Text("Permissions not granted. Please grant permissions to see data.")
+                Text("Permissions not granted. Please grant permissions to see data.", textAlign = TextAlign.Start)
                 Button(onClick = { viewModel.checkOrRequestPermissions() }) {
                     Text("Request Permissions")
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true, name = "Health Connect Available - Permissions Granted")
-@Composable
-fun HealthDataScreenPreview_Granted() {
-    MaterialTheme {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(text = "Health Connect Data (from Local DB)", style = MaterialTheme.typography.headlineSmall)
-            Text(text = "Steps (from DB): 10000")
-            Text(text = "Latest HR (DB): 75 BPM at 2023-01-01 10:00:00")
-            Text(text = "Last Sleep (DB): 480 mins (ends 2023-01-01 07:00:00)")
-            Text(text = "Latest Glucose (DB): 90 mg/dL at 2023-01-01 08:00:00")
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = { }) { Text("Refresh Data from Health Connect") }
-        }
-    }
-}
-
-// Other previews (NotGranted, NotAvailable, PermissionRationaleScreen) remain the same.
-@Preview(showBackground = true, name = "Health Connect Available - Permissions Not Granted")
-@Composable
-fun HealthDataScreenPreview_NotGranted() {
-    MaterialTheme {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(text = "Health Connect Data (from Local DB)", style = MaterialTheme.typography.headlineSmall)
-            Text("Permissions not granted. Please grant permissions to see data.")
-            Button(onClick = { }) { Text("Request Permissions") }
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Health Connect Not Available")
-@Composable
-fun HealthDataScreenPreview_NotAvailable() {
-    MaterialTheme {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(text = "Health Connect Data (from Local DB)", style = MaterialTheme.typography.headlineSmall)
-            Text("Health Connect SDK is not available on this device.")
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Permission Rationale Screen")
-@Composable
-fun PermissionRationaleScreenPreview() {
-    MaterialTheme {
-        PermissionRationaleScreen(onContinue = {}, onCancel = {})
     }
 }

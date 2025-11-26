@@ -19,11 +19,9 @@ interface SleepSessionDao {
     @Query("SELECT * FROM sleep_sessions WHERE health_connect_uid = :hcUid LIMIT 1")
     suspend fun getRecordByHcUid(hcUid: String): SleepSessionEntity?
 
-    @Query("SELECT * FROM sleep_sessions WHERE is_synced = 0 ORDER BY start_time_epoch_millis ASC")
-    suspend fun getUnsyncedSessions(): List<SleepSessionEntity>
+    // getUnsyncedSessions() removed
 
-    @Query("UPDATE sleep_sessions SET is_synced = 1 WHERE id IN (:ids)")
-    suspend fun markAsSynced(ids: List<Long>): Int
+    // markAsSynced(ids: List<Long>) removed
 
     @Query("DELETE FROM sleep_sessions WHERE id IN (:ids)")
     suspend fun deleteByIds(ids: List<Long>): Int

@@ -19,11 +19,9 @@ interface StepsRecordDao {
     @Query("SELECT * FROM steps_records WHERE health_connect_uid = :hcUid LIMIT 1")
     suspend fun getRecordByHcUid(hcUid: String): StepsRecordEntity?
 
-    @Query("SELECT * FROM steps_records WHERE is_synced = 0 ORDER BY start_time_epoch_millis ASC")
-    suspend fun getUnsyncedSteps(): List<StepsRecordEntity>
+    // getUnsyncedSteps() removed
 
-    @Query("UPDATE steps_records SET is_synced = 1 WHERE id IN (:ids)")
-    suspend fun markAsSynced(ids: List<Long>): Int
+    // markAsSynced(ids: List<Long>) removed
 
     @Query("DELETE FROM steps_records WHERE id IN (:ids)")
     suspend fun deleteByIds(ids: List<Long>): Int

@@ -1,49 +1,51 @@
 package io.github.hitoshura25.healthsyncapp
 
 import android.app.Application
-import android.util.Log
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import io.github.hitoshura25.healthsyncapp.data.local.database.AppDatabase
-import io.github.hitoshura25.healthsyncapp.worker.SyncWorker
+import dagger.hilt.android.HiltAndroidApp
+import io.github.hitoshura25.healthsyncapp.worker.HealthDataFetcherWorker // Import the worker
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class HealthSyncAppApplication : Application() {
+@HiltAndroidApp
+class HealthSyncAppApplication : Application(), Configuration.Provider {
 
-    private val TAG = "HealthSyncApp"
-    // SharedPreferences constants for initial data operations will be moved to ViewModel or a shared const file.
-
-    val database: AppDatabase by lazy { AppDatabase.getDatabase(this) }
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
 
     override fun onCreate() {
         super.onCreate()
-        Log.d(TAG, "Application onCreate - Initializing database and scheduling periodic sync.")
-        setupPeriodicSync()
+        setupHealthDataFetcherWorker()
     }
 
-    // Removed scheduleInitialSync() - this logic will move to MainViewModel
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .setMinimumLoggingLevel(android.util.Log.DEBUG) // Optional: for more logs
+            .build()
 
-    private fun setupPeriodicSync() {
+    private fun setupHealthDataFetcherWorker() {
+        val workManager = WorkManager.getInstance(this)
+
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
-        // Periodic sync will run as scheduled, but its first successful data processing
-        // will depend on permissions being granted and data being available.
-        val periodicSyncRequest = PeriodicWorkRequestBuilder<SyncWorker>(
-            15, TimeUnit.MINUTES // Minimum 15 minutes for periodic
-        )
-            .setConstraints(constraints)
-            .build()
+        val periodicFetchRequest = 
+            PeriodicWorkRequestBuilder<HealthDataFetcherWorker>(24, TimeUnit.HOURS) // Repeat every 24 hours
+                .setConstraints(constraints)
+                .build()
 
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            SyncWorker::class.java.name, // Unique name for the periodic work
-            ExistingPeriodicWorkPolicy.KEEP, // Keep existing if already scheduled
-            periodicSyncRequest
+        workManager.enqueueUniquePeriodicWork(
+            HealthDataFetcherWorker.WORK_NAME, // Use the unique name from the worker companion object
+            ExistingPeriodicWorkPolicy.KEEP, // Or REPLACE if you want new parameters to take effect
+            periodicFetchRequest
         )
-        Log.i(TAG, "Periodic sync worker (15 min interval) scheduled with KEEP policy.")
     }
 }

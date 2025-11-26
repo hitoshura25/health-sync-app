@@ -9,7 +9,6 @@ import androidx.room.PrimaryKey
     tableName = "sleep_sessions",
     indices = [
         Index(value = ["health_connect_uid"], unique = true),
-        Index(value = ["is_synced"]),
         Index(value = ["start_time_epoch_millis"])
     ]
 )
@@ -19,7 +18,7 @@ data class SleepSessionEntity(
     val id: Long = 0,
 
     @ColumnInfo(name = "health_connect_uid")
-    val hcUid: String, // From HealthConnectRecord.metadata.id
+    val hcUid: String,
 
     @ColumnInfo(name = "title")
     val title: String? = null,
@@ -31,20 +30,38 @@ data class SleepSessionEntity(
     val startTimeEpochMillis: Long,
 
     @ColumnInfo(name = "start_zone_offset_id")
-    val startZoneOffsetId: String?, // Store ZoneOffset.id as String, nullable
+    val startZoneOffsetId: String?,
 
     @ColumnInfo(name = "end_time_epoch_millis")
     val endTimeEpochMillis: Long,
 
     @ColumnInfo(name = "end_zone_offset_id")
-    val endZoneOffsetId: String?, // Store ZoneOffset.id as String, nullable
+    val endZoneOffsetId: String?,
 
     @ColumnInfo(name = "duration_millis")
-    val durationMillis: Long? = null, // Can be calculated: endTime - startTime
+    val durationMillis: Long? = null,
 
     @ColumnInfo(name = "app_record_fetch_time_epoch_millis")
     val appRecordFetchTimeEpochMillis: Long,
 
-    @ColumnInfo(name = "is_synced", defaultValue = "0")
-    val isSynced: Boolean = false
+    @ColumnInfo(name = "data_origin_package_name")
+    val dataOriginPackageName: String,
+
+    @ColumnInfo(name = "hc_last_modified_time_epoch_millis")
+    val hcLastModifiedTimeEpochMillis: Long,
+
+    @ColumnInfo(name = "client_record_id")
+    val clientRecordId: String?,
+
+    @ColumnInfo(name = "client_record_version")
+    val clientRecordVersion: Long,
+
+    @ColumnInfo(name = "device_manufacturer")
+    val deviceManufacturer: String?,
+
+    @ColumnInfo(name = "device_model")
+    val deviceModel: String?,
+
+    @ColumnInfo(name = "device_type")
+    val deviceType: String?
 )
