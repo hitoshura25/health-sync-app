@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "hitoshura25_mcp_android_playstore_deploy": {
+      "command": "uvx",
+      "args": ["hitoshura25-mcp-android-playstore-deploy"]
+    }
+  }
+}
