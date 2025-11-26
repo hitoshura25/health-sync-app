@@ -37,6 +37,25 @@ jobs:
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
           SIGNING_KEY_STORE_PATH: ${{ github.workspace }}/release.jks
 
+      - name: Verify Build Artifacts
+        run: |
+          echo "Checking for AAB file..."
+          if [ ! -f app/build/outputs/bundle/release/app-release.aab ]; then
+            echo "❌ Error: AAB file not found at app/build/outputs/bundle/release/app-release.aab"
+            exit 1
+          fi
+          echo "✅ AAB file found"
+
+          echo "Checking for ProGuard mapping file..."
+          if [ ! -f app/build/outputs/mapping/release/mapping.txt ]; then
+            echo "⚠️  Warning: ProGuard mapping file not found at app/build/outputs/mapping/release/mapping.txt"
+            echo "This may cause issues with crash report deobfuscation in Play Console"
+          else
+            echo "✅ ProGuard mapping file found"
+          fi
+
+          echo "Build artifacts verified successfully"
+
       # Note (Issue #16): This uses r0adkll/upload-google-play, a community-maintained action.
       # For production, consider official alternatives or pin to a specific commit SHA.
       - name: Upload to Google Play internal Track

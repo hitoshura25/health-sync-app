@@ -23,10 +23,19 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file(System.getenv("SIGNING_KEY_STORE_PATH") ?: "release.jks")
-            storePassword = System.getenv("SIGNING_STORE_PASSWORD")
-            keyAlias = System.getenv("SIGNING_KEY_ALIAS")
-            keyPassword = System.getenv("SIGNING_KEY_PASSWORD")
+            val keystorePath = System.getenv("SIGNING_KEY_STORE_PATH")
+                ?: error("SIGNING_KEY_STORE_PATH environment variable must be set for release builds")
+            val storePass = System.getenv("SIGNING_STORE_PASSWORD")
+                ?: error("SIGNING_STORE_PASSWORD environment variable must be set for release builds")
+            val alias = System.getenv("SIGNING_KEY_ALIAS")
+                ?: error("SIGNING_KEY_ALIAS environment variable must be set for release builds")
+            val keyPass = System.getenv("SIGNING_KEY_PASSWORD")
+                ?: error("SIGNING_KEY_PASSWORD environment variable must be set for release builds")
+
+            storeFile = file(keystorePath)
+            storePassword = storePass
+            keyAlias = alias
+            keyPassword = keyPass
         }
     }
 
