@@ -9,7 +9,7 @@ fun AvroBasalBodyTemperatureRecord.toBasalBodyTemperatureRecordEntity(): BasalBo
         timeEpochMillis = this.timeEpochMillis,
         zoneOffsetId = this.zoneOffsetId,
         temperatureInCelsius = this.temperatureInCelsius,
-        measurementLocation = this.measurementLocation,
+        measurementLocation = this.measurementLocation.ordinal,
         appRecordFetchTimeEpochMillis = this.appRecordFetchTimeEpochMillis,
         dataOriginPackageName = this.metadata.dataOriginPackageName,
         hcLastModifiedTimeEpochMillis = this.metadata.lastModifiedTimeEpochMillis,

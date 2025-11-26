@@ -8,6 +8,6 @@ data class AvroBasalBodyTemperatureRecord(
     val timeEpochMillis: Long,
     val zoneOffsetId: String? = null,
     val temperatureInCelsius: Double,
-    val measurementLocation: Int,
+    val measurementLocation: AvroBasalBodyTemperatureMeasurementLocation,
     val appRecordFetchTimeEpochMillis: Long
 )

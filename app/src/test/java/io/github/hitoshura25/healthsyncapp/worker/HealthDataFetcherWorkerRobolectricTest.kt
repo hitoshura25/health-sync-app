@@ -430,7 +430,12 @@ class HealthDataFetcherWorkerRobolectricTest {
         `when`(hrResponse.records).thenReturn(listOf(hcHeartRateRecord))
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<HeartRateRecord>? -> req?.recordType == HeartRateRecord::class })).thenReturn(hrResponse)
 
-        val hcBgRecord = BloodGlucoseRecord(FIXED_INSTANT.minusSeconds(50), ZoneOffset.UTC,Metadata.manualEntry("bg-write-success"), BloodGlucose.milligramsPerDeciliter(90.0))
+        val hcBgRecord = BloodGlucoseRecord(
+            time = FIXED_INSTANT.minusSeconds(50),
+            zoneOffset = ZoneOffset.UTC,
+            level = BloodGlucose.milligramsPerDeciliter(90.0),
+            metadata = Metadata.manualEntry("bg-write-success")
+        )
         val bgResponse = mock<ReadRecordsResponse<BloodGlucoseRecord>>()
         `when`(bgResponse.records).thenReturn(listOf(hcBgRecord))
         `when`(mockHealthConnectClient.readRecords(argThat { req: ReadRecordsRequest<BloodGlucoseRecord>? -> req?.recordType == BloodGlucoseRecord::class })).thenReturn(bgResponse)

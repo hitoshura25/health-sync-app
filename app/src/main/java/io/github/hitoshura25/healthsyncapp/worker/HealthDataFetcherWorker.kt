@@ -100,6 +100,6 @@ class HealthDataFetcherWorker @AssistedInject constructor(
             ExistingWorkPolicy.REPLACE,
             processRequest
         )
-        Log.i(TAG, "Enqueued $AvroFileProcessorWorker.WORK_NAME with REPLACE policy.")
+        Log.i(TAG, "Enqueued ${AvroFileProcessorWorker.WORK_NAME} with REPLACE policy.")
     }
 }

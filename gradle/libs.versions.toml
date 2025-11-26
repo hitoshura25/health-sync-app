@@ -22,7 +22,6 @@ room = "2.8.0"
 ksp = "2.2.0-2.0.2" # Reverted to KSP version for Kotlin 2.2.0
 workmanager = "2.9.0"
 # Kotlinx Serialization versions
-kotlinSerializationPlugin = "1.9.22"
 kotlinxSerializationCore = "1.6.3"
 # Mockito versions
 mockitoCore = "5.12.0"
@@ -94,5 +93,5 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinSerializationPlugin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" } # Hilt Gradle Plugin

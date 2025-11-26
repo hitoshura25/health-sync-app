@@ -16,6 +16,7 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
 import io.github.hitoshura25.healthsyncapp.data.avro.AvroActiveCaloriesBurnedRecord
+import io.github.hitoshura25.healthsyncapp.data.avro.AvroBasalBodyTemperatureMeasurementLocation
 import io.github.hitoshura25.healthsyncapp.data.avro.AvroBasalBodyTemperatureRecord
 import io.github.hitoshura25.healthsyncapp.data.avro.AvroBasalMetabolicRateRecord
 import io.github.hitoshura25.healthsyncapp.data.avro.AvroBloodGlucoseMealType
@@ -407,7 +408,7 @@ class AvroFileProcessorWorkerRobolectricTest {
             timeEpochMillis = System.currentTimeMillis(),
             zoneOffsetId = null,
             temperatureInCelsius = 36.5,
-            measurementLocation = AvroBodyTemperatureMeasurementLocation.ARMPIT.ordinal,
+            measurementLocation = AvroBasalBodyTemperatureMeasurementLocation.ARMPIT,
             appRecordFetchTimeEpochMillis = System.currentTimeMillis()
         )
         testSingleRecordTypeProcessing(
