@@ -1,7 +1,7 @@
 name: Deploy to Internal Testing
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
