@@ -47,6 +47,8 @@ jobs:
           track: internal
           status: completed
           whatsNewDirectory: distribution/whatsnew
+        env:
+          ACTIONS_STEP_DEBUG: true
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
