@@ -1,7 +1,7 @@
 name: Deploy to Internal Testing
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
@@ -41,22 +41,24 @@ jobs:
       - name: Deploy to Internal Testing
         uses: r0adkll/upload-google-play@v1
         with:
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON_PLAINTEXT }}
           packageName: io.github.hitoshura25.healthsyncapp
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
           track: internal
           status: completed
           whatsNewDirectory: distribution/whatsnew
+        env:
+          ACTIONS_STEP_DEBUG: true
 
       - name: Upload AAB artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: release-aab
           path: app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
 
       - name: Upload mapping file
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mapping-file
           path: app/build/outputs/mapping/release/mapping.txt
