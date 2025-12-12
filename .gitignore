@@ -34,3 +34,7 @@ google-services.json
 
 # Android Profiling
 *.hprof
+keystores/
+
+# Gradle properties with secrets
+gradle.properties

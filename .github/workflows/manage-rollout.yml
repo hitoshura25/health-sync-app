@@ -1,0 +1,71 @@
+name: Manage Production Rollout
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Rollout action'
+        required: true
+        type: choice
+        options:
+          - increase
+          - halt
+          - resume
+          - complete
+      percentage:
+        description: 'New percentage (for increase action: 5, 10, 20, 50, 100)'
+        required: false
+        default: '20'
+
+jobs:
+  manage-rollout:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Increase Rollout
+        if: github.event.inputs.action == 'increase'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: io.github.hitoshura25.healthsyncapp
+          track: production
+          status: inProgress
+          userFraction: ${{ github.event.inputs.percentage }}
+
+      - name: Halt Rollout
+        if: github.event.inputs.action == 'halt'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: io.github.hitoshura25.healthsyncapp
+          track: production
+          status: halted
+
+      - name: Resume Rollout
+        if: github.event.inputs.action == 'resume'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: io.github.hitoshura25.healthsyncapp
+          track: production
+          status: inProgress
+
+      - name: Complete Rollout (100%)
+        if: github.event.inputs.action == 'complete'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: io.github.hitoshura25.healthsyncapp
+          track: production
+          status: completed
+
+      - name: Notify result
+        run: |
+          echo "✅ Rollout action completed: ${{ github.event.inputs.action }}"
+          if [ "${{ github.event.inputs.action }}" == "increase" ]; then
+            echo "📊 New rollout percentage: ${{ github.event.inputs.percentage }}%"
+          fi
