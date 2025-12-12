@@ -30,7 +30,7 @@ jobs:
         if: github.event.inputs.action == 'increase'
         uses: r0adkll/upload-google-play@v1
         with:
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON_PLAINTEXT }}
           packageName: io.github.hitoshura25.healthsyncapp
           track: production
           status: inProgress
@@ -40,7 +40,7 @@ jobs:
         if: github.event.inputs.action == 'halt'
         uses: r0adkll/upload-google-play@v1
         with:
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON_PLAINTEXT }}
           packageName: io.github.hitoshura25.healthsyncapp
           track: production
           status: halted
@@ -49,7 +49,7 @@ jobs:
         if: github.event.inputs.action == 'resume'
         uses: r0adkll/upload-google-play@v1
         with:
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON_PLAINTEXT }}
           packageName: io.github.hitoshura25.healthsyncapp
           track: production
           status: inProgress
@@ -58,7 +58,7 @@ jobs:
         if: github.event.inputs.action == 'complete'
         uses: r0adkll/upload-google-play@v1
         with:
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON_PLAINTEXT }}
           packageName: io.github.hitoshura25.healthsyncapp
           track: production
           status: completed
